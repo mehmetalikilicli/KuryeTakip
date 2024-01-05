@@ -38,4 +38,20 @@ class AuthService {
       throw Exception('Failed to register');
     }
   }
+
+  Future<Register> login(String email, String password) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/Authentication/Login'),
+      body: {
+        'email': email,
+        'password': password,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return Register.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to register');
+    }
+  }
 }
