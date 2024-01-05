@@ -23,7 +23,11 @@ class _TypesPageViewState extends State<TypesPageView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: false,
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        surfaceTintColor: Colors.white,
+        backgroundColor: Colors.white,
         centerTitle: true,
         title: const Text(
           "Renteker",
@@ -42,39 +46,37 @@ class _TypesPageViewState extends State<TypesPageView> {
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: ListView(
                 children: [
-                  const Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Icon(
-                        Icons.location_on_outlined,
-                        color: AppColors.primaryColor,
-                      ),
-                      Text(
-                        "Kadıköy/İstanbul",
-                        style: TextStyle(fontSize: 10),
-                      ),
-                    ],
+                  const Padding(
+                    padding: EdgeInsets.only(right: 8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Icon(Icons.location_on_outlined, size: 16, color: AppColors.primaryColor),
+                        Text("Kadıköy/İstanbul", style: TextStyle(fontSize: 12)),
+                      ],
+                    ),
                   ),
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      //CustomCarouselSlider(carController: carController),
                       CarouselSlider.builder(
-                        itemCount: carController.bannerUrls.length,
+                        itemCount: carController.bannerSvgAssets.length,
                         options: CarouselOptions(
                           viewportFraction: 1,
                           autoPlay: true,
-                          aspectRatio: 16 / 7,
+                          aspectRatio: 16 / 8,
                           enlargeCenterPage: true,
                         ),
                         itemBuilder: (context, index, realIdx) {
-                          if (index < carController.bannerUrls.length) {
+                          if (index < carController.bannerSvgAssets.length) {
                             return Center(
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(12),
-                                child: Image.network(
-                                  carController.bannerUrls[index],
+                                child: SvgPicture.asset(
+                                  carController.bannerSvgAssets[index],
                                   fit: BoxFit.cover,
-                                  width: Get.width - 8,
+                                  width: MediaQuery.of(context).size.width - 8,
                                 ),
                               ),
                             );
@@ -121,7 +123,8 @@ class _TypesPageViewState extends State<TypesPageView> {
                     () => ListView.separated(
                       padding: const EdgeInsets.only(top: 8),
                       shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
+                      primary: false,
+                      physics: const NeverScrollableScrollPhysics(),
                       itemCount: carController.filteredCars.value.length,
                       itemBuilder: (BuildContext context, int index) {
                         return GestureDetector(
@@ -149,6 +152,44 @@ class _TypesPageViewState extends State<TypesPageView> {
   }
 }
 
+class CustomCarouselSlider extends StatelessWidget {
+  const CustomCarouselSlider({
+    super.key,
+    required this.carController,
+  });
+
+  final CarController carController;
+
+  @override
+  Widget build(BuildContext context) {
+    return CarouselSlider.builder(
+      itemCount: carController.bannerUrls.length,
+      options: CarouselOptions(
+        viewportFraction: 1,
+        autoPlay: true,
+        aspectRatio: 16 / 7,
+        enlargeCenterPage: true,
+      ),
+      itemBuilder: (context, index, realIdx) {
+        if (index < carController.bannerUrls.length) {
+          return Center(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.network(
+                carController.bannerUrls[index],
+                fit: BoxFit.cover,
+                width: Get.width - 8,
+              ),
+            ),
+          );
+        } else {
+          return Container();
+        }
+      },
+    );
+  }
+}
+
 class CarItemCard extends StatelessWidget {
   const CarItemCard({
     super.key,
@@ -164,7 +205,7 @@ class CarItemCard extends StatelessWidget {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       elevation: 2,
-      shadowColor: Color.fromRGBO(244, 172, 28, 1.0),
+      shadowColor: AppColors.primaryColor,
       color: Colors.white,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -184,7 +225,7 @@ class CarItemCard extends StatelessWidget {
                   errorBuilder: (context, error, stackTrace) {
                     return AspectRatio(
                       aspectRatio: 16 / 9,
-                      child: SvgPicture.asset("assets/logo/logo.svg"),
+                      child: SvgPicture.asset("assets/logo/_dart.png"),
                     );
                   },
                 ),

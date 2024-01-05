@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:kurye_takip/app_constants/app_colors.dart';
 
 import '../../controllers/car_controller.dart';
 
@@ -26,10 +27,10 @@ class CarCategoryButton extends GetView<CarController> {
           style: OutlinedButton.styleFrom(
             //shape: const RoundedRectangleBorder(),
             side: BorderSide(
-              color: controller.activeType.value == id ? Color.fromRGBO(244, 172, 28, 1.0) : Colors.grey,
+              color: controller.activeType.value == id ? AppColors.primaryColor : Colors.grey,
             ),
 
-            foregroundColor: controller.activeType.value == id ? Color.fromRGBO(244, 172, 28, 1.0) : Colors.grey,
+            foregroundColor: controller.activeType.value == id ? AppColors.primaryColor : Colors.grey,
           ),
           onPressed: () => controller.filter(id),
           child: Row(

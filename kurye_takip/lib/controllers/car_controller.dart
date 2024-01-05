@@ -1,7 +1,5 @@
 // ignore_for_file: invalid_use_of_protected_member, avoid_print
 
-import 'dart:developer';
-
 import 'package:get/get.dart';
 import 'package:kurye_takip/model/car_item.dart';
 import 'package:kurye_takip/service/api_service.dart';
@@ -13,6 +11,14 @@ class CarController extends GetxController {
   RxList<CarItem> filteredCars = <CarItem>[].obs;
 
   RxInt activeType = 1.obs;
+
+  final List<String> bannerSvgAssets = [
+    'assets/svgs/banner1.svg',
+    'assets/svgs/banner2.svg',
+    'assets/svgs/banner3.svg',
+    'assets/svgs/banner4.svg',
+    'assets/svgs/banner5.svg',
+  ];
 
   @override
   void onInit() {

@@ -205,7 +205,7 @@ class FeaturedCarDetailCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
           boxShadow: [
             BoxShadow(
-              color: AppColors.primaryColor.withOpacity(0.2),
+              color: Colors.grey.withOpacity(0.2),
               blurRadius: 5.0,
               spreadRadius: 0.0,
               offset: const Offset(
