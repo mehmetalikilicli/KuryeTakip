@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:kurye_takip/app_constants/app_colors.dart';
 
-import '../../controllers/car_controller.dart';
+import '../../controllers/dashboard_controller.dart';
 
-class CarCategoryButton extends GetView<CarController> {
+class CarCategoryButton extends GetView<DashboardController> {
   const CarCategoryButton({
     super.key,
     required this.id,

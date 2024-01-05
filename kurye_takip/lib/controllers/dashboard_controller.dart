@@ -5,12 +5,14 @@ import 'package:kurye_takip/model/car_item.dart';
 import 'package:kurye_takip/service/api_service.dart';
 import 'package:kurye_takip/service/banner_service.dart';
 
-class CarController extends GetxController {
+class DashboardController extends GetxController {
   List<CarItem> cars = [];
   List<String> bannerUrls = [];
   RxList<CarItem> filteredCars = <CarItem>[].obs;
 
   RxInt activeType = 1.obs;
+
+  RxInt currentIndex = 0.obs;
 
   final List<String> bannerSvgAssets = [
     'assets/svgs/banner1.svg',

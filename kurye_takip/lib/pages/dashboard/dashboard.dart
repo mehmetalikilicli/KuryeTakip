@@ -3,22 +3,23 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:kurye_takip/app_constants/app_colors.dart';
-import 'package:kurye_takip/controllers/car_controller.dart';
+import 'package:kurye_takip/controllers/dashboard_controller.dart';
 import 'package:kurye_takip/model/car_item.dart';
 import 'package:kurye_takip/pages/cars_list/car_detail.dart';
 
 import '../widgets/car_category_button.dart';
 
-class TypesPageView extends StatefulWidget {
-  const TypesPageView({Key? key}) : super(key: key);
+class Dashboard extends StatefulWidget {
+  const Dashboard({Key? key}) : super(key: key);
 
   @override
-  State<TypesPageView> createState() => _TypesPageViewState();
+  State<Dashboard> createState() => _DashboardState();
 }
 
-class _TypesPageViewState extends State<TypesPageView> {
-  final CarController carController = Get.put(CarController());
+class _DashboardState extends State<Dashboard> {
+  final DashboardController dashboardController = Get.put(DashboardController());
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +36,7 @@ class _TypesPageViewState extends State<TypesPageView> {
         ),
       ),
       body: FutureBuilder(
-        future: carController.fetchData(),
+        future: dashboardController.fetchData(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return const Center(child: Text("Hata!"));
@@ -60,63 +61,8 @@ class _TypesPageViewState extends State<TypesPageView> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       //CustomCarouselSlider(carController: carController),
-                      CarouselSlider.builder(
-                        itemCount: carController.bannerSvgAssets.length,
-                        options: CarouselOptions(
-                          viewportFraction: 1,
-                          autoPlay: true,
-                          aspectRatio: 16 / 8,
-                          enlargeCenterPage: true,
-                        ),
-                        itemBuilder: (context, index, realIdx) {
-                          if (index < carController.bannerSvgAssets.length) {
-                            return Center(
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: SvgPicture.asset(
-                                  carController.bannerSvgAssets[index],
-                                  fit: BoxFit.cover,
-                                  width: MediaQuery.of(context).size.width - 8,
-                                ),
-                              ),
-                            );
-                          } else {
-                            return Container();
-                          }
-                        },
-                      ),
-                      const Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          CarCategoryButton(
-                            id: 1,
-                            title: "Otomobil",
-                            iconName: "car",
-                          ),
-                          SizedBox(width: 8),
-                          CarCategoryButton(
-                            id: 2,
-                            title: "Motorsiklet",
-                            iconName: "motorcycle",
-                          ),
-                        ],
-                      ),
-                      const Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          CarCategoryButton(
-                            id: 3,
-                            title: "Ticari Araç",
-                            iconName: "truck",
-                          ),
-                          SizedBox(width: 8),
-                          CarCategoryButton(
-                            id: 4,
-                            title: "Karavan",
-                            iconName: "caravan",
-                          ),
-                        ],
-                      ),
+                      DashboardSlider(dashboardController: dashboardController),
+                      VehicleTypes(),
                     ],
                   ),
                   Obx(
@@ -125,15 +71,15 @@ class _TypesPageViewState extends State<TypesPageView> {
                       shrinkWrap: true,
                       primary: false,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: carController.filteredCars.value.length,
+                      itemCount: dashboardController.filteredCars.value.length,
                       itemBuilder: (BuildContext context, int index) {
                         return GestureDetector(
                           onTap: () {
-                            Get.to(() => CarDetailView(car: carController.filteredCars.value[index]));
+                            Get.to(() => CarDetailView(car: dashboardController.filteredCars.value[index]));
                           },
                           child: CarItemCard(
-                            carController: carController,
-                            carItem: carController.filteredCars[index],
+                            carController: dashboardController,
+                            carItem: dashboardController.filteredCars[index],
                           ),
                         );
                       },
@@ -148,6 +94,136 @@ class _TypesPageViewState extends State<TypesPageView> {
           }
         },
       ),
+      bottomNavigationBar: BottomNavBar(),
+    );
+  }
+}
+
+class DashboardSlider extends StatelessWidget {
+  const DashboardSlider({
+    super.key,
+    required this.dashboardController,
+  });
+
+  final DashboardController dashboardController;
+
+  @override
+  Widget build(BuildContext context) {
+    return CarouselSlider.builder(
+      itemCount: dashboardController.bannerSvgAssets.length,
+      options: CarouselOptions(
+        viewportFraction: 1,
+        autoPlay: true,
+        aspectRatio: 16 / 8,
+        enlargeCenterPage: true,
+      ),
+      itemBuilder: (context, index, realIdx) {
+        if (index < dashboardController.bannerSvgAssets.length) {
+          return Center(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: SvgPicture.asset(
+                dashboardController.bannerSvgAssets[index],
+                fit: BoxFit.cover,
+                width: MediaQuery.of(context).size.width - 8,
+              ),
+            ),
+          );
+        } else {
+          return Container();
+        }
+      },
+    );
+  }
+}
+
+class VehicleTypes extends StatelessWidget {
+  const VehicleTypes({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            CarCategoryButton(
+              id: 1,
+              title: "Otomobil",
+              iconName: "car",
+            ),
+            SizedBox(width: 8),
+            CarCategoryButton(
+              id: 2,
+              title: "Motorsiklet",
+              iconName: "motorcycle",
+            ),
+          ],
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            CarCategoryButton(
+              id: 3,
+              title: "Ticari Araç",
+              iconName: "truck",
+            ),
+            SizedBox(width: 8),
+            CarCategoryButton(
+              id: 4,
+              title: "Karavan",
+              iconName: "caravan",
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class BottomNavBar extends StatelessWidget {
+  const BottomNavBar({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: AppColors.primaryColor,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(10, 10, 30, 20),
+        child: GNav(
+          color: Colors.white,
+          activeColor: Colors.white,
+          backgroundColor: AppColors.primaryColor,
+          tabBackgroundColor: Colors.black,
+          gap: 8,
+          onTabChange: (index) {
+            print(index);
+          },
+          padding: const EdgeInsets.all(16),
+          tabs: const [
+            GButton(
+              icon: Icons.car_rental,
+              text: "Ana Sayfa",
+            ),
+            GButton(
+              icon: Icons.home,
+              text: "Araçlarım",
+            ),
+            GButton(
+              icon: Icons.person,
+              text: "Profil",
+            ),
+            GButton(
+              icon: Icons.person,
+              text: "Profil",
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -158,7 +234,7 @@ class CustomCarouselSlider extends StatelessWidget {
     required this.carController,
   });
 
-  final CarController carController;
+  final DashboardController carController;
 
   @override
   Widget build(BuildContext context) {
@@ -197,7 +273,7 @@ class CarItemCard extends StatelessWidget {
     required this.carItem,
   });
 
-  final CarController carController;
+  final DashboardController carController;
   final CarItem carItem;
 
   @override
