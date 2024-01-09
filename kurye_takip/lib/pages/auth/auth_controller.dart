@@ -12,6 +12,38 @@ import 'package:shared_preferences/shared_preferences.dart';
 class AuthController extends GetxController {
   final AuthService _authService = AuthService();
 
+  var selectedCity = 'Izmir'.obs;
+  var selectedDistrict = 'Bornova'.obs;
+
+  RxInt isDrivingLicenseFrontImageTaken = 0.obs;
+  RxInt isDrivingLicenseBackImageTaken = 0.obs;
+
+  void selectCity(String city) {
+    selectedCity.value = city;
+    // İlk şehir değiştirildiğinde ilçeleri sıfırla
+    selectedDistrict.value = '';
+  }
+
+  void selectDistrict(String district) {
+    selectedDistrict.value = district;
+  }
+
+  List<String> getDistricts(String city) {
+    // Şehire göre ilçeleri getir
+    switch (city) {
+      case 'Istanbul':
+        return ['Besiktas', 'Kadikoy', 'Sisli'];
+      case 'Ankara':
+        return ['Cankaya', 'Kecioren', 'Mamak'];
+      case 'Izmir':
+        return ['Bornova', 'Konak', 'Cigli'];
+      case 'Bursa':
+        return ['Osmangazi', 'Nilufer', 'Yildirim'];
+      default:
+        return [];
+    }
+  }
+
   Future<Register> register(RegisterModel registerData) async {
     try {
       Register result = await _authService.register(registerData);
