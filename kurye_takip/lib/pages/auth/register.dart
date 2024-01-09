@@ -18,6 +18,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final AuthController authController = Get.put(AuthController());
 
   TextEditingController nameController = TextEditingController();
+  TextEditingController surnameController = TextEditingController();
   TextEditingController phoneController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
@@ -32,19 +33,21 @@ class _RegisterPageState extends State<RegisterPage> {
           children: [
             GetUserInfo(
                 nameController: nameController,
+                surnameController: surnameController,
                 phoneController: phoneController,
                 emailController: emailController,
                 passwordController: passwordController,
                 password2Controller: password2Controller),
             LoginAndRegisterButton(
               nameController: nameController,
+              surnameController: surnameController,
               phoneController: phoneController,
               emailController: emailController,
               passwordController: passwordController,
               password2Controller: password2Controller,
               authController: authController,
             ),
-            GoogleAndAppleRegister(),
+            const GoogleAndAppleRegister(),
           ],
         ),
       ),
@@ -62,13 +65,11 @@ class GoogleAndAppleRegister extends StatelessWidget {
     return Column(
       children: [
         const SizedBox(height: 15),
-        Text(
+        const Text(
           "Google yada Apple ile Kayıt Ol",
           style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
         ),
-        SizedBox(
-          height: 30.0,
-        ),
+        const SizedBox(height: 30.0),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -81,9 +82,7 @@ class GoogleAndAppleRegister extends StatelessWidget {
                 fit: BoxFit.cover,
               ),
             ),
-            SizedBox(
-              width: 30.0,
-            ),
+            const SizedBox(width: 30.0),
             GestureDetector(
               onTap: () {},
               child: Image.asset(
@@ -104,6 +103,7 @@ class LoginAndRegisterButton extends StatelessWidget {
   const LoginAndRegisterButton({
     super.key,
     required this.nameController,
+    required this.surnameController,
     required this.phoneController,
     required this.emailController,
     required this.passwordController,
@@ -112,6 +112,7 @@ class LoginAndRegisterButton extends StatelessWidget {
   });
 
   final TextEditingController nameController;
+  final TextEditingController surnameController;
   final TextEditingController phoneController;
   final TextEditingController emailController;
   final TextEditingController passwordController;
@@ -127,10 +128,11 @@ class LoginAndRegisterButton extends StatelessWidget {
             foregroundColor: MaterialStateProperty.all(Colors.black),
             backgroundColor: MaterialStateProperty.all(AppColors.primaryColor),
             padding: MaterialStateProperty.all(
-              EdgeInsets.symmetric(horizontal: 80.0),
+              const EdgeInsets.symmetric(horizontal: 80.0),
             ),
           ),
           onPressed: () async {
+            /*
             if (passwordController.text != password2Controller.text) {
               Get.dialog(MyPopup(
                 title: 'Hata',
@@ -160,12 +162,9 @@ class LoginAndRegisterButton extends StatelessWidget {
                 Get.snackbar('Hata', 'Kayıt başarısız oldu.');
                 throw Exception(e);
               }
-            }
+            }*/
           },
-          child: Text(
-            "Kayıt Ol",
-            style: TextStyle(fontSize: 20),
-          ),
+          child: const Text("İleri", style: TextStyle(fontSize: 20)),
         ),
         const SizedBox(height: 15),
         TextButton(
@@ -173,13 +172,13 @@ class LoginAndRegisterButton extends StatelessWidget {
             foregroundColor: MaterialStateProperty.all(Colors.black),
             backgroundColor: MaterialStateProperty.all(AppColors.primaryColor),
             padding: MaterialStateProperty.all(
-              EdgeInsets.symmetric(horizontal: 80.0),
+              const EdgeInsets.symmetric(horizontal: 80.0),
             ),
           ),
           onPressed: () {
             Get.to(() => LoginPage());
           },
-          child: Text("Girişe Dön"),
+          child: const Text("Girişe Dön"),
         ),
       ],
     );
@@ -190,6 +189,7 @@ class GetUserInfo extends StatelessWidget {
   const GetUserInfo({
     super.key,
     required this.nameController,
+    required this.surnameController,
     required this.phoneController,
     required this.emailController,
     required this.passwordController,
@@ -197,6 +197,7 @@ class GetUserInfo extends StatelessWidget {
   });
 
   final TextEditingController nameController;
+  final TextEditingController surnameController;
   final TextEditingController phoneController;
   final TextEditingController emailController;
   final TextEditingController passwordController;
@@ -207,14 +208,27 @@ class GetUserInfo extends StatelessWidget {
     return Column(
       children: [
         const SizedBox(height: 15),
-        Text("Kayıt Ol", style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
+        const Text("Kayıt Ol", style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
         const SizedBox(height: 15.0),
         Padding(
           padding: const EdgeInsets.only(left: 20.0, right: 20.0),
           child: TextField(
             controller: nameController,
             decoration: InputDecoration(
-                hintText: "İsim Soyisim",
+                hintText: "İsim",
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none),
+                fillColor: Colors.grey.withOpacity(0.1),
+                filled: true,
+                prefixIcon: const Icon(Icons.person)),
+          ),
+        ),
+        const SizedBox(height: 15.0),
+        Padding(
+          padding: const EdgeInsets.only(left: 20.0, right: 20.0),
+          child: TextField(
+            controller: surnameController,
+            decoration: InputDecoration(
+                hintText: "Soyisim",
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none),
                 fillColor: Colors.grey.withOpacity(0.1),
                 filled: true,
