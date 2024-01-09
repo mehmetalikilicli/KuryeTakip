@@ -4,39 +4,40 @@ import 'package:kurye_takip/model/login.dart';
 import 'package:kurye_takip/model/register.dart';
 
 class AuthService {
-  static const String baseUrl = 'https://example.com/api';
+  static const String baseUrl = 'https://rentekerapi.takipsa.com';
 
-  Future<Register> register(String email, String password) async {
+  Future<Register> register(RegisterModel registerData) async {
     final response = await http.post(
       Uri.parse('$baseUrl/Authentication/Register'),
       body: {
-        'email': email,
-        'password': password,
-        //'name': name,
-        //'phone': phone,
+        "name": registerData.name,
+        "phone": registerData.phone,
+        "email": registerData.email,
+        "password": registerData.password
       },
     );
 
     if (response.statusCode == 200) {
+      //print(response.body);
       return Register.fromJson(json.decode(response.body));
     } else {
       throw Exception('Failed to register');
     }
   }
 
-  Future<Login> login(String email, String password) async {
+  Future<Login> login(String email, String cyriptedPassword) async {
     final response = await http.post(
       Uri.parse('$baseUrl/Authentication/Login'),
       body: {
         'email': email,
-        'password': password,
+        'password': cyriptedPassword,
       },
     );
 
     if (response.statusCode == 200) {
       return Login.fromJson(json.decode(response.body));
     } else {
-      throw Exception('Failed to register');
+      throw Exception('Failed to login');
     }
   }
 }

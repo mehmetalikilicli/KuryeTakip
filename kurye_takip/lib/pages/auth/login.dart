@@ -3,9 +3,12 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:kurye_takip/app_constants/app_colors.dart';
 import 'package:kurye_takip/components/my_popup.dart';
-import 'package:kurye_takip/controllers/auth_controller.dart';
+import 'package:kurye_takip/helpers/helpers.dart';
+import 'package:kurye_takip/model/login.dart';
+import 'package:kurye_takip/pages/auth/auth_controller.dart';
 import 'package:kurye_takip/pages/auth/register.dart';
 import 'package:kurye_takip/pages/dashboard/dashboard.dart';
+import 'package:kurye_takip/pages/gnav_bar/gnav_bar.dart';
 
 class LoginPage extends StatefulWidget {
   LoginPage({super.key});
@@ -23,6 +26,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: SafeArea(
         child: Column(
           children: [
@@ -35,7 +39,7 @@ class _LoginPageState extends State<LoginPage> {
                 authController: authController,
                 emailController: emailController,
                 passwordController: passwordController),
-            LoginWithGoogleAndApple(),
+            //LoginWithGoogleAndApple(),
           ],
         ),
       ),
@@ -144,15 +148,30 @@ class LoginAndRegisterButton extends StatelessWidget {
               EdgeInsets.symmetric(horizontal: 80.0),
             ),
           ),
-          onPressed: () {
+          onPressed: () async {
             if (emailController.text.isEmpty || passwordController.text.isEmpty) {
-              Get.dialog(MyPopup(
-                title: 'Hata',
-                message: 'Eposta veya şifre boş olamaz.',
-              ));
+              Get.dialog(
+                MyPopup(
+                  title: 'Hata',
+                  message: 'Eposta veya şifre boş olamaz.',
+                ),
+              );
             } else {
-              Get.off(Dashboard());
-              //authController.login(emailController.text, passwordController.text);
+              try {
+                Login loginResult = await authController.login(
+                  emailController.text,
+                  Helpers.encryptPassword(passwordController.text),
+                );
+                if (loginResult.success) {
+                  Get.snackbar("Başarılı", 'Giriş Baraşılı oldu');
+                  Get.offAll(GoogleNavBar());
+                } else {
+                  Get.snackbar("Giriş Başarısız", loginResult.message);
+                }
+              } catch (e) {
+                print('Hata: $e');
+                Get.snackbar('Hata', 'Giriş başarısız oldu. Lütfen tekrar deneyin.');
+              }
             }
           },
           child: Text(
@@ -210,6 +229,7 @@ class EmailAndPassword extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(left: 20.0, right: 20.0),
           child: TextField(
+            obscureText: true,
             controller: passwordController,
             decoration: InputDecoration(
                 hintText: "Şifre",

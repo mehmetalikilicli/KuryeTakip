@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:kurye_takip/app_constants/app_colors.dart';
 
-import '../../controllers/dashboard_controller.dart';
+import '../dashboard/dashboard_controller.dart';
 
 class CarCategoryButton extends GetView<DashboardController> {
   const CarCategoryButton({

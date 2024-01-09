@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:kurye_takip/pages/auth/login.dart';
+import 'package:kurye_takip/pages/profile_edit_page/profile_edit.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -13,20 +14,20 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      /*appBar: AppBar(
         actions: [
           IconButton(
             icon: Icon(Icons.edit),
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => LoginPage()),
+                MaterialPageRoute(builder: (context) => (ProfileEditPage())),
               );
             },
           ),
         ],
         title: Text("Profil"),
-      ),
+      ),*/
       body: Column(
         children: [
           ClipRRect(
@@ -35,7 +36,7 @@ class _ProfilePageState extends State<ProfilePage> {
               bottomRight: Radius.circular(8),
             ),
             child: Container(
-              height: Get.height * 0.2,
+              height: Get.height * 0.1,
               width: Get.width,
               color: Colors.red,
             ),
@@ -71,7 +72,12 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ],
             ),
-          )
+          ),
+          TextButton(
+              onPressed: () {
+                Get.offAll(LoginPage());
+              },
+              child: Text("Logout")),
         ],
       ),
     );

@@ -3,9 +3,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
-import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:kurye_takip/app_constants/app_colors.dart';
-import 'package:kurye_takip/controllers/dashboard_controller.dart';
+import 'package:kurye_takip/pages/dashboard/dashboard_controller.dart';
 import 'package:kurye_takip/model/car_item.dart';
 import 'package:kurye_takip/pages/cars_list/car_detail.dart';
 
@@ -94,7 +93,6 @@ class _DashboardState extends State<Dashboard> {
           }
         },
       ),
-      bottomNavigationBar: BottomNavBar(),
     );
   }
 }
@@ -179,51 +177,6 @@ class VehicleTypes extends StatelessWidget {
           ],
         ),
       ],
-    );
-  }
-}
-
-class BottomNavBar extends StatelessWidget {
-  const BottomNavBar({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: AppColors.primaryColor,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(10, 10, 30, 20),
-        child: GNav(
-          color: Colors.white,
-          activeColor: Colors.white,
-          backgroundColor: AppColors.primaryColor,
-          tabBackgroundColor: Colors.black,
-          gap: 8,
-          onTabChange: (index) {
-            print(index);
-          },
-          padding: const EdgeInsets.all(16),
-          tabs: const [
-            GButton(
-              icon: Icons.car_rental,
-              text: "Ana Sayfa",
-            ),
-            GButton(
-              icon: Icons.home,
-              text: "Araçlarım",
-            ),
-            GButton(
-              icon: Icons.person,
-              text: "Profil",
-            ),
-            GButton(
-              icon: Icons.person,
-              text: "Profil",
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

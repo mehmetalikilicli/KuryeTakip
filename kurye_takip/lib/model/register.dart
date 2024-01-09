@@ -32,6 +32,20 @@ class Register {
       };
 }
 
+class RegisterModel {
+  String name;
+  String phone;
+  String email;
+  String password;
+
+  RegisterModel({
+    required this.name,
+    required this.phone,
+    required this.email,
+    required this.password,
+  });
+}
+
 class User {
   String code;
   String email;
