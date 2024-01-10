@@ -41,6 +41,7 @@ class _ProfilePageState extends State<ProfilePage> {
               color: Colors.red,
             ),
           ),
+          const SizedBox(height: 20),
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: Column(
@@ -55,7 +56,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   title: "Email",
                   subtitle: "Kullanıcı Email Adresi",
                 ),
-                ProfileInfoContainer(
+                /*ProfileInfoContainer(
                   icon: Icons.date_range_outlined,
                   title: "Doğum Tarihi",
                   subtitle: "Kullanıcı Doğum Tarihi",
@@ -64,7 +65,40 @@ class _ProfilePageState extends State<ProfilePage> {
                   icon: Icons.phone,
                   title: "Telefon Numarası",
                   subtitle: "Kullanıcı Telefon Numarası",
+                ),*/
+                ProfileInfoContainer(
+                  icon: Icons.phone,
+                  title: "Telefon Numarası",
+                  subtitle: "Kullanıcı Telefon Numarası",
                 ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Column(
+              children: [
+                ProfileInfoContainer(
+                  icon: Icons.person,
+                  title: "Hakkımızda",
+                  subtitle: "Kullanıcı isim ve soyismi",
+                ),
+                ProfileInfoContainer(
+                  icon: Icons.email,
+                  title: "Email",
+                  subtitle: "Kullanıcı Email Adresi",
+                ),
+                /*ProfileInfoContainer(
+                  icon: Icons.date_range_outlined,
+                  title: "Doğum Tarihi",
+                  subtitle: "Kullanıcı Doğum Tarihi",
+                ),
+                ProfileInfoContainer(
+                  icon: Icons.phone,
+                  title: "Telefon Numarası",
+                  subtitle: "Kullanıcı Telefon Numarası",
+                ),*/
                 ProfileInfoContainer(
                   icon: Icons.phone,
                   title: "Telefon Numarası",
@@ -98,6 +132,7 @@ class ProfileInfoContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      color: Colors.grey.shade200,
       height: Get.height * 0.07,
       width: Get.width * 0.9,
       child: Column(
@@ -125,6 +160,11 @@ class ProfileInfoContainer extends StatelessWidget {
               ),
             ],
           ),
+          SizedBox(height: 8), // Divider'ın üst boşluğu
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Divider(height: 1, color: Colors.black),
+          ), // Divider
         ],
       ),
     );

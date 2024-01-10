@@ -34,15 +34,33 @@ class Register {
 
 class RegisterModel {
   String name;
+  String surname;
   String phone;
   String email;
   String password;
+  String? city;
+  String? district;
+  String? address;
+  int is_vehicle_owner;
+  String? drivingLicenseNumber;
+  String? drivingLicenseDate;
+  String? drivingLicenseFrontImage;
+  String? drivingLicenseBackImage;
 
   RegisterModel({
     required this.name,
+    required this.surname,
     required this.phone,
     required this.email,
+    required this.city,
+    required this.district,
     required this.password,
+    required this.is_vehicle_owner,
+    this.address,
+    this.drivingLicenseNumber,
+    this.drivingLicenseDate,
+    this.drivingLicenseFrontImage,
+    this.drivingLicenseBackImage,
   });
 }
 

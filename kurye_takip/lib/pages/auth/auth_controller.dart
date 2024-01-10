@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:get/get.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:kurye_takip/model/login.dart';
 import 'package:kurye_takip/model/register.dart';
 import 'package:kurye_takip/pages/auth/login.dart';
@@ -12,11 +13,27 @@ import 'package:shared_preferences/shared_preferences.dart';
 class AuthController extends GetxController {
   final AuthService _authService = AuthService();
 
+  final markers = RxSet<Marker>();
+
   var selectedCity = 'Izmir'.obs;
   var selectedDistrict = 'Bornova'.obs;
 
   RxInt isDrivingLicenseFrontImageTaken = 0.obs;
   RxInt isDrivingLicenseBackImageTaken = 0.obs;
+  RxInt isLocationTaken = 0.obs;
+
+  RegisterModel registerModel = RegisterModel(
+    name: "",
+    surname: "",
+    phone: "",
+    email: "",
+    password: "",
+    city: "",
+    district: "",
+    is_vehicle_owner: 0,
+  );
+
+  void selectLocation() {}
 
   void selectCity(String city) {
     selectedCity.value = city;
@@ -44,9 +61,9 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<Register> register(RegisterModel registerData) async {
+  Future<Register> register() async {
     try {
-      Register result = await _authService.register(registerData);
+      Register result = await _authService.register(registerModel);
       return result;
     } catch (e) {
       print('Hata: $e');

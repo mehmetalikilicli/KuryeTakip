@@ -7,6 +7,7 @@ import 'package:kurye_takip/pages/dashboard/dashboard.dart';
 import 'package:kurye_takip/pages/gnav_bar/gnav_bar.dart';
 import 'package:kurye_takip/pages/profile_edit_page/profile_edit.dart';
 import 'package:kurye_takip/pages/profile/profile.dart';
+import 'package:kurye_takip/pages/test/test_register.dart';
 
 void main() {
   //Get.put(CarController());
@@ -27,7 +28,8 @@ class MyApp extends StatelessWidget {
       ),
       //home: LoginPage(),
       //GoogleNavBar(),
-      home: LoginPage(),
+      //home: GoogleNavBar(),
+      home: TestRegisterView(),
     );
   }
 }
