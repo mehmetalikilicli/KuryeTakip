@@ -9,13 +9,19 @@ class AuthService {
   Future<Register> register(RegisterModel registerData) async {
     final response = await http.post(
       Uri.parse('$baseUrl/Authentication/Register'),
-      body: {
-        "name": registerData.name,
-        "phone": registerData.phone,
-        "email": registerData.email,
-        "password": registerData.password
-      },
+      body: {"name": registerData.name, "phone": registerData.phone, "email": registerData.email, "password": registerData.password},
     );
+
+    if (response.statusCode == 200) {
+      //print(response.body);
+      return Register.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to register');
+    }
+  }
+
+  Future<Register> register2(String jsonBody) async {
+    final response = await http.post(Uri.parse('$baseUrl/Authentication/Register'), body: {});
 
     if (response.statusCode == 200) {
       //print(response.body);

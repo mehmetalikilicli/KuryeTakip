@@ -1,1012 +1,515 @@
-import 'dart:async';
-import 'dart:collection';
+// ignore_for_file: deprecated_member_use
+
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:kurye_takip/app_constants/app_colors.dart';
-import 'package:kurye_takip/components/my_popup.dart';
+import 'package:kurye_takip/controllers/authentication.dart';
 import 'package:kurye_takip/helpers/helpers.dart';
-import 'package:kurye_takip/helpers/location_selection_screen.dart';
-import 'package:kurye_takip/pages/auth/auth_controller.dart';
-import 'package:kurye_takip/model/register.dart';
-import 'package:kurye_takip/pages/auth/login.dart';
-import 'package:kurye_takip/pages/auth/register2.dart';
-import 'package:kurye_takip/pages/dashboard/dashboard.dart';
-import 'package:kurye_takip/pages/map/map.dart';
 import 'package:map_picker/map_picker.dart';
 
-class RegisterPage extends StatefulWidget {
-  const RegisterPage({super.key});
+class RegisterPage extends StatelessWidget {
+  RegisterPage({super.key});
 
-  @override
-  State<RegisterPage> createState() => _RegisterPageState();
-}
-
-class _RegisterPageState extends State<RegisterPage> {
-  final AuthController authController = Get.put(AuthController());
-
-  TextEditingController nameController = TextEditingController();
-  TextEditingController surnameController = TextEditingController();
-  TextEditingController phoneController = TextEditingController();
-  TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
-  TextEditingController password2Controller = TextEditingController();
-
-  TextEditingController drivingLicenseNumber = TextEditingController();
-  TextEditingController drivingLicenseDate = TextEditingController();
-
-  TextEditingController rentNameController = TextEditingController();
-  TextEditingController rentSurnameController = TextEditingController();
-  TextEditingController rentPhoneController = TextEditingController();
-  TextEditingController rentEmailController = TextEditingController();
-  TextEditingController rentPasswordController = TextEditingController();
-  TextEditingController rentPassword2Controller = TextEditingController();
+  final RegisterController controller = Get.put(RegisterController());
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: DefaultTabController(
-        length: 2,
-        child: Scaffold(
-          appBar: AppBar(
-            centerTitle: true,
-            bottom: const TabBar(
-              indicatorPadding: EdgeInsets.all(0),
-              tabs: [
-                Center(child: Text("Araç Kirala")),
-                Center(child: Text("Araç Kiraya Ver")),
-              ],
-            ),
-            title: const Text('RENTEKER'),
-          ),
-          resizeToAvoidBottomInset: false,
-          body: TabBarView(
-            children: [
-              AracKiralaTab(
-                  nameController: nameController,
-                  surnameController: surnameController,
-                  phoneController: phoneController,
-                  emailController: emailController,
-                  passwordController: passwordController,
-                  password2Controller: password2Controller,
-                  drivingLicenseNumberController: drivingLicenseNumber,
-                  drivingLicenseDateController: drivingLicenseDate,
-                  authController: authController),
-              AracKirayaVerTab(
-                  rentNameController: rentNameController,
-                  rentSurnameController: rentSurnameController,
-                  rentPhoneController: rentPhoneController,
-                  rentEmailController: rentEmailController,
-                  rentPasswordController: rentPasswordController,
-                  rentPassword2Controller: rentPassword2Controller,
-                  authController: authController)
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text("RENTEKER"),
+          bottom: const TabBar(
+            tabs: [
+              Tab(text: "Araç Kirala"),
+              Tab(text: "Aracını Kirala"),
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class AracKirayaVerTab extends StatelessWidget {
-  const AracKirayaVerTab({
-    super.key,
-    required this.rentNameController,
-    required this.rentSurnameController,
-    required this.rentPhoneController,
-    required this.rentEmailController,
-    required this.rentPasswordController,
-    required this.rentPassword2Controller,
-    required this.authController,
-  });
-
-  final TextEditingController rentNameController;
-  final TextEditingController rentSurnameController;
-  final TextEditingController rentPhoneController;
-  final TextEditingController rentEmailController;
-  final TextEditingController rentPasswordController;
-  final TextEditingController rentPassword2Controller;
-  final AuthController authController;
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: SingleChildScrollView(
-        child: Column(
+        body: TabBarView(
+          physics: const NeverScrollableScrollPhysics(),
           children: [
-            const SizedBox(height: 10),
-            Padding(
-              padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: Get.width * 0.9,
-                ),
-                child: TextField(
-                  controller: rentNameController,
-                  style: TextStyle(fontSize: 14),
-                  decoration: InputDecoration(
-                    hintText: "İsim",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    fillColor: Colors.grey.withOpacity(0.2),
-                    filled: true,
-                    contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                    prefixIcon: const Icon(Icons.person),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 10.0),
-            Padding(
-              padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: Get.width * 0.9,
-                ),
-                child: TextField(
-                  controller: rentSurnameController,
-                  style: TextStyle(fontSize: 14),
-                  decoration: InputDecoration(
-                    hintText: "Soyisim",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    fillColor: Colors.grey.withOpacity(0.2),
-                    filled: true,
-                    contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                    prefixIcon: const Icon(Icons.person),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 10.0),
-            Padding(
-              padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: Get.width * 0.9,
-                ),
-                child: TextField(
-                  controller: rentPhoneController,
-                  style: TextStyle(fontSize: 14),
-                  decoration: InputDecoration(
-                    hintText: "Telefon",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    fillColor: Colors.grey.withOpacity(0.2),
-                    filled: true,
-                    contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                    prefixIcon: const Icon(Icons.phone),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 10.0),
-            Padding(
-              padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: Get.width * 0.9,
-                ),
-                child: TextField(
-                  controller: rentEmailController,
-                  style: TextStyle(fontSize: 14),
-                  decoration: InputDecoration(
-                    hintText: "Eposta",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    fillColor: Colors.grey.withOpacity(0.2),
-                    filled: true,
-                    contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                    prefixIcon: const Icon(Icons.email),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            Padding(
-              padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: Get.width * 0.9,
-                ),
-                child: TextField(
-                  controller: rentPasswordController,
-                  style: TextStyle(fontSize: 14),
-                  decoration: InputDecoration(
-                    hintText: "Şifre",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    fillColor: Colors.grey.withOpacity(0.2),
-                    filled: true,
-                    contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                    prefixIcon: const Icon(Icons.password_outlined),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            Padding(
-              padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: Get.width * 0.9,
-                ),
-                child: TextField(
-                  controller: rentPassword2Controller,
-                  style: TextStyle(fontSize: 14),
-                  decoration: InputDecoration(
-                    hintText: "Şifre Tekrar",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    fillColor: Colors.grey.withOpacity(0.2),
-                    filled: true,
-                    contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                    prefixIcon: const Icon(Icons.password_outlined),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 30),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 30),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton(
-                    style: ButtonStyle(
-                      foregroundColor: MaterialStateProperty.all(Colors.black),
-                      backgroundColor: MaterialStateProperty.all(AppColors.primaryColor),
-                      padding: MaterialStateProperty.all(
-                        const EdgeInsets.symmetric(horizontal: 50.0),
-                      ),
-                    ),
-                    onPressed: () {
-                      Get.to(() => LoginPage());
-                    },
-                    child: const Text("Girişe Dön"),
-                  ),
-                  const SizedBox(height: 10),
-                  TextButton(
-                    style: ButtonStyle(
-                      foregroundColor: MaterialStateProperty.all(Colors.black),
-                      backgroundColor: MaterialStateProperty.all(AppColors.primaryColor),
-                      padding: MaterialStateProperty.all(
-                        const EdgeInsets.symmetric(horizontal: 50.0),
-                      ),
-                    ),
-                    onPressed: () async {
-                      authController.registerModel.name = rentNameController.text;
-                      authController.registerModel.surname = rentSurnameController.text;
-                      authController.registerModel.phone = rentPhoneController.text;
-                      authController.registerModel.email = rentNameController.text;
-                      authController.registerModel.password = Helpers.encryptPassword(rentPasswordController.text);
-                      authController.registerModel.is_vehicle_owner = 1;
-
-                      await authController.register();
-                    },
-                    child: const Text("Kaydol", style: TextStyle(fontSize: 18)),
-                  ),
-                  const SizedBox(height: 30),
-                ],
-              ),
-            ),
-            GoogleAndAppleRegister(),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class AracKiralaTab extends StatelessWidget {
-  AracKiralaTab({
-    super.key,
-    required this.nameController,
-    required this.surnameController,
-    required this.phoneController,
-    required this.emailController,
-    required this.passwordController,
-    required this.password2Controller,
-    required this.drivingLicenseNumberController,
-    required this.drivingLicenseDateController,
-    required this.authController,
-  });
-
-  final TextEditingController nameController;
-  final TextEditingController surnameController;
-  final TextEditingController phoneController;
-  final TextEditingController emailController;
-  final TextEditingController passwordController;
-  final TextEditingController password2Controller;
-  final TextEditingController drivingLicenseNumberController;
-  final TextEditingController drivingLicenseDateController;
-  final AuthController authController;
-
-  final _controller = Completer<GoogleMapController>();
-  MapPickerController mapPickerController = MapPickerController();
-
-  CameraPosition cameraPosition = const CameraPosition(
-    target: LatLng(38.4237, 27.1428),
-    zoom: 14.4746,
-  );
-
-  var textController = TextEditingController();
-
-  @override
-  Widget build(BuildContext context) {
-    final GetStorage storage = GetStorage();
-
-    return SafeArea(
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            GetUserInfo(
-              nameController: nameController,
-              surnameController: surnameController,
-              phoneController: phoneController,
-              emailController: emailController,
-              passwordController: passwordController,
-              password2Controller: password2Controller,
-            ),
-            DrivingLicenseNoDateFrontAndBack(
-              surnameController: surnameController,
-              authController: authController,
-              drivingLicenseNumberController: drivingLicenseNumberController,
-              drivingLicenseDateController: drivingLicenseDateController,
-            ),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: ElevatedButton(
-                onPressed: () {
-                  _showMapPickerModal(context);
-                },
-                child: Row(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text('Konumunuzu Seçin'),
-                    const SizedBox(width: 10),
-                    Obx(() {
-                      switch (authController.isLocationTaken.value) {
-                        case 1:
-                          return Icon(Icons.check, color: Colors.green);
-                        case 2:
-                          return Icon(Icons.close, color: Colors.red);
-                        default:
-                          return Container();
-                      }
-                    }),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 10),
-
-            //TextButton(onPressed: () {}, child: Text("Konumunuzu seçiniz")),
-            LoginAndRegisterButton(
-              nameController: nameController,
-              surnameController: surnameController,
-              phoneController: phoneController,
-              emailController: emailController,
-              passwordController: passwordController,
-              password2Controller: password2Controller,
-              authController: authController,
-              drivingLicenseNumberController: drivingLicenseNumberController,
-              drivingLicenseDateController: drivingLicenseDateController,
-            ),
-            const GoogleAndAppleRegister(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showMapPickerModal(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          contentPadding: EdgeInsets.all(0),
-          content: Container(
-            height: Get.height * 0.5,
-            width: Get.width * 0.9,
-            child: Stack(
-              alignment: Alignment.topCenter,
+            PageView(
+              controller: controller.rentPageController,
               children: [
-                MapPicker(
-                  // pass icon widget
-                  iconWidget: Image.asset("assets/pngs/location_icon.png"),
-                  // add map picker controller
-                  mapPickerController: mapPickerController,
-                  child: GoogleMap(
-                    myLocationEnabled: true,
-                    zoomControlsEnabled: false,
-                    // hide location button
-                    myLocationButtonEnabled: false,
-                    mapType: MapType.normal,
-                    // camera position
-                    initialCameraPosition: cameraPosition,
-                    onMapCreated: (GoogleMapController controller) {
-                      _controller.complete(controller);
-                    },
-                    onCameraMoveStarted: () {
-                      // notify map is moving
-                      mapPickerController.mapMoving!();
-                      textController.text = "Kontrol Ediliyor...";
-                    },
-                    onCameraMove: (cameraPosition) {
-                      this.cameraPosition = cameraPosition;
-                    },
-                    onCameraIdle: () async {
-                      // notify map stopped moving
-                      mapPickerController.mapFinishedMoving!();
-                      // get address name from camera position
-                      List<Placemark> placemarks = await placemarkFromCoordinates(
-                        cameraPosition.target.latitude,
-                        cameraPosition.target.longitude,
-                      );
-
-                      // update the ui with the address
-                      textController.text = '${placemarks.first.administrativeArea} - ${placemarks.first.subLocality}';
-                      String fullAddress =
-                          '${placemarks.first.thoroughfare} ${placemarks.first.subThoroughfare}, ${placemarks.first.locality} ${placemarks.first.subLocality}, ${placemarks.first.administrativeArea} ${placemarks.first.postalCode}';
-                      authController.registerModel.address = fullAddress;
-                      authController.registerModel.city = placemarks.first.administrativeArea!;
-                      authController.registerModel.district = placemarks.first.subLocality!;
-                    },
-                  ),
-                ),
-                Positioned(
-                  top: MediaQuery.of(context).viewPadding.top + 20,
-                  width: MediaQuery.of(context).size.width - 50,
-                  height: 50,
-                  child: TextFormField(
-                    maxLines: 3,
-                    textAlign: TextAlign.center,
-                    readOnly: true,
-                    decoration: const InputDecoration(contentPadding: EdgeInsets.zero, border: InputBorder.none),
-                    controller: textController,
-                  ),
-                ),
-                Positioned(
-                  bottom: 24,
-                  left: 24,
-                  right: 24,
-                  child: SizedBox(
-                    height: 50,
-                    child: TextButton(
-                      child: const Text(
-                        "Konumu Seç",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.normal,
-                          color: Color(0xFFFFFFFF),
-                          fontSize: 19,
-                          // height: 19/19,
-                        ),
-                      ),
-                      onPressed: () {
-                        print("Location ${cameraPosition.target.latitude} ${cameraPosition.target.longitude}");
-                        print("Address: ${textController.text}");
-
-                        authController.isLocationTaken.value = 1;
-
-                        Navigator.of(context).pop(); // Close the dialog
-                      },
-                      style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFFA3080C)),
-                        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15.0),
+                SafeArea(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: Form(
+                      key: controller.rentForm,
+                      child: Column(
+                        children: [
+                          TextFormField(
+                            controller: controller.rentName,
+                            keyboardType: TextInputType.name,
+                            decoration: const InputDecoration(
+                              label: Text("İsim"),
+                              border: OutlineInputBorder(),
+                              prefixIcon: Icon(Icons.person, color: AppColors.primaryColor),
+                            ),
+                            validator: (value) => value!.isEmpty ? "boş bırakılamaz" : null,
                           ),
-                        ),
+                          const SizedBox(height: 8),
+                          TextFormField(
+                            controller: controller.rentSurname,
+                            keyboardType: TextInputType.name,
+                            decoration: const InputDecoration(
+                              label: Text("Soyisim"),
+                              border: OutlineInputBorder(),
+                              prefixIcon: Icon(Icons.person, color: AppColors.primaryColor),
+                            ),
+                            validator: (value) => value!.isEmpty ? "boş bırakılamaz" : null,
+                          ),
+                          const SizedBox(height: 8),
+                          TextFormField(
+                            controller: controller.rentPhone,
+                            keyboardType: TextInputType.phone,
+                            decoration: const InputDecoration(
+                              label: Text("Telefon"),
+                              border: OutlineInputBorder(),
+                              prefixIcon: Icon(Icons.person, color: AppColors.primaryColor),
+                            ),
+                            validator: (value) => value!.isEmpty ? "boş bırakılamaz" : null,
+                          ),
+                          const SizedBox(height: 8),
+                          TextFormField(
+                            controller: controller.rentMail,
+                            keyboardType: TextInputType.emailAddress,
+                            decoration: const InputDecoration(
+                              label: Text("Mail"),
+                              border: OutlineInputBorder(),
+                              prefixIcon: Icon(Icons.person, color: AppColors.primaryColor),
+                            ),
+                            validator: (value) => value!.isEmpty
+                                ? "boş bırakılamaz"
+                                : !value.toString().isEmail
+                                    ? "Geçerli bir mail adresi giriniz."
+                                    : null,
+                          ),
+                          /*const SizedBox(height: 8),
+                        TextFormField(
+                          controller: controller.rentPhone,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            label: const Text("TC Kimlik Numarası"),
+                            border: const OutlineInputBorder(),
+                            prefixIcon: const Icon(Icons.person, color: AppColors.primaryColor),
+                            suffixIcon: GestureDetector(
+                              onTap: () {},
+                              child: Icon(Icons.warning_amber_rounded),
+                            ),
+                          ),
+                          validator: (value) => value!.isEmpty ? "boş bırakılamaz" : null,
+                        ),*/
+                          const SizedBox(height: 8),
+                          Obx(
+                            () => TextFormField(
+                              obscureText: controller.rentPasswordHide.isTrue,
+                              controller: controller.rentPassword,
+                              keyboardType: TextInputType.text,
+                              decoration: InputDecoration(
+                                label: const Text("Şifre"),
+                                border: const OutlineInputBorder(),
+                                prefixIcon: const Icon(Icons.password, color: AppColors.primaryColor),
+                                suffixIcon: GestureDetector(
+                                  onTap: () => controller.rentPasswordHide.toggle(),
+                                  child: Icon(controller.rentPasswordHide.isTrue ? Icons.visibility : Icons.visibility_off),
+                                ),
+                              ),
+                              validator: (value) => value!.isEmpty
+                                  ? "boş bırakılamaz"
+                                  : value.trim() != controller.rentPassword2.text.trim()
+                                      ? "Şifreler uyuşmuyor"
+                                      : null,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Obx(
+                            () => TextFormField(
+                              obscureText: controller.rentPassword2Hide.isTrue,
+                              controller: controller.rentPassword2,
+                              keyboardType: TextInputType.text,
+                              decoration: InputDecoration(
+                                label: const Text("Şifre Tekrar"),
+                                border: const OutlineInputBorder(),
+                                prefixIcon: const Icon(Icons.password, color: AppColors.primaryColor),
+                                suffixIcon: GestureDetector(
+                                  onTap: () => controller.rentPassword2Hide.toggle(),
+                                  child: Icon(controller.rentPassword2Hide.isTrue ? Icons.visibility : Icons.visibility_off),
+                                ),
+                              ),
+                              validator: (value) => value!.isEmpty
+                                  ? "boş bırakılamaz"
+                                  : value.trim() != controller.rentPassword.text.trim()
+                                      ? "Şifreler uyuşmuyor"
+                                      : null,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          TextFormField(
+                            controller: controller.rentDLnumber,
+                            keyboardType: TextInputType.text,
+                            decoration: const InputDecoration(
+                              label: Text("Ehliyet Numarası"),
+                              border: OutlineInputBorder(),
+                              prefixIcon: Icon(Icons.credit_card, color: AppColors.primaryColor),
+                            ),
+                            validator: (value) => value!.isEmpty ? "boş bırakılamaz" : null,
+                          ),
+                          const SizedBox(height: 8),
+                          TextFormField(
+                            readOnly: true,
+                            controller: controller.rentDLdateInput,
+                            decoration: const InputDecoration(
+                              label: Text("Ehliyet Tarihi"),
+                              border: OutlineInputBorder(),
+                              prefixIcon: Icon(Icons.person, color: AppColors.primaryColor),
+                            ),
+                            validator: (value) => value!.isEmpty ? "boş bırakılamaz" : null,
+                            onTap: () async {
+                              DateTime? pickedDate = await showDatePicker(
+                                context: context,
+                                initialDate: controller.rentDLdate,
+                                firstDate: DateTime(1950),
+                                lastDate: DateTime(2100),
+                              );
+                              if (pickedDate != null) {
+                                controller.rentDLdate = pickedDate;
+                                controller.rentDLdateInput.text = DateFormat('dd-MM-yyyy').format(pickedDate);
+                              } else {}
+                            },
+                          ),
+                          const SizedBox(height: 8),
+                          MaterialButton(
+                            color: AppColors.softPrimaryColor,
+                            minWidth: Get.width,
+                            child: const Text("Ehliyet Ön Yüzünü Yükle"),
+                            onPressed: () async {
+                              final XFile? image = await ImagePicker().pickImage(source: ImageSource.camera);
+                              if (!image.isNull) {
+                                final bytes = await image!.readAsBytes();
+                                var result = await FlutterImageCompress.compressWithList(bytes, minWidth: 720, minHeight: 480, quality: 50, rotate: 0);
+                                final byteLength = result.lengthInBytes;
+                                final kByte = byteLength / 1024;
+                                final mByte = kByte / 1024;
+                                if (mByte > 2.5) {
+                                  log("Maksimum boyut 2.5 mb olabilir.");
+                                } else {
+                                  controller.image1 = base64.encode(result);
+                                  controller.image1ext = image.path.split(".").last;
+                                }
+                              } else {}
+                            },
+                          ),
+                          const SizedBox(height: 4),
+                          MaterialButton(
+                            color: AppColors.softPrimaryColor,
+                            minWidth: Get.width,
+                            child: const Text("Ehliyet Arka Yüzünü Yükle"),
+                            onPressed: () async {
+                              final XFile? image = await ImagePicker().pickImage(source: ImageSource.camera);
+                              if (!image.isNull) {
+                                final bytes = await image!.readAsBytes();
+                                var result = await FlutterImageCompress.compressWithList(bytes, minWidth: 720, minHeight: 480, quality: 50, rotate: 0);
+                                final byteLength = result.lengthInBytes;
+                                final kByte = byteLength / 1024;
+                                final mByte = kByte / 1024;
+                                if (mByte > 2.5) {
+                                  log("Maksimum boyut 2.5 mb olabilir.");
+                                } else {
+                                  controller.image2 = base64.encode(result);
+                                  controller.image2ext = image.path.split(".").last;
+                                }
+                              } else {}
+                            },
+                          ),
+                          const SizedBox(height: 8),
+                          MaterialButton(
+                            color: AppColors.softPrimaryColor,
+                            minWidth: Get.width,
+                            child: const Text("Konum Seç"),
+                            onPressed: () {
+                              Get.dialog(const SelectLoactionRegisterRent());
+                            },
+                          ),
+                          const SizedBox(height: 8),
+                          Obx(
+                            () => Visibility(
+                              visible: controller.address.value.isNotEmpty,
+                              child: Text(controller.address.value),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          MaterialButton(
+                            color: AppColors.primaryColor,
+                            minWidth: Get.width,
+                            child: const Text("KAYIT OL"),
+                            onPressed: () {
+                              if (controller.rentForm.currentState!.validate()) {
+                                if (controller.image1.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Eyliyetinizin ön yüzünü yükleyiniz.')),
+                                  );
+                                } else if (controller.image2.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Eyliyetinizin arka yüzünü yükleyiniz.')),
+                                  );
+                                } else if (controller.address.value.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Lütfen adres seçiniz')),
+                                  );
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Processing Data')),
+                                  );
+                                }
+                              } else {
+                                String body = json.encode({
+                                  "name": controller.rentName.text,
+                                  "surname": controller.rentSurname.text,
+                                  "phone": controller.rentPhone.text,
+                                  "email": controller.rentMail.text,
+                                  "password": Helpers.encryptPassword(controller.rentPassword.text),
+                                  "driving_license_number": controller.rentDLnumber.text,
+                                  "driving_license_date": controller.rentDLdate,
+                                  "driving_license_front": controller.image1,
+                                  "driving_license_front_ext": controller.image1ext,
+                                  "driving_license_back": controller.image2,
+                                  "driving_license_back_ext": controller.image2ext,
+                                  "address": controller.address,
+                                  "city": controller.city,
+                                  "district": controller.district,
+                                });
+
+                                //controller.Register(body);
+                                /*ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Eksik veri girişi')),
+                              );*/
+                              }
+                            },
+                          ),
+                          const SizedBox(height: 8),
+                          MaterialButton(
+                            onPressed: () {},
+                            child: const Text("İleri"),
+                          ),
+                        ],
                       ),
                     ),
                   ),
+                ),
+                Center(
+                  child: Text("Second Page"),
                 )
               ],
             ),
-          ),
-        );
-      },
+            PageView(
+              controller: controller.rentPageController,
+              children: [
+                SafeArea(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: Form(
+                      key: controller.rentForm,
+                      child: Column(
+                        children: [
+                          TextFormField(
+                              // Diğer TextFormField'lar burada...
+                              ),
+                          const SizedBox(height: 8),
+                          MaterialButton(
+                            onPressed: () {
+                              // İleri butonuna tıklandığında bir sonraki sayfaya geçiş
+                              controller.rentPageController.nextPage(
+                                duration: const Duration(milliseconds: 500),
+                                curve: Curves.easeInOut,
+                              );
+                            },
+                            child: const Text("İleri"),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Sayfa 2 içeriği
+                SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Form(
+                    key: controller.ownerForm,
+                    child: Column(
+                      children: [
+                        // Diğer widget'lar burada...
+                        MaterialButton(
+                          onPressed: () {
+                            // İleri butonuna tıklandığında bir sonraki sayfaya geçiş
+                            controller.rentPageController.nextPage(
+                              duration: const Duration(milliseconds: 500),
+                              curve: Curves.easeInOut,
+                            );
+                          },
+                          child: const Text("İleri"),
+                        ),
+                        const SizedBox(height: 8),
+                        MaterialButton(
+                          onPressed: () {
+                            // Geri butonuna tıklandığında bir önceki sayfaya geçiş
+                            controller.rentPageController.previousPage(
+                              duration: const Duration(milliseconds: 500),
+                              curve: Curves.easeInOut,
+                            );
+                          },
+                          child: const Text("Geri"),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Sayfa 3 içeriği - Sadece Geri butonu
+                SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      // Sayfa 3 içeriği burada
+                      MaterialButton(
+                        onPressed: () {
+                          // Geri butonuna tıklandığında bir önceki sayfaya geçiş
+                          controller.rentPageController.previousPage(
+                            duration: const Duration(milliseconds: 500),
+                            curve: Curves.easeInOut,
+                          );
+                        },
+                        child: const Text("Geri"),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
 
-class DrivingLicenseNoDateFrontAndBack extends StatelessWidget {
-  DrivingLicenseNoDateFrontAndBack({
-    super.key,
-    required this.surnameController,
-    required this.authController,
-    required this.drivingLicenseNumberController,
-    required this.drivingLicenseDateController,
-  });
-
-  final TextEditingController surnameController;
-  final AuthController authController;
-  final TextEditingController drivingLicenseNumberController;
-  final TextEditingController drivingLicenseDateController;
+class SelectLoactionRegisterRent extends GetView<RegisterController> {
+  const SelectLoactionRegisterRent({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: Get.width * 0.9,
-            ),
-            child: TextField(
-              controller: drivingLicenseNumberController,
-              style: const TextStyle(fontSize: 14),
-              decoration: InputDecoration(
-                hintText: "Ehliyet Numarası",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                fillColor: Colors.grey.withOpacity(0.2),
-                filled: true,
-                contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                prefixIcon: const Icon(Icons.numbers),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 10),
-        Padding(
-          padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: Get.width * 0.9,
-            ),
-            child: TextField(
-              controller: drivingLicenseDateController,
-              style: const TextStyle(fontSize: 14),
-              decoration: InputDecoration(
-                hintText: "Ehliyet Tarihi",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                fillColor: Colors.grey.withOpacity(0.2),
-                filled: true,
-                contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                prefixIcon: const Icon(Icons.date_range_outlined),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 10),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: ElevatedButton(
-            onPressed: () async {
-              final XFile? image = await ImagePicker().pickImage(source: ImageSource.camera);
-              print(image);
-
-              if (image != null) {
-                authController.isDrivingLicenseFrontImageTaken.value = 1;
-
-                List<int> imageBytes = await image.readAsBytes();
-                String base64Image = base64Encode(imageBytes);
-
-                authController.registerModel.drivingLicenseFrontImage = base64Encode(imageBytes);
-
-                _showResultDialog(true, context);
-              } else {
-                authController.isDrivingLicenseFrontImageTaken.value = 2;
-                _showResultDialog(false, context);
-              }
-            },
-            child: Row(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text('Ehliyet Ön Yüz Fotoğrafını Çek'),
-                const SizedBox(width: 10),
-                Obx(() {
-                  switch (authController.isDrivingLicenseFrontImageTaken.value) {
-                    case 1:
-                      return Icon(Icons.check, color: Colors.green);
-                    case 2:
-                      return Icon(Icons.close, color: Colors.red);
-                    default:
-                      return Container();
-                  }
-                }),
-                const SizedBox(width: 10),
-              ],
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: ElevatedButton(
-            onPressed: () async {
-              final XFile? image = await ImagePicker().pickImage(source: ImageSource.camera);
-
-              if (image != null) {
-                authController.isDrivingLicenseBackImageTaken.value = 1;
-
-                List<int> imageBytes = await image.readAsBytes();
-                String base64Image = base64Encode(imageBytes);
-
-                /*
-                storage.write('drivingLicenseBack', base64Image);
-                print("Front  ${storage.read<String>('drivingLicenseBack')}");*/
-
-                authController.registerModel.drivingLicenseBackImage = base64Encode(imageBytes);
-
-                _showResultDialog(true, context);
-              } else {
-                authController.isDrivingLicenseBackImageTaken.value = 2;
-                _showResultDialog(false, context);
-              }
-            },
-            child: Row(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text('Ehliyet Arka Yüz Fotoğrafını Çek'),
-                const SizedBox(width: 10),
-                Obx(() {
-                  switch (authController.isDrivingLicenseBackImageTaken.value) {
-                    case 1:
-                      return const Icon(Icons.check, color: Colors.green);
-                    case 2:
-                      return const Icon(Icons.close, color: Colors.red);
-                    default:
-                      return Container();
-                  }
-                }),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-void _showResultDialog(bool isSuccess, BuildContext context) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: isSuccess ? Icon(Icons.check, color: Colors.green) : Icon(Icons.close, color: Colors.red),
-        content: isSuccess ? Text('İşlem başarıyla tamamlandı.') : Text('Resim alınamadı.'),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: const Text('Tamam'),
-          ),
-        ],
-      );
-    },
-  );
-}
-
-void openCamera() async {
-  final ImagePicker _picker = ImagePicker();
-  final XFile? image = await _picker.pickImage(source: ImageSource.camera);
-
-  if (image != null) {
-    // Seçilen fotoğrafı kullanmak için buraya işlemleri ekleyebilirsiniz.
-    print('Fotoğraf Yüklendi: ${image.path}');
-  } else {
-    print('Kullanıcı fotoğraf seçmedi');
-  }
-}
-
-class GoogleAndAppleRegister extends StatelessWidget {
-  const GoogleAndAppleRegister({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const SizedBox(height: 10),
-        const Text(
-          "Google yada Apple ile Kayıt Ol",
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 30.0),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+    return AlertDialog(
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+      contentPadding: const EdgeInsets.all(0),
+      content: SizedBox(
+        height: Get.height * 0.5,
+        width: Get.width * .75,
+        child: Stack(
+          alignment: Alignment.topCenter,
           children: [
-            GestureDetector(
-              onTap: () {},
-              child: Image.asset(
-                "assets/pngs/google.png",
-                height: 45,
-                width: 45,
-                fit: BoxFit.cover,
+            MapPicker(
+              iconWidget: Image.asset("assets/pngs/location_icon.png"),
+              mapPickerController: controller.mapPickerController,
+              child: GoogleMap(
+                myLocationEnabled: true,
+                zoomControlsEnabled: false,
+                myLocationButtonEnabled: false,
+                mapType: MapType.normal,
+                initialCameraPosition: controller.cameraPosition,
+                onMapCreated: (GoogleMapController gmcontroller) => controller.googleMapController.complete(gmcontroller),
+                onCameraMoveStarted: () {
+                  controller.mapPickerController.mapMoving!();
+                  controller.gmAddressText.value = "Kontrol Ediliyor...";
+                },
+                onCameraMove: (cameraPosition) => controller.cameraPosition = cameraPosition,
+                onCameraIdle: () async {
+                  controller.mapPickerController.mapFinishedMoving!();
+                  // get address name from camera position
+                  List<Placemark> placemarks = await placemarkFromCoordinates(
+                    controller.cameraPosition.target.latitude,
+                    controller.cameraPosition.target.longitude,
+                  );
+
+                  if (placemarks.isNotEmpty) {
+                    Placemark address = placemarks.first;
+                    controller.gmAddressText.value =
+                        "${address.thoroughfare!} ${address.subThoroughfare}, ${address.locality} ${address.subLocality}, ${address.administrativeArea} ${address.postalCode}";
+                    controller.rxCity.value = address.administrativeArea!;
+                    controller.rxDistrict.value = address.subLocality!;
+                  }
+
+/*
+                  // update the ui with the address
+                  textController.text = '${placemarks.first.administrativeArea} - ${placemarks.first.subLocality}';
+                  String fullAddress =
+                      '${placemarks.first.thoroughfare} ${placemarks.first.subThoroughfare}, ${placemarks.first.locality} ${placemarks.first.subLocality}, ${placemarks.first.administrativeArea} ${placemarks.first.postalCode}';
+                  authController.registerModel.address = fullAddress;
+                  authController.registerModel.city = placemarks.first.administrativeArea!;
+                  authController.registerModel.district = placemarks.first.subLocality!;
+                  */
+                },
               ),
             ),
-            const SizedBox(width: 30.0),
-            GestureDetector(
-              onTap: () {},
-              child: Image.asset(
-                "assets/pngs/apple1.png",
+            Positioned(
+              top: 8,
+              child: Container(
+                width: Get.width * .65,
+                margin: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  color: Colors.white,
+                ),
+                padding: const EdgeInsets.all(8),
+                child: Obx(
+                  () => Text(controller.gmAddressText.value),
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: 24,
+              left: 24,
+              right: 24,
+              child: SizedBox(
                 height: 50,
-                width: 50,
-                fit: BoxFit.cover,
+                child: TextButton(
+                  onPressed: () {
+                    controller.address.value = controller.gmAddressText.value;
+                    controller.city = controller.rxCity.value;
+                    controller.district = controller.rxDistrict.value;
+                    Get.back();
+                  },
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFFA3080C)),
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
+                    ),
+                  ),
+                  child: const Text(
+                    "Konumu Seç",
+                    style: TextStyle(
+                      fontWeight: FontWeight.w400,
+                      fontStyle: FontStyle.normal,
+                      color: Color(0xFFFFFFFF),
+                      fontSize: 19,
+                      // height: 19/19,
+                    ),
+                  ),
+                ),
               ),
             )
           ],
         ),
-      ],
-    );
-  }
-}
-
-class LoginAndRegisterButton extends StatelessWidget {
-  const LoginAndRegisterButton({
-    super.key,
-    required this.nameController,
-    required this.surnameController,
-    required this.phoneController,
-    required this.emailController,
-    required this.passwordController,
-    required this.password2Controller,
-    required this.authController,
-    required this.drivingLicenseNumberController,
-    required this.drivingLicenseDateController,
-  });
-
-  final TextEditingController nameController;
-  final TextEditingController surnameController;
-  final TextEditingController phoneController;
-  final TextEditingController emailController;
-  final TextEditingController passwordController;
-  final TextEditingController password2Controller;
-  final AuthController authController;
-  final TextEditingController drivingLicenseNumberController;
-  final TextEditingController drivingLicenseDateController;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          TextButton(
-            style: ButtonStyle(
-              foregroundColor: MaterialStateProperty.all(Colors.black),
-              backgroundColor: MaterialStateProperty.all(AppColors.primaryColor),
-              padding: MaterialStateProperty.all(
-                const EdgeInsets.symmetric(horizontal: 50.0),
-              ),
-            ),
-            onPressed: () {
-              Get.to(() => LoginPage());
-            },
-            child: const Text("Girişe Dön"),
-          ),
-          const SizedBox(height: 10),
-          TextButton(
-            style: ButtonStyle(
-              foregroundColor: MaterialStateProperty.all(Colors.black),
-              backgroundColor: MaterialStateProperty.all(AppColors.primaryColor),
-              padding: MaterialStateProperty.all(
-                const EdgeInsets.symmetric(horizontal: 50.0),
-              ),
-            ),
-            onPressed: () async {
-              authController.registerModel.name = nameController.text;
-              authController.registerModel.surname = surnameController.text;
-              authController.registerModel.phone = phoneController.text;
-              authController.registerModel.email = emailController.text;
-              authController.registerModel.password = Helpers.encryptPassword(emailController.text);
-              authController.registerModel.drivingLicenseNumber = drivingLicenseNumberController.text;
-              authController.registerModel.drivingLicenseDate = drivingLicenseDateController.text;
-              authController.registerModel.is_vehicle_owner = 0;
-
-              await authController.register();
-            },
-            child: const Text("Kaydol", style: TextStyle(fontSize: 18)),
-          ),
-        ],
       ),
-    );
-  }
-}
-
-class GetUserInfo extends StatelessWidget {
-  const GetUserInfo({
-    super.key,
-    required this.nameController,
-    required this.surnameController,
-    required this.phoneController,
-    required this.emailController,
-    required this.passwordController,
-    required this.password2Controller,
-  });
-
-  final TextEditingController nameController;
-  final TextEditingController surnameController;
-  final TextEditingController phoneController;
-  final TextEditingController emailController;
-  final TextEditingController passwordController;
-  final TextEditingController password2Controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const SizedBox(height: 10),
-        Padding(
-          padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: Get.width * 0.9,
-            ),
-            child: TextField(
-              controller: nameController,
-              style: TextStyle(fontSize: 14),
-              decoration: InputDecoration(
-                hintText: "İsim",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                fillColor: Colors.grey.withOpacity(0.2),
-                filled: true,
-                contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                prefixIcon: const Icon(Icons.person),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 10.0),
-        Padding(
-          padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: Get.width * 0.9,
-            ),
-            child: TextField(
-              controller: surnameController,
-              style: TextStyle(fontSize: 14),
-              decoration: InputDecoration(
-                hintText: "Soyisim",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                fillColor: Colors.grey.withOpacity(0.2),
-                filled: true,
-                contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                prefixIcon: const Icon(Icons.person),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 10.0),
-        Padding(
-          padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: Get.width * 0.9,
-            ),
-            child: TextField(
-              controller: phoneController,
-              style: TextStyle(fontSize: 14),
-              decoration: InputDecoration(
-                hintText: "Telefon",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                fillColor: Colors.grey.withOpacity(0.2),
-                filled: true,
-                contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                prefixIcon: const Icon(Icons.phone),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 10.0),
-        Padding(
-          padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: Get.width * 0.9,
-            ),
-            child: TextField(
-              controller: emailController,
-              style: TextStyle(fontSize: 14),
-              decoration: InputDecoration(
-                hintText: "Eposta",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                fillColor: Colors.grey.withOpacity(0.2),
-                filled: true,
-                contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                prefixIcon: const Icon(Icons.email),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 10),
-        Padding(
-          padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: Get.width * 0.9,
-            ),
-            child: TextField(
-              controller: passwordController,
-              style: TextStyle(fontSize: 14),
-              decoration: InputDecoration(
-                hintText: "Şifre",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                fillColor: Colors.grey.withOpacity(0.2),
-                filled: true,
-                contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                prefixIcon: const Icon(Icons.password_outlined),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 10),
-        Padding(
-          padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: Get.width * 0.9,
-            ),
-            child: TextField(
-              controller: password2Controller,
-              style: TextStyle(fontSize: 14),
-              decoration: InputDecoration(
-                hintText: "Şifre Tekrar",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                fillColor: Colors.grey.withOpacity(0.2),
-                filled: true,
-                contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                prefixIcon: const Icon(Icons.password_outlined),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 10),
-      ],
     );
   }
 }

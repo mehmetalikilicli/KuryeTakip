@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
 import 'package:kurye_takip/app_constants/app_colors.dart';
-import 'package:kurye_takip/pages/auth/login.dart';
 import 'package:kurye_takip/pages/auth/register.dart';
-import 'package:kurye_takip/pages/dashboard/dashboard.dart';
-import 'package:kurye_takip/pages/gnav_bar/gnav_bar.dart';
-import 'package:kurye_takip/pages/profile_edit_page/profile_edit.dart';
-import 'package:kurye_takip/pages/profile/profile.dart';
-import 'package:kurye_takip/pages/test/test_register.dart';
 
 void main() {
   //Get.put(CarController());
@@ -29,7 +24,14 @@ class MyApp extends StatelessWidget {
       //home: LoginPage(),
       //GoogleNavBar(),
       //home: GoogleNavBar(),
-      home: TestRegisterView(),
+      home: RegisterPage(),
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [Locale('en'), Locale('tr')],
+      locale: const Locale("tr"),
     );
   }
 }

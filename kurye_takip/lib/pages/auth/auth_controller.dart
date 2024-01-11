@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -21,6 +22,32 @@ class AuthController extends GetxController {
   RxInt isDrivingLicenseFrontImageTaken = 0.obs;
   RxInt isDrivingLicenseBackImageTaken = 0.obs;
   RxInt isLocationTaken = 0.obs;
+
+  final loginFormKey = GlobalKey<FormState>();
+  final registerFormKey = GlobalKey<FormState>();
+  final rentRegisterFormKey = GlobalKey<FormState>();
+
+  //Login TextEditingControllers
+  TextEditingController loginEmailController = TextEditingController();
+  TextEditingController loginPasswordController = TextEditingController();
+
+  //Register TextEditingControllers
+  TextEditingController nameController = TextEditingController();
+  TextEditingController surnameController = TextEditingController();
+  TextEditingController phoneController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  TextEditingController password2Controller = TextEditingController();
+
+  TextEditingController drivingLicenseNumber = TextEditingController();
+  TextEditingController drivingLicenseDate = TextEditingController();
+
+  TextEditingController rentNameController = TextEditingController();
+  TextEditingController rentSurnameController = TextEditingController();
+  TextEditingController rentPhoneController = TextEditingController();
+  TextEditingController rentEmailController = TextEditingController();
+  TextEditingController rentPasswordController = TextEditingController();
+  TextEditingController rentPassword2Controller = TextEditingController();
 
   RegisterModel registerModel = RegisterModel(
     name: "",

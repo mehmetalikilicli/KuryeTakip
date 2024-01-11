@@ -6,7 +6,7 @@ import 'package:kurye_takip/components/my_popup.dart';
 import 'package:kurye_takip/helpers/helpers.dart';
 import 'package:kurye_takip/model/login.dart';
 import 'package:kurye_takip/pages/auth/auth_controller.dart';
-import 'package:kurye_takip/pages/auth/register.dart';
+import 'package:kurye_takip/pages/auth/register_old.dart';
 import 'package:kurye_takip/pages/dashboard/dashboard.dart';
 import 'package:kurye_takip/pages/gnav_bar/gnav_bar.dart';
 
@@ -20,27 +20,27 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final AuthController authController = Get.put(AuthController());
 
-  TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: SafeArea(
-        child: Column(
-          children: [
-            ImageAndText(),
-            EmailAndPassword(
-              emailController: emailController,
-              passwordController: passwordController,
+        child: SingleChildScrollView(
+          child: Form(
+            key: authController.loginFormKey,
+            child: Column(
+              children: [
+                ImageAndText(),
+                EmailAndPassword(
+                  authController: authController,
+                ),
+                LoginAndRegisterButton(
+                  authController: authController,
+                ),
+                //LoginWithGoogleAndApple(),
+              ],
             ),
-            LoginAndRegisterButton(
-                authController: authController,
-                emailController: emailController,
-                passwordController: passwordController),
-            //LoginWithGoogleAndApple(),
-          ],
+          ),
         ),
       ),
     );
@@ -128,13 +128,9 @@ class LoginAndRegisterButton extends StatelessWidget {
   const LoginAndRegisterButton({
     super.key,
     required this.authController,
-    required this.emailController,
-    required this.passwordController,
   });
 
   final AuthController authController;
-  final TextEditingController emailController;
-  final TextEditingController passwordController;
 
   @override
   Widget build(BuildContext context) {
@@ -149,18 +145,11 @@ class LoginAndRegisterButton extends StatelessWidget {
             ),
           ),
           onPressed: () async {
-            if (emailController.text.isEmpty || passwordController.text.isEmpty) {
-              Get.dialog(
-                MyPopup(
-                  title: 'Hata',
-                  message: 'Eposta veya şifre boş olamaz.',
-                ),
-              );
-            } else {
+            if (authController.loginFormKey.currentState!.validate()) {
               try {
                 Login loginResult = await authController.login(
-                  emailController.text,
-                  Helpers.encryptPassword(passwordController.text),
+                  authController.loginEmailController.text,
+                  Helpers.encryptPassword(authController.loginPasswordController.text),
                 );
                 if (loginResult.success) {
                   Get.snackbar("Başarılı", 'Giriş Baraşılı oldu');
@@ -199,14 +188,9 @@ class LoginAndRegisterButton extends StatelessWidget {
 }
 
 class EmailAndPassword extends StatelessWidget {
-  const EmailAndPassword({
-    super.key,
-    required this.emailController,
-    required this.passwordController,
-  });
+  const EmailAndPassword({super.key, required this.authController});
 
-  final TextEditingController emailController;
-  final TextEditingController passwordController;
+  final AuthController authController;
 
   @override
   Widget build(BuildContext context) {
@@ -215,8 +199,14 @@ class EmailAndPassword extends StatelessWidget {
         const SizedBox(height: 15.0),
         Padding(
           padding: const EdgeInsets.only(left: 20.0, right: 20.0),
-          child: TextField(
-            controller: emailController,
+          child: TextFormField(
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Lütfen epostanızı giriniz.';
+              }
+              return null;
+            },
+            controller: authController.loginEmailController,
             decoration: InputDecoration(
                 hintText: "Eposta",
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none),
@@ -228,9 +218,16 @@ class EmailAndPassword extends StatelessWidget {
         const SizedBox(height: 15),
         Padding(
           padding: const EdgeInsets.only(left: 20.0, right: 20.0),
-          child: TextField(
+          child: TextFormField(
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Lütfen şifrenizi giriniz';
+              } else {
+                return null;
+              }
+            },
             obscureText: true,
-            controller: passwordController,
+            controller: authController.loginPasswordController,
             decoration: InputDecoration(
                 hintText: "Şifre",
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none),

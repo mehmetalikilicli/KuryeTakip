@@ -10,6 +10,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  
+  flutter_localizations:
+    sdk: flutter
 
   get: ^4.6.6  
   carousel_slider: ^4.2.1
@@ -25,6 +28,7 @@ dependencies:
   geocoding: ^2.1.1
   map_picker: ^0.0.3
   flutter_image_compress: ^2.1.0
+  intl: ^0.18.1
 
   cupertino_icons: ^1.0.2
 
