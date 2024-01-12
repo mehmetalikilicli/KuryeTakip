@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -38,6 +39,7 @@ class RegisterPage extends StatelessWidget {
           physics: const NeverScrollableScrollPhysics(),
           children: [
             PageView(
+              physics: const NeverScrollableScrollPhysics(),
               controller: controller.rentPageController,
               children: [
                 SafeArea(
@@ -55,7 +57,7 @@ class RegisterPage extends StatelessWidget {
                               border: OutlineInputBorder(),
                               prefixIcon: Icon(Icons.person, color: AppColors.primaryColor),
                             ),
-                            validator: (value) => value!.isEmpty ? "boş bırakılamaz" : null,
+                            validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
                           ),
                           const SizedBox(height: 8),
                           TextFormField(
@@ -66,7 +68,7 @@ class RegisterPage extends StatelessWidget {
                               border: OutlineInputBorder(),
                               prefixIcon: Icon(Icons.person, color: AppColors.primaryColor),
                             ),
-                            validator: (value) => value!.isEmpty ? "boş bırakılamaz" : null,
+                            validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
                           ),
                           const SizedBox(height: 8),
                           TextFormField(
@@ -77,7 +79,7 @@ class RegisterPage extends StatelessWidget {
                               border: OutlineInputBorder(),
                               prefixIcon: Icon(Icons.person, color: AppColors.primaryColor),
                             ),
-                            validator: (value) => value!.isEmpty ? "boş bırakılamaz" : null,
+                            validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
                           ),
                           const SizedBox(height: 8),
                           TextFormField(
@@ -89,7 +91,7 @@ class RegisterPage extends StatelessWidget {
                               prefixIcon: Icon(Icons.person, color: AppColors.primaryColor),
                             ),
                             validator: (value) => value!.isEmpty
-                                ? "boş bırakılamaz"
+                                ? "Boş bırakılamaz"
                                 : !value.toString().isEmail
                                     ? "Geçerli bir mail adresi giriniz."
                                     : null,
@@ -107,7 +109,7 @@ class RegisterPage extends StatelessWidget {
                               child: Icon(Icons.warning_amber_rounded),
                             ),
                           ),
-                          validator: (value) => value!.isEmpty ? "boş bırakılamaz" : null,
+                          validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
                         ),*/
                           const SizedBox(height: 8),
                           Obx(
@@ -125,7 +127,7 @@ class RegisterPage extends StatelessWidget {
                                 ),
                               ),
                               validator: (value) => value!.isEmpty
-                                  ? "boş bırakılamaz"
+                                  ? "Boş bırakılamaz"
                                   : value.trim() != controller.rentPassword2.text.trim()
                                       ? "Şifreler uyuşmuyor"
                                       : null,
@@ -147,95 +149,22 @@ class RegisterPage extends StatelessWidget {
                                 ),
                               ),
                               validator: (value) => value!.isEmpty
-                                  ? "boş bırakılamaz"
+                                  ? "Boş bırakılamaz"
                                   : value.trim() != controller.rentPassword.text.trim()
                                       ? "Şifreler uyuşmuyor"
                                       : null,
                             ),
                           ),
                           const SizedBox(height: 8),
-                          TextFormField(
-                            controller: controller.rentDLnumber,
-                            keyboardType: TextInputType.text,
-                            decoration: const InputDecoration(
-                              label: Text("Ehliyet Numarası"),
-                              border: OutlineInputBorder(),
-                              prefixIcon: Icon(Icons.credit_card, color: AppColors.primaryColor),
+                          MaterialButton(
+                            height: Get.height * 0.053,
+                            color: AppColors.softPrimaryColor,
+                            minWidth: Get.width,
+                            child: Text(
+                              "Konum Seç",
+                              style: TextStyle(color: Colors.white),
                             ),
-                            validator: (value) => value!.isEmpty ? "boş bırakılamaz" : null,
-                          ),
-                          const SizedBox(height: 8),
-                          TextFormField(
-                            readOnly: true,
-                            controller: controller.rentDLdateInput,
-                            decoration: const InputDecoration(
-                              label: Text("Ehliyet Tarihi"),
-                              border: OutlineInputBorder(),
-                              prefixIcon: Icon(Icons.person, color: AppColors.primaryColor),
-                            ),
-                            validator: (value) => value!.isEmpty ? "boş bırakılamaz" : null,
-                            onTap: () async {
-                              DateTime? pickedDate = await showDatePicker(
-                                context: context,
-                                initialDate: controller.rentDLdate,
-                                firstDate: DateTime(1950),
-                                lastDate: DateTime(2100),
-                              );
-                              if (pickedDate != null) {
-                                controller.rentDLdate = pickedDate;
-                                controller.rentDLdateInput.text = DateFormat('dd-MM-yyyy').format(pickedDate);
-                              } else {}
-                            },
-                          ),
-                          const SizedBox(height: 8),
-                          MaterialButton(
-                            color: AppColors.softPrimaryColor,
-                            minWidth: Get.width,
-                            child: const Text("Ehliyet Ön Yüzünü Yükle"),
-                            onPressed: () async {
-                              final XFile? image = await ImagePicker().pickImage(source: ImageSource.camera);
-                              if (!image.isNull) {
-                                final bytes = await image!.readAsBytes();
-                                var result = await FlutterImageCompress.compressWithList(bytes, minWidth: 720, minHeight: 480, quality: 50, rotate: 0);
-                                final byteLength = result.lengthInBytes;
-                                final kByte = byteLength / 1024;
-                                final mByte = kByte / 1024;
-                                if (mByte > 2.5) {
-                                  log("Maksimum boyut 2.5 mb olabilir.");
-                                } else {
-                                  controller.image1 = base64.encode(result);
-                                  controller.image1ext = image.path.split(".").last;
-                                }
-                              } else {}
-                            },
-                          ),
-                          const SizedBox(height: 4),
-                          MaterialButton(
-                            color: AppColors.softPrimaryColor,
-                            minWidth: Get.width,
-                            child: const Text("Ehliyet Arka Yüzünü Yükle"),
-                            onPressed: () async {
-                              final XFile? image = await ImagePicker().pickImage(source: ImageSource.camera);
-                              if (!image.isNull) {
-                                final bytes = await image!.readAsBytes();
-                                var result = await FlutterImageCompress.compressWithList(bytes, minWidth: 720, minHeight: 480, quality: 50, rotate: 0);
-                                final byteLength = result.lengthInBytes;
-                                final kByte = byteLength / 1024;
-                                final mByte = kByte / 1024;
-                                if (mByte > 2.5) {
-                                  log("Maksimum boyut 2.5 mb olabilir.");
-                                } else {
-                                  controller.image2 = base64.encode(result);
-                                  controller.image2ext = image.path.split(".").last;
-                                }
-                              } else {}
-                            },
-                          ),
-                          const SizedBox(height: 8),
-                          MaterialButton(
-                            color: AppColors.softPrimaryColor,
-                            minWidth: Get.width,
-                            child: const Text("Konum Seç"),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             onPressed: () {
                               Get.dialog(const SelectLoactionRegisterRent());
                             },
@@ -248,127 +177,224 @@ class RegisterPage extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 8),
-                          MaterialButton(
-                            color: AppColors.primaryColor,
-                            minWidth: Get.width,
-                            child: const Text("KAYIT OL"),
-                            onPressed: () {
-                              if (controller.rentForm.currentState!.validate()) {
-                                if (controller.image1.isEmpty) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Eyliyetinizin ön yüzünü yükleyiniz.')),
-                                  );
-                                } else if (controller.image2.isEmpty) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Eyliyetinizin arka yüzünü yükleyiniz.')),
-                                  );
-                                } else if (controller.address.value.isEmpty) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Lütfen adres seçiniz')),
-                                  );
-                                } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Processing Data')),
-                                  );
-                                }
-                              } else {
-                                String body = json.encode({
-                                  "name": controller.rentName.text,
-                                  "surname": controller.rentSurname.text,
-                                  "phone": controller.rentPhone.text,
-                                  "email": controller.rentMail.text,
-                                  "password": Helpers.encryptPassword(controller.rentPassword.text),
-                                  "driving_license_number": controller.rentDLnumber.text,
-                                  "driving_license_date": controller.rentDLdate,
-                                  "driving_license_front": controller.image1,
-                                  "driving_license_front_ext": controller.image1ext,
-                                  "driving_license_back": controller.image2,
-                                  "driving_license_back_ext": controller.image2ext,
-                                  "address": controller.address,
-                                  "city": controller.city,
-                                  "district": controller.district,
-                                });
-
-                                //controller.Register(body);
-                                /*ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Eksik veri girişi')),
-                              );*/
-                              }
-                            },
-                          ),
                           const SizedBox(height: 8),
-                          MaterialButton(
-                            onPressed: () {},
-                            child: const Text("İleri"),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                Center(
-                  child: Text("Second Page"),
-                )
-              ],
-            ),
-            PageView(
-              controller: controller.rentPageController,
-              children: [
-                SafeArea(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(16),
-                    child: Form(
-                      key: controller.rentForm,
-                      child: Column(
-                        children: [
-                          TextFormField(
-                              // Diğer TextFormField'lar burada...
+                          Padding(
+                            padding: const EdgeInsets.only(right: 24.0),
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: MaterialButton(
+                                color: AppColors.primaryColor,
+                                minWidth: Get.width / 3,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12.0),
+                                ),
+                                onPressed: () {
+                                  if (controller.rentForm.currentState!.validate()) {
+                                    if (controller.address.value.isEmpty) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('Lütfen adres seçiniz')),
+                                      );
+                                    } else {
+                                      controller.rentPageController.nextPage(
+                                        duration: const Duration(milliseconds: 500),
+                                        curve: Curves.easeInOut,
+                                      );
+                                    }
+                                  }
+                                },
+                                child: const Text(
+                                  "İleri",
+                                  style: TextStyle(color: Colors.white),
+                                ),
                               ),
-                          const SizedBox(height: 8),
-                          MaterialButton(
-                            onPressed: () {
-                              // İleri butonuna tıklandığında bir sonraki sayfaya geçiş
-                              controller.rentPageController.nextPage(
-                                duration: const Duration(milliseconds: 500),
-                                curve: Curves.easeInOut,
-                              );
-                            },
-                            child: const Text("İleri"),
+                            ),
                           ),
                         ],
                       ),
                     ),
                   ),
                 ),
-
-                // Sayfa 2 içeriği
                 SingleChildScrollView(
                   padding: const EdgeInsets.all(16),
                   child: Form(
-                    key: controller.ownerForm,
+                    key: controller.rentForm2,
                     child: Column(
                       children: [
-                        // Diğer widget'lar burada...
-                        MaterialButton(
-                          onPressed: () {
-                            // İleri butonuna tıklandığında bir sonraki sayfaya geçiş
-                            controller.rentPageController.nextPage(
-                              duration: const Duration(milliseconds: 500),
-                              curve: Curves.easeInOut,
+                        TextFormField(
+                          controller: controller.rentDLnumber,
+                          keyboardType: TextInputType.text,
+                          decoration: InputDecoration(
+                              label: Text("Ehliyet Numarası"),
+                              border: OutlineInputBorder(),
+                              prefixIcon: Icon(Icons.credit_card, color: AppColors.primaryColor),
+                              suffixIcon: GestureDetector(
+                                onTap: () {
+                                  Get.dialog(
+                                    AlertDialog(
+                                      contentPadding: EdgeInsets.all(16),
+                                      content: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Image.asset(
+                                            "assets/pngs/ehliyet.png",
+                                          ),
+                                          SizedBox(height: 16),
+                                          Text(
+                                            "Ehliyetinizin ön yüzündeki 5 numaralı bilgi ehliyet kimlik numaranızdır.",
+                                            textAlign: TextAlign.center,
+                                          ),
+                                          SizedBox(height: 16),
+                                          ElevatedButton(
+                                            onPressed: () {
+                                              Get.back();
+                                            },
+                                            child: Text("Tamam"),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: Icon(
+                                  Icons.info_outlined,
+                                  size: 32,
+                                ),
+                              )),
+                          validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          readOnly: true,
+                          controller: controller.rentDLdateInput,
+                          decoration: const InputDecoration(
+                            label: Text("Ehliyet Tarihi"),
+                            border: OutlineInputBorder(),
+                            prefixIcon: Icon(Icons.person, color: AppColors.primaryColor),
+                          ),
+                          validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
+                          onTap: () async {
+                            DateTime? pickedDate = await showDatePicker(
+                              context: context,
+                              initialDate: controller.rentDLdate,
+                              firstDate: DateTime(1950),
+                              lastDate: DateTime(2100),
                             );
+                            if (pickedDate != null) {
+                              controller.rentDLdate = pickedDate;
+                              controller.rentDLdateInput.text = DateFormat('dd-MM-yyyy').format(pickedDate);
+                            } else {}
                           },
-                          child: const Text("İleri"),
                         ),
                         const SizedBox(height: 8),
                         MaterialButton(
-                          onPressed: () {
-                            // Geri butonuna tıklandığında bir önceki sayfaya geçiş
-                            controller.rentPageController.previousPage(
-                              duration: const Duration(milliseconds: 500),
-                              curve: Curves.easeInOut,
-                            );
+                          color: AppColors.softPrimaryColor,
+                          minWidth: Get.width,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          child: const Text("Ehliyet Ön Yüzünü Yükle", style: TextStyle(color: Colors.white)),
+                          onPressed: () async {
+                            final XFile? image = await ImagePicker().pickImage(source: ImageSource.camera);
+                            if (!image.isNull) {
+                              final bytes = await image!.readAsBytes();
+                              var result = await FlutterImageCompress.compressWithList(bytes, minWidth: 720, minHeight: 480, quality: 50, rotate: 0);
+                              final byteLength = result.lengthInBytes;
+                              final kByte = byteLength / 1024;
+                              final mByte = kByte / 1024;
+                              if (mByte > 2.5) {
+                                log("Maksimum boyut 2.5 mb olabilir.");
+                              } else {
+                                controller.image1 = base64.encode(result);
+                                controller.image1ext = image.path.split(".").last;
+                              }
+                            } else {}
                           },
-                          child: const Text("Geri"),
+                        ),
+                        const SizedBox(height: 4),
+                        MaterialButton(
+                          color: AppColors.softPrimaryColor,
+                          minWidth: Get.width,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          onPressed: () async {
+                            final XFile? image = await ImagePicker().pickImage(source: ImageSource.camera);
+                            if (!image.isNull) {
+                              final bytes = await image!.readAsBytes();
+                              var result = await FlutterImageCompress.compressWithList(bytes, minWidth: 720, minHeight: 480, quality: 50, rotate: 0);
+                              final byteLength = result.lengthInBytes;
+                              final kByte = byteLength / 1024;
+                              final mByte = kByte / 1024;
+                              if (mByte > 2.5) {
+                                log("Maksimum boyut 2.5 mb olabilir.");
+                              } else {
+                                controller.image2 = base64.encode(result);
+                                controller.image2ext = image.path.split(".").last;
+                              }
+                            } else {}
+                          },
+                          child: const Text("Ehliyet Arka Yüzünü Yükle", style: TextStyle(color: Colors.white)),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Align(
+                                alignment: Alignment.center,
+                                child: MaterialButton(
+                                  color: AppColors.primaryColor,
+                                  minWidth: Get.width / 3,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12.0),
+                                  ),
+                                  onPressed: () {
+                                    controller.rentPageController.previousPage(
+                                      duration: const Duration(milliseconds: 500),
+                                      curve: Curves.easeInOut,
+                                    );
+                                  },
+                                  child: const Text("Geri", style: TextStyle(color: Colors.white)),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Align(
+                                alignment: Alignment.center,
+                                child: MaterialButton(
+                                  color: AppColors.primaryColor,
+                                  minWidth: Get.width / 3,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12.0),
+                                  ),
+                                  onPressed: () {
+                                    if (controller.rentForm2.currentState!.validate()) {
+                                      if (controller.image1.isEmpty) {
+                                        //Will be deleted
+                                        controller.rentPageController.nextPage(
+                                          duration: const Duration(milliseconds: 500),
+                                          curve: Curves.easeInOut,
+                                        );
+
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(content: Text('Ehliyetinizin ön yüzünü yükleyiniz.')),
+                                        );
+                                      } else if (controller.image2.isEmpty) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(content: Text("Ehliyetinizin arka yüzünü yükleyiniz.")),
+                                        );
+                                      } else {
+                                        controller.rentPageController.nextPage(
+                                          duration: const Duration(milliseconds: 500),
+                                          curve: Curves.easeInOut,
+                                        );
+                                      }
+                                    }
+                                  },
+                                  child: const Text(
+                                    "İleri",
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -378,23 +404,304 @@ class RegisterPage extends StatelessWidget {
                 // Sayfa 3 içeriği - Sadece Geri butonu
                 SingleChildScrollView(
                   padding: const EdgeInsets.all(16),
+                  child: Form(
+                    key: controller.rentForm3,
+                    child: Column(
+                      children: [
+                        TextFormField(
+                          controller: controller.rentName,
+                          enabled: false,
+                          decoration: const InputDecoration(
+                            label: Text("İsim"),
+                            border: OutlineInputBorder(),
+                            prefixIcon: Icon(Icons.person, color: AppColors.primaryColor),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: controller.rentSurname,
+                          enabled: false,
+                          decoration: const InputDecoration(
+                            label: Text("Soyisim"),
+                            border: OutlineInputBorder(),
+                            prefixIcon: Icon(Icons.person, color: AppColors.primaryColor),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: controller.rentTC,
+                          keyboardType: TextInputType.phone,
+                          decoration: InputDecoration(
+                              label: Text("TC Kimlik Numarası"),
+                              border: OutlineInputBorder(),
+                              prefixIcon: Icon(
+                                Icons.credit_card,
+                                color: AppColors.primaryColor,
+                              ),
+                              suffixIcon: GestureDetector(
+                                onTap: () {
+                                  Get.dialog(
+                                    AlertDialog(
+                                      title: Center(child: Text("Bilgilendirme!")),
+                                      contentPadding: const EdgeInsets.all(20),
+                                      content: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            "Yasa gereği araç kiralayanların bilgileri KABİS(Kiralık Araç Bildirim Sistemi)'e bildirilmektedir.",
+                                            textAlign: TextAlign.center,
+                                          ),
+                                          SizedBox(height: 20),
+                                          ElevatedButton(
+                                            onPressed: () {
+                                              Get.back(); // Pencereyi kapat
+                                            },
+                                            child: Text("Tamam"),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: Icon(
+                                  Icons.warning_amber_outlined,
+                                  color: Colors.red,
+                                  size: 32,
+                                ),
+                              )),
+                          validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          readOnly: true,
+                          controller: controller.rentBirthDateInput,
+                          decoration: const InputDecoration(
+                            label: Text("Doğum Tarihi"),
+                            border: OutlineInputBorder(),
+                            prefixIcon: Icon(Icons.person, color: AppColors.primaryColor),
+                          ),
+                          validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
+                          onTap: () async {
+                            DateTime? pickedDate = await showDatePicker(
+                              context: context,
+                              firstDate: DateTime(1930),
+                              lastDate: DateTime(2100),
+                            );
+                            if (pickedDate != null) {
+                              controller.rentBirthDate = pickedDate;
+                              controller.rentBirthDateInput.text = DateFormat("dd-MM-yyy").format(pickedDate);
+                            }
+                          },
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: controller.rentSerialNumber,
+                          keyboardType: TextInputType.text,
+                          decoration: const InputDecoration(
+                            label: Text("Seri No"),
+                            border: OutlineInputBorder(),
+                            prefixIcon: Icon(
+                              Icons.numbers,
+                              color: AppColors.primaryColor,
+                            ),
+                          ),
+                          validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
+                        ),
+                        const SizedBox(height: 8),
+                        Obx(
+                          () => Container(
+                            padding: EdgeInsets.symmetric(horizontal: 16),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.black),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: DropdownButton<String>(
+                              value: controller.rentGender.value,
+                              icon: Icon(Icons.keyboard_arrow_down, color: AppColors.softPrimaryColor),
+                              iconSize: 24,
+                              elevation: 16,
+                              style: TextStyle(color: Colors.black),
+                              underline: Container(
+                                height: 2,
+                                color: AppColors.softPrimaryColor,
+                              ),
+                              onChanged: (String? newValue) {
+                                controller.rentGender.value = newValue ?? "";
+                              },
+                              items: <String>['', 'Erkek', 'Kadın'].map((String value) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        value == 'Erkek' ? Icons.male : Icons.female,
+                                        color: AppColors.softPrimaryColor,
+                                      ),
+                                      SizedBox(width: 8),
+                                      Text(value),
+                                    ],
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        MaterialButton(
+                          color: AppColors.primaryColor,
+                          minWidth: Get.width,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          child: const Text(
+                            "KAYIT OL",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          onPressed: () {
+                            if (controller.rentForm3.currentState!.validate()) {
+                              if (controller.rentGender.value.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Lütfen cinsiyetinizi seçiniz')),
+                                );
+                              }
+                            } else {}
+                          },
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 24.0),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: MaterialButton(
+                              color: AppColors.primaryColor,
+                              minWidth: Get.width / 3,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              onPressed: () {
+                                controller.rentPageController.previousPage(
+                                  duration: const Duration(milliseconds: 500),
+                                  curve: Curves.easeInOut,
+                                );
+                              },
+                              child: const Text(
+                                "Geri",
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SafeArea(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Form(
+                  key: controller.ownerForm,
                   child: Column(
                     children: [
-                      // Sayfa 3 içeriği burada
+                      TextFormField(
+                        controller: controller.ownerName,
+                        keyboardType: TextInputType.name,
+                        decoration: const InputDecoration(
+                          label: Text("İsim"),
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.person, color: AppColors.primaryColor),
+                        ),
+                        validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
+                      ),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        controller: controller.ownerSurname,
+                        keyboardType: TextInputType.name,
+                        decoration: const InputDecoration(
+                          label: Text("Soyisim"),
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(
+                            Icons.person,
+                            color: AppColors.primaryColor,
+                          ),
+                        ),
+                        validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
+                      ),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        controller: controller.ownerMail,
+                        keyboardType: TextInputType.phone,
+                        decoration: const InputDecoration(
+                          label: Text("Telefon"),
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(
+                            Icons.phone,
+                            color: AppColors.primaryColor,
+                          ),
+                        ),
+                        validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
+                      ),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        controller: controller.ownerMail,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: const InputDecoration(
+                          label: Text("Eposta"),
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(
+                            Icons.phone,
+                            color: AppColors.primaryColor,
+                          ),
+                        ),
+                        validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
+                      ),
+                      const SizedBox(height: 8),
+                      Obx(
+                        () => TextFormField(
+                            obscureText: controller.ownerPasswordHide.isTrue,
+                            controller: controller.ownerPassword,
+                            keyboardType: TextInputType.text,
+                            decoration: InputDecoration(
+                              label: Text("Şifre"),
+                              border: OutlineInputBorder(),
+                              prefixIcon: Icon(Icons.password, color: AppColors.primaryColor),
+                              suffixIcon: GestureDetector(
+                                onTap: () => controller.ownerPasswordHide.toggle(),
+                                child: Icon(controller.ownerPasswordHide.isTrue ? Icons.visibility : Icons.visibility_off),
+                              ),
+                            ),
+                            validator: (value) => value!.isEmpty
+                                ? "Boş bırakılamaz"
+                                : value.trim() != controller.ownerPassword2.text.trim()
+                                    ? "Şifreler uyuşmuyor"
+                                    : null),
+                      ),
+                      const SizedBox(height: 8),
+                      Obx(
+                        () => TextFormField(
+                            obscureText: controller.ownerPassword2Hide.isTrue,
+                            controller: controller.ownerPassword2,
+                            keyboardType: TextInputType.text,
+                            decoration: InputDecoration(
+                              label: Text("Şifre tekrar"),
+                              border: OutlineInputBorder(),
+                              prefixIcon: Icon(Icons.password, color: AppColors.primaryColor),
+                              suffixIcon: Icon(controller.ownerPassword2Hide.isTrue ? Icons.visibility : Icons.visibility_off),
+                            ),
+                            validator: (value) => value!.isEmpty
+                                ? "Boş bırakılamaz"
+                                : value.trim() != controller.ownerPassword.text.trim()
+                                    ? "Şifreler uyuşmuyor"
+                                    : null),
+                      ),
                       MaterialButton(
-                        onPressed: () {
-                          // Geri butonuna tıklandığında bir önceki sayfaya geçiş
-                          controller.rentPageController.previousPage(
-                            duration: const Duration(milliseconds: 500),
-                            curve: Curves.easeInOut,
-                          );
-                        },
-                        child: const Text("Geri"),
+                        onPressed: () {},
+                        child: const Text("Kaydol"),
                       ),
                     ],
                   ),
                 ),
-              ],
+              ),
             ),
           ],
         ),
