@@ -12,14 +12,14 @@ import 'package:kurye_takip/pages/auth/auth_controller.dart';
 import 'package:kurye_takip/pages/auth/login.dart';
 import 'package:map_picker/map_picker.dart';
 
-class RegisterPage extends StatefulWidget {
-  const RegisterPage({super.key});
+class RegisterOldPage extends StatefulWidget {
+  const RegisterOldPage({super.key});
 
   @override
-  State<RegisterPage> createState() => _RegisterPageState();
+  State<RegisterOldPage> createState() => _RegisterOldPageState();
 }
 
-class _RegisterPageState extends State<RegisterPage> {
+class _RegisterOldPageState extends State<RegisterOldPage> {
   static AuthController authController = Get.put(AuthController());
 
   @override

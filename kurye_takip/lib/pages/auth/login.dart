@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:kurye_takip/app_constants/app_colors.dart';
-import 'package:kurye_takip/components/my_popup.dart';
 import 'package:kurye_takip/helpers/helpers.dart';
 import 'package:kurye_takip/model/login.dart';
 import 'package:kurye_takip/pages/auth/auth_controller.dart';
-import 'package:kurye_takip/pages/auth/register_old.dart';
-import 'package:kurye_takip/pages/dashboard/dashboard.dart';
+import 'package:kurye_takip/pages/auth/register.dart';
 import 'package:kurye_takip/pages/gnav_bar/gnav_bar.dart';
 
 class LoginPage extends StatefulWidget {

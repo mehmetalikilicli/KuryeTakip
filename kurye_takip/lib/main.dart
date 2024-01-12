@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
 import 'package:kurye_takip/app_constants/app_colors.dart';
+import 'package:kurye_takip/pages/auth/login.dart';
 import 'package:kurye_takip/pages/auth/register.dart';
 
 void main() {
@@ -24,7 +25,7 @@ class MyApp extends StatelessWidget {
       //home: LoginPage(),
       //GoogleNavBar(),
       //home: GoogleNavBar(),
-      home: RegisterPage(),
+      home: LoginPage(),
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,

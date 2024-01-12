@@ -13,6 +13,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:kurye_takip/app_constants/app_colors.dart';
 import 'package:kurye_takip/controllers/authentication.dart';
+import 'package:kurye_takip/helpers/custom_dialog.dart';
 import 'package:kurye_takip/helpers/helpers.dart';
 import 'package:kurye_takip/model/register.dart';
 import 'package:kurye_takip/pages/auth/login.dart';
@@ -88,9 +89,9 @@ class RegisterPage extends StatelessWidget {
                             controller: controller.rentMail,
                             keyboardType: TextInputType.emailAddress,
                             decoration: const InputDecoration(
-                              label: Text("Mail"),
+                              label: Text("Eposta"),
                               border: OutlineInputBorder(),
-                              prefixIcon: Icon(Icons.person, color: AppColors.primaryColor),
+                              prefixIcon: Icon(Icons.email, color: AppColors.primaryColor),
                             ),
                             validator: (value) => value!.isEmpty
                                 ? "Boş bırakılamaz"
@@ -162,14 +163,14 @@ class RegisterPage extends StatelessWidget {
                             height: Get.height * 0.053,
                             color: AppColors.softPrimaryColor,
                             minWidth: Get.width,
-                            child: Text(
-                              "Konum Seç",
-                              style: TextStyle(color: Colors.white),
-                            ),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             onPressed: () {
                               Get.dialog(const SelectLoactionRegisterRent());
                             },
+                            child: const Text(
+                              "Konum Seç",
+                              style: TextStyle(color: Colors.white),
+                            ),
                           ),
                           const SizedBox(height: 8),
                           Obx(
@@ -258,8 +259,8 @@ class RegisterPage extends StatelessWidget {
                           controller: controller.rentDLnumber,
                           keyboardType: TextInputType.phone,
                           decoration: InputDecoration(
-                              label: Text("Ehliyet Numarası"),
-                              border: OutlineInputBorder(),
+                              label: const Text("Ehliyet Numarası"),
+                              border: const OutlineInputBorder(),
                               prefixIcon: Icon(Icons.credit_card, color: AppColors.primaryColor),
                               suffixIcon: GestureDetector(
                                 onTap: () {
@@ -272,27 +273,24 @@ class RegisterPage extends StatelessWidget {
                                           Image.asset(
                                             "assets/pngs/ehliyet.png",
                                           ),
-                                          SizedBox(height: 16),
-                                          Text(
+                                          const SizedBox(height: 16),
+                                          const Text(
                                             "Ehliyetinizin ön yüzündeki 5 numaralı bilgi ehliyet kimlik numaranızdır.",
                                             textAlign: TextAlign.center,
                                           ),
-                                          SizedBox(height: 16),
+                                          const SizedBox(height: 16),
                                           ElevatedButton(
                                             onPressed: () {
                                               Get.back();
                                             },
-                                            child: Text("Tamam"),
+                                            child: const Text("Tamam"),
                                           ),
                                         ],
                                       ),
                                     ),
                                   );
                                 },
-                                child: Icon(
-                                  Icons.info_outlined,
-                                  size: 32,
-                                ),
+                                child: const Icon(Icons.info_outlined, size: 32),
                               )),
                           validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
                         ),
@@ -468,6 +466,7 @@ class RegisterPage extends StatelessWidget {
                             border: OutlineInputBorder(),
                             prefixIcon: Icon(Icons.person, color: AppColors.primaryColor),
                           ),
+                          validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
                         ),
                         const SizedBox(height: 8),
                         TextFormField(
@@ -489,7 +488,7 @@ class RegisterPage extends StatelessWidget {
                                       content: Column(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          Text(
+                                          const Text(
                                             "Yasa gereği araç kiralayanların bilgileri KABİS(Kiralık Araç Bildirim Sistemi)'e bildirilmektedir.",
                                             textAlign: TextAlign.center,
                                           ),
@@ -612,7 +611,17 @@ class RegisterPage extends StatelessWidget {
                                 controller.registerModel.gender = controller.rentGender.value;
                                 try {
                                   RegisterResponse registerResponse = await controller.Register(controller.registerModel);
-                                  print(registerResponse.message);
+
+                                  if (registerResponse.success == true) {
+                                    // ignore: use_build_context_synchronously
+                                    CustomDialog.showMessage(
+                                        context: context,
+                                        title: "Kayıt Başarılı",
+                                        message: "Kaydınız başarılı, admin onayından sonra giriş yapabilirsiniz.",
+                                        onPositiveButtonPressed: () {
+                                          Get.offAll(LoginPage());
+                                        });
+                                  } else {}
                                 } catch (e) {
                                   print(e);
                                 }
@@ -682,7 +691,7 @@ class RegisterPage extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       TextFormField(
-                        controller: controller.ownerMail,
+                        controller: controller.ownerPhone,
                         keyboardType: TextInputType.phone,
                         decoration: const InputDecoration(
                           label: Text("Telefon"),
@@ -702,7 +711,7 @@ class RegisterPage extends StatelessWidget {
                           label: Text("Eposta"),
                           border: OutlineInputBorder(),
                           prefixIcon: Icon(
-                            Icons.phone,
+                            Icons.email,
                             color: AppColors.primaryColor,
                           ),
                         ),
@@ -739,7 +748,9 @@ class RegisterPage extends StatelessWidget {
                               label: Text("Şifre tekrar"),
                               border: OutlineInputBorder(),
                               prefixIcon: Icon(Icons.password, color: AppColors.primaryColor),
-                              suffixIcon: Icon(controller.ownerPassword2Hide.isTrue ? Icons.visibility : Icons.visibility_off),
+                              suffixIcon: GestureDetector(
+                                  onTap: () => controller.ownerPassword2Hide.toggle(),
+                                  child: Icon(controller.ownerPassword2Hide.isTrue ? Icons.visibility : Icons.visibility_off)),
                             ),
                             validator: (value) => value!.isEmpty
                                 ? "Boş bırakılamaz"
@@ -747,9 +758,56 @@ class RegisterPage extends StatelessWidget {
                                     ? "Şifreler uyuşmuyor"
                                     : null),
                       ),
-                      MaterialButton(
-                        onPressed: () {},
-                        child: const Text("Kaydol"),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 24.0, top: 8),
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: MaterialButton(
+                            color: AppColors.primaryColor,
+                            minWidth: Get.width / 3,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            onPressed: () async {
+                              if (controller.ownerForm.currentState!.validate()) {
+                                controller.registerModel2.name = controller.ownerName.text;
+                                controller.registerModel2.surname = controller.ownerSurname.text;
+                                controller.registerModel2.phone = controller.ownerPhone.text;
+                                controller.registerModel2.email = controller.ownerMail.text;
+                                controller.registerModel2.password = Helpers.encryptPassword(controller.ownerPassword.text);
+                                try {
+                                  RegisterResponse registerResponse = await controller.Register(controller.registerModel2);
+
+                                  if (registerResponse.success == true) {
+                                    // ignore: use_build_context_synchronously
+                                    CustomDialog.showMessage(
+                                        context: context,
+                                        title: "Kayıt Başarılı",
+                                        message: "Kaydınız başarılı, admin onayından sonra giriş yapabilirsiniz.",
+                                        onPositiveButtonPressed: () {
+                                          Get.offAll(LoginPage());
+                                        });
+                                  } else {
+                                    // ignore: use_build_context_synchronously
+                                    CustomDialog.showMessage(
+                                        context: context,
+                                        title: "Kayıt Başarısız",
+                                        message: registerResponse.message,
+                                        onPositiveButtonPressed: () {
+                                          Get.offAll(LoginPage());
+                                        });
+                                  }
+                                } catch (e) {
+                                  print(e);
+                                }
+                              }
+                            },
+                            child: const Text(
+                              "Kaydol",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),

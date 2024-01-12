@@ -38,6 +38,7 @@ class RegisterController extends GetxController {
   TextEditingController ownerPassword2 = TextEditingController();
 
   RegisterModel registerModel = RegisterModel();
+  RegisterModel registerModel2 = RegisterModel();
 
   DateTime rentDLdate = DateTime.now();
   DateTime rentBirthDate = DateTime.now();
