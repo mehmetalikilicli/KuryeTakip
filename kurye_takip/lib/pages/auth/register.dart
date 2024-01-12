@@ -14,6 +14,7 @@ import 'package:intl/intl.dart';
 import 'package:kurye_takip/app_constants/app_colors.dart';
 import 'package:kurye_takip/controllers/authentication.dart';
 import 'package:kurye_takip/helpers/helpers.dart';
+import 'package:kurye_takip/model/register.dart';
 import 'package:kurye_takip/pages/auth/login.dart';
 import 'package:map_picker/map_picker.dart';
 
@@ -255,7 +256,7 @@ class RegisterPage extends StatelessWidget {
                       children: [
                         TextFormField(
                           controller: controller.rentDLnumber,
-                          keyboardType: TextInputType.text,
+                          keyboardType: TextInputType.phone,
                           decoration: InputDecoration(
                               label: Text("Ehliyet Numarası"),
                               border: OutlineInputBorder(),
@@ -598,20 +599,24 @@ class RegisterPage extends StatelessWidget {
                             "KAYIT OL",
                             style: TextStyle(color: Colors.white),
                           ),
-                          onPressed: () {
+                          onPressed: () async {
                             if (controller.rentForm3.currentState!.validate()) {
                               if (controller.rentGender.value.isEmpty) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(content: Text('Lütfen cinsiyetinizi seçiniz')),
                                 );
+                              } else {
+                                controller.registerModel.tc = controller.rentTC.text;
+                                controller.registerModel.birth_date = controller.rentBirthDate;
+                                controller.registerModel.serial_number = controller.rentSerialNumber.text;
+                                controller.registerModel.gender = controller.rentGender.value;
+                                try {
+                                  RegisterResponse registerResponse = await controller.Register(controller.registerModel);
+                                  print(registerResponse.message);
+                                } catch (e) {
+                                  print(e);
+                                }
                               }
-                            } else {
-                              controller.registerModel.tc = int.parse(controller.rentTC.text);
-                              controller.registerModel.birth_date = controller.rentBirthDate;
-                              controller.registerModel.serial_number = controller.rentSerialNumber.text;
-                              controller.registerModel.gender = controller.rentGender.value;
-
-                              controller.Register(controller.registerModel);
                             }
                           },
                         ),

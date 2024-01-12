@@ -35,7 +35,7 @@ class RegisterResponse {
 class RegisterModel {
   String? name;
   String? surname;
-  int? tc;
+  String? tc;
   DateTime? birth_date;
   String? nationality;
   String? gender;
