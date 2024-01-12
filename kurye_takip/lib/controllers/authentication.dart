@@ -37,6 +37,8 @@ class RegisterController extends GetxController {
   TextEditingController ownerPassword = TextEditingController();
   TextEditingController ownerPassword2 = TextEditingController();
 
+  RegisterModel registerModel = RegisterModel();
+
   DateTime rentDLdate = DateTime.now();
   DateTime rentBirthDate = DateTime.now();
 
@@ -56,4 +58,15 @@ class RegisterController extends GetxController {
   String district = "", city = "";
 
   CameraPosition cameraPosition = const CameraPosition(target: LatLng(38.4237, 27.1428), zoom: 14.4746);
+
+  Future<RegisterResponse> Register(RegisterModel registerModel) async {
+    try {
+      RegisterResponse result = await _authService.register(registerModel);
+      return result;
+    } catch (e) {
+      print('Hata: $e');
+      Get.snackbar('Hata', 'Kayıt başarısız oldu. Lütfen tekrar deneyin.');
+      throw Exception(e);
+    }
+  }
 }

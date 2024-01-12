@@ -14,6 +14,7 @@ import 'package:intl/intl.dart';
 import 'package:kurye_takip/app_constants/app_colors.dart';
 import 'package:kurye_takip/controllers/authentication.dart';
 import 'package:kurye_takip/helpers/helpers.dart';
+import 'package:kurye_takip/pages/auth/login.dart';
 import 'package:map_picker/map_picker.dart';
 
 class RegisterPage extends StatelessWidget {
@@ -178,36 +179,68 @@ class RegisterPage extends StatelessWidget {
                           ),
                           const SizedBox(height: 8),
                           const SizedBox(height: 8),
-                          Padding(
-                            padding: const EdgeInsets.only(right: 24.0),
-                            child: Align(
-                              alignment: Alignment.centerRight,
-                              child: MaterialButton(
-                                color: AppColors.primaryColor,
-                                minWidth: Get.width / 3,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12.0),
-                                ),
-                                onPressed: () {
-                                  if (controller.rentForm.currentState!.validate()) {
-                                    if (controller.address.value.isEmpty) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(content: Text('Lütfen adres seçiniz')),
-                                      );
-                                    } else {
-                                      controller.rentPageController.nextPage(
-                                        duration: const Duration(milliseconds: 500),
-                                        curve: Curves.easeInOut,
-                                      );
-                                    }
-                                  }
-                                },
-                                child: const Text(
-                                  "İleri",
-                                  style: TextStyle(color: Colors.white),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Align(
+                                  alignment: Alignment.center,
+                                  child: MaterialButton(
+                                    color: AppColors.primaryColor,
+                                    minWidth: Get.width / 3,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12.0),
+                                    ),
+                                    onPressed: () {
+                                      Get.offAll(LoginPage());
+                                    },
+                                    child: const Text(
+                                      "Girişe Dön",
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
+                              Expanded(
+                                child: Align(
+                                  alignment: Alignment.center,
+                                  child: MaterialButton(
+                                    color: AppColors.primaryColor,
+                                    minWidth: Get.width / 3,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12.0),
+                                    ),
+                                    onPressed: () {
+                                      if (controller.rentForm.currentState!.validate()) {
+                                        if (controller.address.value.isEmpty) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(content: Text('Lütfen adres seçiniz')),
+                                          );
+                                        } else {
+                                          controller.registerModel.name = controller.rentName.text;
+                                          controller.registerModel.surname = controller.rentSurname.text;
+                                          controller.registerModel.phone = controller.rentPhone.text;
+                                          controller.registerModel.email = controller.rentMail.text;
+                                          controller.registerModel.password = Helpers.encryptPassword(controller.rentPassword.text);
+                                          controller.registerModel.address = controller.address.value;
+                                          controller.registerModel.city = controller.city;
+                                          controller.registerModel.district = controller.district;
+
+                                          controller.rentPageController.nextPage(
+                                            duration: const Duration(milliseconds: 500),
+                                            curve: Curves.easeInOut,
+                                          );
+                                        }
+                                      }
+                                    },
+                                    child: const Text(
+                                      "İleri",
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -380,6 +413,14 @@ class RegisterPage extends StatelessWidget {
                                           const SnackBar(content: Text("Ehliyetinizin arka yüzünü yükleyiniz.")),
                                         );
                                       } else {
+                                        controller.registerModel.driving_license_number = controller.rentSerialNumber.text;
+                                        controller.registerModel.driving_license_date = controller.rentDLdate;
+
+                                        controller.registerModel.driving_license_front_image = controller.image1;
+                                        controller.registerModel.driving_license_front_image_ext = controller.image1ext;
+                                        controller.registerModel.driving_license_back_image = controller.image2;
+                                        controller.registerModel.driving_license_back_image_ext = controller.image2ext;
+
                                         controller.rentPageController.nextPage(
                                           duration: const Duration(milliseconds: 500),
                                           curve: Curves.easeInOut,
@@ -564,7 +605,14 @@ class RegisterPage extends StatelessWidget {
                                   const SnackBar(content: Text('Lütfen cinsiyetinizi seçiniz')),
                                 );
                               }
-                            } else {}
+                            } else {
+                              controller.registerModel.tc = int.parse(controller.rentTC.text);
+                              controller.registerModel.birth_date = controller.rentBirthDate;
+                              controller.registerModel.serial_number = controller.rentSerialNumber.text;
+                              controller.registerModel.gender = controller.rentGender.value;
+
+                              controller.Register(controller.registerModel);
+                            }
                           },
                         ),
                         Padding(

@@ -49,16 +49,7 @@ class AuthController extends GetxController {
   TextEditingController rentPasswordController = TextEditingController();
   TextEditingController rentPassword2Controller = TextEditingController();
 
-  RegisterModel registerModel = RegisterModel(
-    name: "",
-    surname: "",
-    phone: "",
-    email: "",
-    password: "",
-    city: "",
-    district: "",
-    is_vehicle_owner: 0,
-  );
+  RegisterModel registerModel = RegisterModel();
 
   void selectLocation() {}
 
@@ -88,9 +79,9 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<Register> register() async {
+  Future<RegisterResponse> register() async {
     try {
-      Register result = await _authService.register(registerModel);
+      RegisterResponse result = await _authService.register(registerModel);
       return result;
     } catch (e) {
       print('Hata: $e');

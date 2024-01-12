@@ -4,22 +4,22 @@
 
 import 'dart:convert';
 
-Register registerFromJson(String str) => Register.fromJson(json.decode(str));
+RegisterResponse registerFromJson(String str) => RegisterResponse.fromJson(json.decode(str));
 
-String registerToJson(Register data) => json.encode(data.toJson());
+String registerToJson(RegisterResponse data) => json.encode(data.toJson());
 
-class Register {
+class RegisterResponse {
   bool success;
   String message;
   User user;
 
-  Register({
+  RegisterResponse({
     required this.success,
     required this.message,
     required this.user,
   });
 
-  factory Register.fromJson(Map<String, dynamic> json) => Register(
+  factory RegisterResponse.fromJson(Map<String, dynamic> json) => RegisterResponse(
         success: json["success"],
         message: json["message"],
         user: User.fromJson(json["user"]),
@@ -33,34 +33,48 @@ class Register {
 }
 
 class RegisterModel {
-  String name;
-  String surname;
-  String phone;
-  String email;
-  String password;
+  String? name;
+  String? surname;
+  int? tc;
+  DateTime? birth_date;
+  String? nationality;
+  String? gender;
+  String? serial_number;
+  String? phone;
+  String? email;
+  String? password;
   String? city;
   String? district;
   String? address;
-  int is_vehicle_owner;
-  String? drivingLicenseNumber;
-  String? drivingLicenseDate;
-  String? drivingLicenseFrontImage;
-  String? drivingLicenseBackImage;
+  int? is_vehicle_owner;
+  String? driving_license_number;
+  DateTime? driving_license_date;
+  String? driving_license_front_image;
+  String? driving_license_front_image_ext;
+  String? driving_license_back_image;
+  String? driving_license_back_image_ext;
 
   RegisterModel({
-    required this.name,
-    required this.surname,
-    required this.phone,
-    required this.email,
-    required this.city,
-    required this.district,
-    required this.password,
-    required this.is_vehicle_owner,
+    this.name,
+    this.surname,
+    this.tc,
+    this.birth_date,
+    this.gender,
+    this.nationality,
+    this.serial_number,
+    this.phone,
+    this.email,
+    this.city,
+    this.district,
+    this.password,
+    this.is_vehicle_owner,
     this.address,
-    this.drivingLicenseNumber,
-    this.drivingLicenseDate,
-    this.drivingLicenseFrontImage,
-    this.drivingLicenseBackImage,
+    this.driving_license_number,
+    this.driving_license_date,
+    this.driving_license_front_image,
+    this.driving_license_front_image_ext,
+    this.driving_license_back_image,
+    this.driving_license_back_image_ext,
   });
 }
 

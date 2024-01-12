@@ -239,8 +239,7 @@ class AracKirayaVerTab extends StatelessWidget {
                       authController.registerModel.surname = authController.rentSurnameController.text;
                       authController.registerModel.phone = authController.rentPhoneController.text;
                       authController.registerModel.email = authController.rentNameController.text;
-                      authController.registerModel.password =
-                          Helpers.encryptPassword(authController.rentPasswordController.text);
+                      authController.registerModel.password = Helpers.encryptPassword(authController.rentPasswordController.text);
                       authController.registerModel.is_vehicle_owner = 1;
 
                       await authController.register();
@@ -519,7 +518,7 @@ class DrivingLicenseNoDateFrontAndBack extends StatelessWidget {
                 List<int> imageBytes = await image.readAsBytes();
                 String base64Image = base64Encode(imageBytes);
 
-                authController.registerModel.drivingLicenseFrontImage = base64Encode(imageBytes);
+                authController.registerModel.driving_license_front_image = base64Encode(imageBytes);
 
                 _showResultDialog(true, context);
               } else {
@@ -564,7 +563,7 @@ class DrivingLicenseNoDateFrontAndBack extends StatelessWidget {
                 storage.write('drivingLicenseBack', base64Image);
                 print("Front  ${storage.read<String>('drivingLicenseBack')}");*/
 
-                authController.registerModel.drivingLicenseBackImage = base64Encode(imageBytes);
+                authController.registerModel.driving_license_back_image = base64Encode(imageBytes);
 
                 _showResultDialog(true, context);
               } else {
@@ -716,8 +715,8 @@ class LoginAndRegisterButton extends StatelessWidget {
               authController.registerModel.phone = authController.phoneController.text;
               authController.registerModel.email = authController.emailController.text;
               authController.registerModel.password = Helpers.encryptPassword(authController.emailController.text);
-              authController.registerModel.drivingLicenseNumber = authController.drivingLicenseNumber.text;
-              authController.registerModel.drivingLicenseDate = authController.drivingLicenseDate.text;
+              authController.registerModel.driving_license_number = authController.drivingLicenseNumber.text;
+              //authController.registerModel.driving_license_date = authController.drivingLicenseDate.text;
               authController.registerModel.is_vehicle_owner = 0;
 
               await authController.register();
