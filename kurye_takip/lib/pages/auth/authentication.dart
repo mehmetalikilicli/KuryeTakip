@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:kurye_takip/model/login.dart';
 import 'package:kurye_takip/model/register.dart';
 import 'package:kurye_takip/service/auth_service.dart';
 import 'package:map_picker/map_picker.dart';
@@ -65,9 +67,67 @@ class RegisterController extends GetxController {
       RegisterResponse result = await _authService.register(registerModel);
       return result;
     } catch (e) {
-      print('Hata: $e');
       Get.snackbar('Hata', 'Kayıt başarısız oldu. Lütfen tekrar deneyin.');
       throw Exception(e);
     }
   }
+
+/*
+  Future<void> saveUserData(user) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    // Convert User object to JSON string
+    String userJson = json.encode(user.toJson());
+
+    // Save the JSON string to SharedPreferences
+    await prefs.setString('user_data', userJson);
+  }*/
+}
+
+class LoginController extends GetxController {
+  final AuthService _authService = AuthService();
+
+  final markers = RxSet<Marker>();
+
+  var selectedCity = 'Izmir'.obs;
+  var selectedDistrict = 'Bornova'.obs;
+
+  RxInt isDrivingLicenseFrontImageTaken = 0.obs;
+  RxInt isDrivingLicenseBackImageTaken = 0.obs;
+  RxInt isLocationTaken = 0.obs;
+
+  final loginFormKey = GlobalKey<FormState>();
+  final registerFormKey = GlobalKey<FormState>();
+  final rentRegisterFormKey = GlobalKey<FormState>();
+
+  //Login TextEditingControllers
+  TextEditingController loginEmailController = TextEditingController();
+  TextEditingController loginPasswordController = TextEditingController();
+
+  RegisterModel registerModel = RegisterModel();
+
+  Future<LoginResponse> Login(String email, String cyriptedPassword) async {
+    try {
+      LoginResponse result = await _authService.login(email, cyriptedPassword);
+      final box = GetStorage();
+      await box.write('user_data', result.user.toJson());
+      //await saveUserData(result.user);
+      //print(result.user.code);
+      return result;
+    } catch (e) {
+      print('Hata: $e');
+      Get.snackbar('Hata', 'Giriş başarısız oldu. Lütfen tekrar deneyin.');
+      throw Exception(e);
+    }
+  }
+
+  /*Future<void> saveUserData(user) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    // Convert User object to JSON string
+    String userJson = json.encode(user.toJson());
+
+    // Save the JSON string to SharedPreferences
+    await prefs.setString('user_data', userJson);
+  }*/
 }

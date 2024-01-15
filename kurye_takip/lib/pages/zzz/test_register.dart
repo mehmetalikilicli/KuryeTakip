@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use
+/*// ignore_for_file: deprecated_member_use
 
 import 'dart:convert';
 import 'dart:developer';
@@ -40,8 +40,7 @@ class TestRegisterView extends StatelessWidget {
                     log(bytes.lengthInBytes.toString(), name: "Image length");
                     log((bytes.lengthInBytes / 1024).toStringAsFixed(2), name: "Image Kb");
 
-                    var result = await FlutterImageCompress.compressWithList(bytes,
-                        minWidth: 720, minHeight: 480, quality: 50, rotate: 0);
+                    var result = await FlutterImageCompress.compressWithList(bytes, minWidth: 720, minHeight: 480, quality: 50, rotate: 0);
                     compressed = result;
                     log(result.lengthInBytes.toString(), name: "Image length compressed");
                     log((result.lengthInBytes / 1024).toStringAsFixed(2), name: "Image Kb");
@@ -107,7 +106,7 @@ class RegisterController extends GetxController {
       "name": name.text.trim(),
       "mail": mail.text.trim(),
       "phone": phone.text.trim(),
-      "password": Helpers.encryptPassword(password.text.trim()),
+      "password": Helpers.encryption(password.text.trim()),
       "is_vehicle_owner": is_vehicle_owner,
     });
     return jsonBody;
@@ -118,7 +117,7 @@ class RegisterController extends GetxController {
       "name": name.text.trim(),
       "mail": mail.text.trim(),
       "phone": phone.text.trim(),
-      "password": Helpers.encryptPassword(password.text.trim()),
+      "password": Helpers.encryption(password.text.trim()),
       "is_vehicle_owner": is_vehicle_owner,
       "dl_front_image": dl_front_image,
       "dl_front_image_extension": dl_back_extension,
@@ -144,3 +143,4 @@ class RegisterController extends GetxController {
 
 // İnputları validate eder sadece image yüklenip yüklenmediğini sen edecen
 
+*/

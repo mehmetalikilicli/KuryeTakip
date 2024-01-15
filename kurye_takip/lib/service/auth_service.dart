@@ -6,6 +6,24 @@ import 'package:kurye_takip/model/register.dart';
 class AuthService {
   static const String baseUrl = 'https://rentekerapi.takipsa.com';
 
+  Future<LoginResponse> login(String email, String cyriptedPassword) async {
+    final Map<String, dynamic> loginData = {"email": email, "password": cyriptedPassword};
+
+    final String loginBody = json.encode(loginData);
+
+    final response = await http.post(
+      Uri.parse("$baseUrl/Authentication/Login"),
+      headers: {'Content-Type': 'application/json'},
+      body: loginBody,
+    );
+
+    if (response.statusCode == 200) {
+      return LoginResponse.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to login');
+    }
+  }
+
   Future<RegisterResponse> register(RegisterModel registerData) async {
     final Map<String, dynamic> requestData = {
       "name": registerData.name,
@@ -44,7 +62,7 @@ class AuthService {
       throw Exception('Failed to register');
     }
   }
-
+/*
   Future<RegisterResponse> register2(String jsonBody) async {
     final response = await http.post(Uri.parse('$baseUrl/Authentication/Register'), body: {});
 
@@ -54,21 +72,5 @@ class AuthService {
     } else {
       throw Exception('Failed to register');
     }
-  }
-
-  Future<Login> login(String email, String cyriptedPassword) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/Authentication/Login'),
-      body: {
-        'email': email,
-        'password': cyriptedPassword,
-      },
-    );
-
-    if (response.statusCode == 200) {
-      return Login.fromJson(json.decode(response.body));
-    } else {
-      throw Exception('Failed to login');
-    }
-  }
+  }*/
 }

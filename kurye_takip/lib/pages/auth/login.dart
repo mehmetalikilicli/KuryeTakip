@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:kurye_takip/app_constants/app_colors.dart';
+import 'package:kurye_takip/pages/auth/authentication.dart';
+import 'package:kurye_takip/helpers/custom_dialog.dart';
 import 'package:kurye_takip/helpers/helpers.dart';
 import 'package:kurye_takip/model/login.dart';
-import 'package:kurye_takip/pages/auth/auth_controller.dart';
 import 'package:kurye_takip/pages/auth/register.dart';
 import 'package:kurye_takip/pages/gnav_bar/gnav_bar.dart';
 
@@ -15,7 +16,14 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final AuthController authController = Get.put(AuthController());
+  final LoginController authController = Get.put(LoginController());
+
+  @override
+  void initState() {
+    authController.loginEmailController.text = "";
+    authController.loginPasswordController.text = "";
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -127,7 +135,7 @@ class LoginAndRegisterButton extends StatelessWidget {
     required this.authController,
   });
 
-  final AuthController authController;
+  final LoginController authController;
 
   @override
   Widget build(BuildContext context) {
@@ -144,15 +152,19 @@ class LoginAndRegisterButton extends StatelessWidget {
           onPressed: () async {
             if (authController.loginFormKey.currentState!.validate()) {
               try {
-                Login loginResult = await authController.login(
+                LoginResponse loginResult = await authController.Login(
                   authController.loginEmailController.text,
-                  Helpers.encryptPassword(authController.loginPasswordController.text),
+                  Helpers.encryption(authController.loginPasswordController.text),
                 );
-                if (loginResult.success) {
-                  Get.snackbar("Başarılı", 'Giriş Baraşılı oldu');
+                if (loginResult.success && loginResult.user.isApproved == 1) {
                   Get.offAll(GoogleNavBar());
                 } else {
-                  Get.snackbar("Giriş Başarısız", loginResult.message);
+                  // ignore: use_build_context_synchronously
+                  CustomDialog.showMessage(
+                    context: context,
+                    title: "Giriş Başarısız",
+                    message: loginResult.message,
+                  );
                 }
               } catch (e) {
                 print('Hata: $e');
@@ -187,7 +199,7 @@ class LoginAndRegisterButton extends StatelessWidget {
 class EmailAndPassword extends StatelessWidget {
   const EmailAndPassword({super.key, required this.authController});
 
-  final AuthController authController;
+  final LoginController authController;
 
   @override
   Widget build(BuildContext context) {

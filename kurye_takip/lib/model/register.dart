@@ -4,6 +4,8 @@
 
 import 'dart:convert';
 
+import 'package:kurye_takip/model/login.dart';
+
 RegisterResponse registerFromJson(String str) => RegisterResponse.fromJson(json.decode(str));
 
 String registerToJson(RegisterResponse data) => json.encode(data.toJson());
@@ -76,32 +78,4 @@ class RegisterModel {
     this.driving_license_back_image,
     this.driving_license_back_image_ext,
   });
-}
-
-class User {
-  String code;
-  String email;
-  String name;
-  String phone;
-
-  User({
-    required this.code,
-    required this.email,
-    required this.name,
-    required this.phone,
-  });
-
-  factory User.fromJson(Map<String, dynamic> json) => User(
-        code: json["code"],
-        email: json["email"],
-        name: json["name"],
-        phone: json["phone"],
-      );
-
-  Map<String, dynamic> toJson() => {
-        "code": code,
-        "email": email,
-        "name": name,
-        "phone": phone,
-      };
 }

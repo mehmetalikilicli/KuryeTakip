@@ -7,12 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:kurye_takip/app_constants/app_colors.dart';
-import 'package:kurye_takip/controllers/authentication.dart';
+import 'package:kurye_takip/pages/auth/authentication.dart';
 import 'package:kurye_takip/helpers/custom_dialog.dart';
 import 'package:kurye_takip/helpers/helpers.dart';
 import 'package:kurye_takip/model/register.dart';
@@ -39,7 +38,7 @@ class RegisterPage extends StatelessWidget {
           ),
         ),
         body: TabBarView(
-          physics: const NeverScrollableScrollPhysics(),
+          //physics: const NeverScrollableScrollPhysics(),
           children: [
             PageView(
               physics: const NeverScrollableScrollPhysics(),
@@ -223,7 +222,7 @@ class RegisterPage extends StatelessWidget {
                                           controller.registerModel.surname = controller.rentSurname.text;
                                           controller.registerModel.phone = controller.rentPhone.text;
                                           controller.registerModel.email = controller.rentMail.text;
-                                          controller.registerModel.password = Helpers.encryptPassword(controller.rentPassword.text);
+                                          controller.registerModel.password = Helpers.encryption(controller.rentPassword.text);
                                           controller.registerModel.address = controller.address.value;
                                           controller.registerModel.city = controller.city;
                                           controller.registerModel.district = controller.district;
@@ -399,6 +398,10 @@ class RegisterPage extends StatelessWidget {
                                     if (controller.rentForm2.currentState!.validate()) {
                                       if (controller.image1.isEmpty) {
                                         //Will be deleted
+
+                                        controller.registerModel.driving_license_number = controller.rentDLnumber.text;
+                                        controller.registerModel.driving_license_date = controller.rentDLdate;
+
                                         controller.rentPageController.nextPage(
                                           duration: const Duration(milliseconds: 500),
                                           curve: Curves.easeInOut,
@@ -412,7 +415,8 @@ class RegisterPage extends StatelessWidget {
                                           const SnackBar(content: Text("Ehliyetinizin arka yüzünü yükleyiniz.")),
                                         );
                                       } else {
-                                        controller.registerModel.driving_license_number = controller.rentSerialNumber.text;
+                                        //Şu an için simulatorden resim alamadığımız için bilgileri controllera
+                                        controller.registerModel.driving_license_number = controller.rentDLnumber.text;
                                         controller.registerModel.driving_license_date = controller.rentDLdate;
 
                                         controller.registerModel.driving_license_front_image = controller.image1;
@@ -440,8 +444,6 @@ class RegisterPage extends StatelessWidget {
                     ),
                   ),
                 ),
-
-                // Sayfa 3 içeriği - Sadece Geri butonu
                 SingleChildScrollView(
                   padding: const EdgeInsets.all(16),
                   child: Form(
@@ -621,7 +623,13 @@ class RegisterPage extends StatelessWidget {
                                         onPositiveButtonPressed: () {
                                           Get.offAll(LoginPage());
                                         });
-                                  } else {}
+                                  } else {
+                                    CustomDialog.showMessage(
+                                      context: context,
+                                      title: "Kayıt Başarısız",
+                                      message: registerResponse.message,
+                                    );
+                                  }
                                 } catch (e) {
                                   print(e);
                                 }
@@ -774,7 +782,8 @@ class RegisterPage extends StatelessWidget {
                                 controller.registerModel2.surname = controller.ownerSurname.text;
                                 controller.registerModel2.phone = controller.ownerPhone.text;
                                 controller.registerModel2.email = controller.ownerMail.text;
-                                controller.registerModel2.password = Helpers.encryptPassword(controller.ownerPassword.text);
+                                controller.registerModel2.password = Helpers.encryption(controller.ownerPassword.text);
+                                controller.registerModel2.is_vehicle_owner = 1;
                                 try {
                                   RegisterResponse registerResponse = await controller.Register(controller.registerModel2);
 
@@ -794,7 +803,7 @@ class RegisterPage extends StatelessWidget {
                                         title: "Kayıt Başarısız",
                                         message: registerResponse.message,
                                         onPositiveButtonPressed: () {
-                                          Get.offAll(LoginPage());
+                                          //Get.offAll(LoginPage());
                                         });
                                   }
                                 } catch (e) {

@@ -1,19 +1,29 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:encrypt/encrypt.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:kurye_takip/app_constants/logic_constants.dart';
+import 'package:kurye_takip/model/login.dart';
 
 class Helpers {
-  static String encryptPassword(String password) {
-    final plainText = password;
-    final key = Key.fromUtf8('QeLtGkHhZsXoBuIyUwNpErKlJcMgFqVx');
-    final iv = IV.fromLength(16);
-
+  static String encryption(String value) {
+    final plainText = "72";
+    final key = Key.fromUtf8(LogicConstants.securityKey);
+    final iv = IV.fromBase64(LogicConstants.securityKey);
     final encrypter = Encrypter(AES(key, mode: AESMode.ecb, padding: 'PKCS7'));
-
     final encrypted = encrypter.encrypt(plainText, iv: iv);
-    final decrypted = encrypter.decrypt(encrypted, iv: iv);
-
-    //print(decrypted); // Lorem ipsum dolor sit amet, consectetur adipiscing elit
-    //print(encrypted.base64); // R4PxiU3h8YoIRqVowBXm36ZcCeNeZ4s1OvVBTfFlZRdmohQqOpPQqD1YecJeZMAop/hZ4OxqgC1WtwvX/hP9mw==
-
+    print(encrypted.base64);
     return encrypted.base64;
+  }
+
+  static String decryption(String value) {
+    final key = Key.fromUtf8(LogicConstants.securityKey);
+    final iv = IV.fromBase64(LogicConstants.securityKey);
+    Uint8List _bytes = const Base64Decoder().convert(value);
+    Encrypted encrypted = Encrypted(_bytes);
+    final encrypter = Encrypter(AES(key, mode: AESMode.ecb, padding: 'PKCS7'));
+    final decrypted = encrypter.decrypt(encrypted, iv: iv);
+    return decrypted;
   }
 }

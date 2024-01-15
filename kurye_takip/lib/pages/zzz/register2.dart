@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+/*import 'package:flutter/material.dart';
 
 class Register2Page extends StatefulWidget {
   const Register2Page({super.key});
@@ -31,3 +31,4 @@ class _Register2PageState extends State<Register2Page> {
     );
   }
 }
+*/

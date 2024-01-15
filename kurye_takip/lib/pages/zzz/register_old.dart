@@ -1,4 +1,4 @@
-import 'dart:async';
+/*import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
@@ -8,7 +8,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:kurye_takip/app_constants/app_colors.dart';
 import 'package:kurye_takip/helpers/helpers.dart';
-import 'package:kurye_takip/pages/auth/auth_controller.dart';
+import 'package:kurye_takip/pages/auth/old/auth_controller.dart';
 import 'package:kurye_takip/pages/auth/login.dart';
 import 'package:map_picker/map_picker.dart';
 
@@ -239,7 +239,7 @@ class AracKirayaVerTab extends StatelessWidget {
                       authController.registerModel.surname = authController.rentSurnameController.text;
                       authController.registerModel.phone = authController.rentPhoneController.text;
                       authController.registerModel.email = authController.rentNameController.text;
-                      authController.registerModel.password = Helpers.encryptPassword(authController.rentPasswordController.text);
+                      authController.registerModel.password = Helpers.encryption(authController.rentPasswordController.text);
                       authController.registerModel.is_vehicle_owner = 1;
 
                       await authController.register();
@@ -714,7 +714,7 @@ class LoginAndRegisterButton extends StatelessWidget {
               authController.registerModel.surname = authController.surnameController.text;
               authController.registerModel.phone = authController.phoneController.text;
               authController.registerModel.email = authController.emailController.text;
-              authController.registerModel.password = Helpers.encryptPassword(authController.emailController.text);
+              authController.registerModel.password = Helpers.encryption(authController.emailController.text);
               authController.registerModel.driving_license_number = authController.drivingLicenseNumber.text;
               //authController.registerModel.driving_license_date = authController.drivingLicenseDate.text;
               authController.registerModel.is_vehicle_owner = 0;
@@ -897,3 +897,4 @@ class GetUserInfo extends StatelessWidget {
     );
   }
 }
+*/

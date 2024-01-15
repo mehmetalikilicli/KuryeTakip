@@ -1,4 +1,4 @@
-import 'dart:convert';
+/*import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -90,11 +90,11 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<Login> login(String email, String cyriptedPassword) async {
+  Future<LoginResponse> login(String email, String cyriptedPassword) async {
     try {
-      Login result = await _authService.login(email, cyriptedPassword);
+      LoginResponse result = await _authService.login(email, cyriptedPassword);
       //await saveUserData(result.user);
-      print(result.user.code);
+      //print(result.user.code);
       return result;
     } catch (e) {
       print('Hata: $e');
@@ -113,3 +113,4 @@ class AuthController extends GetxController {
     await prefs.setString('user_data', userJson);
   }
 }
+*/
