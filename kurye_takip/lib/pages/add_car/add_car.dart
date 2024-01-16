@@ -6,6 +6,8 @@ import 'package:get_storage/get_storage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:kurye_takip/app_constants/app_colors.dart';
 import 'package:kurye_takip/helpers/custom_dialog.dart';
+import 'package:kurye_takip/model/brand.dart';
+import 'package:kurye_takip/model/model.dart';
 import 'package:kurye_takip/pages/add_car/add_car_controller.dart';
 import 'package:map_picker/map_picker.dart';
 
@@ -41,7 +43,7 @@ class AddCarPage extends StatelessWidget {
                         decoration: const InputDecoration(
                           label: Text("Plaka Numarası"),
                           border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.car_rental, color: AppColors.primaryColor),
+                          prefixIcon: Icon(Icons.car_rental, color: Colors.grey),
                         ),
                         validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
                       ),
@@ -189,10 +191,13 @@ class AddCarPage extends StatelessWidget {
                   enabled: true,
                   controller: controller.rentName,
                   keyboardType: TextInputType.name,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     label: Text("İsim"),
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.person, color: AppColors.primaryColor),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                      borderSide: BorderSide(color: Colors.grey),
+                    ),
+                    prefixIcon: Icon(Icons.person, color: Colors.grey),
                   ),
                   validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
                 ),
@@ -205,7 +210,7 @@ class AddCarPage extends StatelessWidget {
                   decoration: const InputDecoration(
                     label: Text("Soyisim"),
                     border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.person, color: AppColors.primaryColor),
+                    prefixIcon: Icon(Icons.person, color: Colors.grey),
                   ),
                   validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
                 ),
@@ -214,10 +219,13 @@ class AddCarPage extends StatelessWidget {
                 TextFormField(
                   controller: controller.rentPhone,
                   keyboardType: TextInputType.phone,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     label: Text("Telefon"),
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.person, color: AppColors.primaryColor),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                      borderSide: BorderSide(color: Colors.grey),
+                    ),
+                    prefixIcon: Icon(Icons.person, color: const Color.fromARGB(255, 152, 176, 190)),
                   ),
                   validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
                 ),
@@ -226,10 +234,13 @@ class AddCarPage extends StatelessWidget {
                 TextFormField(
                   controller: controller.rentMail,
                   keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     label: Text("Eposta"),
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.email, color: AppColors.primaryColor),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                      borderSide: BorderSide(color: Colors.grey),
+                    ),
+                    prefixIcon: Icon(Icons.email, color: Colors.grey),
                   ),
                   validator: (value) => value!.isEmpty
                       ? "Boş bırakılamaz"
@@ -333,16 +344,24 @@ class carAddPage1 extends StatelessWidget {
                           ],
                         ),
                         items: controller.carBrandsList
-                            .map((String item) => DropdownMenuItem<String>(
-                                  value: item,
-                                  child: Text(item,
-                                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black), overflow: TextOverflow.ellipsis),
+                            .map<DropdownMenuItem<String>>((BrandElement item) => DropdownMenuItem<String>(
+                                  value: item.name,
+                                  child: Text(
+                                    item.name,
+                                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ))
                             .toList(),
                         //value: controller.brandDropdownValue.value,
                         onChanged: (String? value) {
                           controller.brandDropdownHint.value = value ?? "";
+                          controller.modelDropdownHint.value = "Model Seçiniz";
+                          int selectedBrandId = controller.carBrandsList.firstWhere((element) => element.name == value).id;
+
+                          controller.fetchModels(selectedBrandId);
                         },
+
                         buttonStyleData: ButtonStyleData(
                           height: 50,
                           width: Get.width,
@@ -386,9 +405,9 @@ class carAddPage1 extends StatelessWidget {
                           ],
                         ),
                         items: controller.carModelList
-                            .map((String item) => DropdownMenuItem<String>(
-                                  value: item,
-                                  child: Text(item,
+                            .map<DropdownMenuItem<String>>((ModelElement item) => DropdownMenuItem<String>(
+                                  value: item.name,
+                                  child: Text(item.name,
                                       style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black), overflow: TextOverflow.ellipsis),
                                 ))
                             .toList(),
@@ -580,6 +599,17 @@ class carAddPage1 extends StatelessWidget {
                     ),
                   ),
                 ),
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: controller.dailyRentMoney,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    label: Text("Günlük Kira Bedelini Giriniz"),
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.car_rental, color: Colors.grey),
+                  ),
+                  validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
+                ),
                 Padding(
                   padding: const EdgeInsets.only(right: 24.0),
                   child: Align(
@@ -593,11 +623,22 @@ class carAddPage1 extends StatelessWidget {
                                 message: "Lütfen marka ve model seçiniz.",
                               );
                             } else {
-                              controller.getDailyRentMoney(controller.brandDropdownHint.value, controller.modelDropdownHint.value);
+                              //controller.getDailyRentMoney(controller.brandDropdownHint.value, controller.modelDropdownHint.value);
+
+                              int? dailyRentMoneyInt = int.tryParse(controller.dailyRentMoney.text);
+                              String message = "";
+
+                              if (dailyRentMoneyInt != null) {
+                                int monthlyRentIncome = dailyRentMoneyInt * 30;
+                                message = "Aylık kira getiriniz: ${controller.dailyRentMoney.text} * 30 = $monthlyRentIncome TL";
+                              } else {
+                                message = "Hatalı bir sayı girişi yapıldı.";
+                              }
+
                               CustomDialog.showMessage(
                                 context: context,
                                 title: "Aylık Kira Getirisi",
-                                message: "Aylık kira getiriniz: ${controller.dailyRentMoney} * 30 = ${controller.dailyRentMoney * 30} TL",
+                                message: message,
                               );
                             }
                           },
@@ -616,6 +657,7 @@ class carAddPage1 extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12.0),
                     ),
                     onPressed: () {
+                      //validation for daily price
                       if (controller.brandDropdownHint == "Marka Seçiniz") {
                         CustomDialog.showMessage(context: context, title: "Marka Seçilmedi", message: "Lütfen marka seçiniz.", onPositiveButtonPressed: () {});
                       } else if (controller.modelDropdownHint == "Model Seçiniz") {

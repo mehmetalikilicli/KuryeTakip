@@ -324,8 +324,8 @@ class RegisterPage extends StatelessWidget {
                           child: const Text("Ehliyet Ön Yüzünü Yükle", style: TextStyle(color: Colors.white)),
                           onPressed: () async {
                             final XFile? image = await ImagePicker().pickImage(source: ImageSource.camera);
-                            if (!image.isNull) {
-                              final bytes = await image!.readAsBytes();
+                            if (image != null) {
+                              final bytes = await image.readAsBytes();
                               var result = await FlutterImageCompress.compressWithList(bytes, minWidth: 720, minHeight: 480, quality: 50, rotate: 0);
                               final byteLength = result.lengthInBytes;
                               final kByte = byteLength / 1024;
@@ -336,7 +336,11 @@ class RegisterPage extends StatelessWidget {
                                 controller.image1 = base64.encode(result);
                                 controller.image1ext = image.path.split(".").last;
                               }
-                            } else {}
+                            } else {
+                              // Kullanıcı fotoğraf seçmedi, bu durumu yönetmek için gerekli işlemleri yapabilirsiniz.
+                              // Örneğin bir mesaj göstermek veya başka bir işlem yapmak.
+                              log("Kullanıcı kamera ile fotoğraf seçmedi.");
+                            }
                           },
                         ),
                         const SizedBox(height: 4),

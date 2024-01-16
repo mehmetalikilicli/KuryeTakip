@@ -31,7 +31,7 @@ class DashboardController extends GetxController {
 
   Future<void> fetchData() async {
     try {
-      cars = await CarService.fetchCars();
+      cars = await ApiService.fetchCars();
       filter(activeType.value);
       //await Future.delayed(const Duration(seconds: 2));
     } catch (e) {
