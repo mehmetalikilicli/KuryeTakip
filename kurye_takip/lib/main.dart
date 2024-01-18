@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
       //home: LoginPage(),renteker
       //GoogleNavBar(),
       //home: GoogleNavBar(),
-      home: LoginPage(),
+      home: AddCarPage(),
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,

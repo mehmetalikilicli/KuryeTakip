@@ -6,6 +6,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
@@ -163,8 +164,32 @@ class RegisterPage extends StatelessWidget {
                             color: AppColors.softPrimaryColor,
                             minWidth: Get.width,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                            onPressed: () {
-                              Get.dialog(const SelectLoactionRegisterRent());
+                            onPressed: () async {
+                              LocationPermission permission = await Geolocator.checkPermission();
+
+                              if (permission == LocationPermission.denied) {
+                                // Konum izni yoksa, izin iste
+                                permission = await Geolocator.requestPermission();
+
+                                if (permission == LocationPermission.denied) {
+                                  CustomDialog.showMessage(
+                                    context: context,
+                                    title: "Aracın Teslim Konumu Gereklidir",
+                                    message: "Lütfen aracın teslim konumunu seçiniz.",
+                                  ).then((value) => Get.dialog(SelectLoactionRegisterRent()));
+                                  return;
+                                }
+                              } else if (permission == LocationPermission.whileInUse || permission == LocationPermission.always) {
+                                // Konum izni varsa, kullanıcının konumunu al
+                                Position position = await Geolocator.getCurrentPosition();
+                                // Haritayı kullanıcının konumuna taşı
+                                if (position != null) {
+                                  controller.cameraPosition = CameraPosition(target: LatLng(position.latitude, position.longitude), zoom: 14.4746);
+                                  Get.dialog(SelectLoactionRegisterRent());
+                                }
+                              } else {
+                                Get.dialog(SelectLoactionRegisterRent());
+                              }
                             },
                             child: const Text(
                               "Konum Seç",
@@ -337,8 +362,6 @@ class RegisterPage extends StatelessWidget {
                                 controller.image1ext = image.path.split(".").last;
                               }
                             } else {
-                              // Kullanıcı fotoğraf seçmedi, bu durumu yönetmek için gerekli işlemleri yapabilirsiniz.
-                              // Örneğin bir mesaj göstermek veya başka bir işlem yapmak.
                               log("Kullanıcı kamera ile fotoğraf seçmedi.");
                             }
                           },
@@ -879,7 +902,7 @@ class SelectLoactionRegisterRent extends GetView<RegisterController> {
                     controller.rxDistrict.value = address.subLocality!;
                   }
 
-/*
+                  /*
                   // update the ui with the address
                   textController.text = '${placemarks.first.administrativeArea} - ${placemarks.first.subLocality}';
                   String fullAddress =

@@ -104,4 +104,74 @@ class AddCarController extends GetxController {
       rentMail.text = user.email ?? "";
     }
   }
+
+  //Page4
+  TextEditingController avaibleDate = TextEditingController();
+  RxBool isGeneral = true.obs;
+
+  TimeOfDay selectedTime = TimeOfDay(hour: 8, minute: 0);
+
+  Rx<TimeOfDay> rxTimeOfDay = TimeOfDay.now().obs;
+
+  TextEditingController availableWeekdayStart = TextEditingController();
+  TextEditingController availableWeekdayEnd = TextEditingController();
+  TextEditingController availableWeekendStart = TextEditingController();
+  TextEditingController availableWeekendEnd = TextEditingController();
+
+  TextEditingController availableMondayStart = TextEditingController();
+  TextEditingController availableMondayEnd = TextEditingController();
+  TextEditingController availableTuesdayStart = TextEditingController();
+  TextEditingController availableTuesdayEnd = TextEditingController();
+  TextEditingController availableWednesdayStart = TextEditingController();
+  TextEditingController availableWednesdayEnd = TextEditingController();
+  TextEditingController availableThursdayStart = TextEditingController();
+  TextEditingController availableThursdayEnd = TextEditingController();
+  TextEditingController availableFridayStart = TextEditingController();
+  TextEditingController availableFridayEnd = TextEditingController();
+  TextEditingController availableSaturdayStart = TextEditingController();
+  TextEditingController availableSaturdayEnd = TextEditingController();
+  TextEditingController availableSundayStart = TextEditingController();
+  TextEditingController availableSundayEnd = TextEditingController();
+
+  //RxString gmAddressText = "".obs, rxCity = "".obs, rxDistrict = "".obs;
+
+  //RxString address = "".obs;
+
+  TimeOfDay availableWeekdayStartTime = TimeOfDay.now();
+  TimeOfDay availableWeekdayEndTime = TimeOfDay.now();
+  TimeOfDay availableWeekEndStartTime = TimeOfDay.now();
+  TimeOfDay availableWeekEndEndTime = TimeOfDay.now();
+
+  TimeOfDay availableMondayStartTime = TimeOfDay.now();
+  TimeOfDay availableMondayEndTime = TimeOfDay.now();
+  TimeOfDay availableTuesdayStartTime = TimeOfDay.now();
+  TimeOfDay availableTuesdayEndTime = TimeOfDay.now();
+  TimeOfDay availableWednesdayStartTime = TimeOfDay.now();
+  TimeOfDay availableWednesdayEndTime = TimeOfDay.now();
+  TimeOfDay availableThursdayStartTime = TimeOfDay.now();
+  TimeOfDay availableThursdayEndTime = TimeOfDay.now();
+  TimeOfDay availableFridayStartTime = TimeOfDay.now();
+  TimeOfDay availableFridayEndTime = TimeOfDay.now();
+  TimeOfDay availableSaturdayStartTime = TimeOfDay.now();
+  TimeOfDay availableSaturdayEndTime = TimeOfDay.now();
+  TimeOfDay availableSundayStartTime = TimeOfDay.now();
+  TimeOfDay availableSundayEndTime = TimeOfDay.now();
+
+  //Page5
+
+  RxInt isimage1Taken = 0.obs;
+  RxInt isimage2Taken = 0.obs;
+  RxInt isimage3Taken = 0.obs;
+  RxInt isimage4Taken = 0.obs;
+  RxInt isimage5Taken = 0.obs;
+  RxInt isimage6Taken = 0.obs;
+  RxInt isimage7Taken = 0.obs;
+
+  String image1 = "", image1ext = "";
+  String image2 = "", image2ext = "";
+  String image3 = "", image3ext = "";
+  String image4 = "", image4ext = "";
+  String image5 = "", image5ext = "";
+  String image6 = "", image6ext = "";
+  String image7 = "", image7ext = "";
 }
