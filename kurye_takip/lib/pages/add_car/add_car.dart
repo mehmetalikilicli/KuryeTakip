@@ -32,10 +32,10 @@ class AddCarPage extends StatelessWidget {
         physics: const NeverScrollableScrollPhysics(),
         controller: controller.addCarPageController,
         children: [
-          carAddPage1(controller: controller),
+          //carAddPage1(controller: controller),
           carAddPage2(),
-          carAddPage3(controller: controller),
-          carAddPage4(controller: controller),
+          //carAddPage3(controller: controller),
+          //carAddPage4(controller: controller),
           SafeArea(
             child: Padding(
               padding: EdgeInsets.all(16),
@@ -44,13 +44,12 @@ class AddCarPage extends StatelessWidget {
                   key: controller.addCarFormKey5,
                   child: Column(
                     children: [
-                      Column(
+                      Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Text(
-                            "Aracın Önden Fotoğrafını yükleyiniz.",
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          const Expanded(
+                            child: Text("Aracın Önden Fotoğrafını yükleyiniz.", style: TextStyle(fontSize: 16)),
                           ),
                           SizedBox(height: 16),
                           GestureDetector(
@@ -131,8 +130,8 @@ class AddCarPage extends StatelessWidget {
                               );
                             },
                             child: Container(
-                              width: 300,
-                              height: 200,
+                              width: Get.width * 0.4,
+                              height: 100,
                               decoration: BoxDecoration(
                                 color: Colors.grey[300],
                                 borderRadius: BorderRadius.circular(12),
@@ -148,15 +147,8 @@ class AddCarPage extends StatelessWidget {
                                     Image.memory(base64Decode(controller.image1), fit: BoxFit.cover, width: double.infinity, height: double.infinity),
                                   Container(
                                     padding: EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: Colors.blue,
-                                    ),
-                                    child: Icon(
-                                      Icons.add,
-                                      color: Colors.white,
-                                      size: 30,
-                                    ),
+                                    decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.blue),
+                                    child: Icon(Icons.add, color: Colors.white, size: 30),
                                   ),
                                 ],
                               ),
@@ -177,10 +169,7 @@ class AddCarPage extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(12.0),
                               ),
                               onPressed: () {
-                                controller.addCarPageController.previousPage(
-                                  duration: const Duration(milliseconds: 500),
-                                  curve: Curves.easeInOut,
-                                );
+                                controller.addCarPageController.previousPage(duration: const Duration(milliseconds: 500), curve: Curves.easeInOut);
                               },
                               child: const Text("Geri", style: TextStyle(color: Colors.white)),
                             ),
@@ -194,15 +183,9 @@ class AddCarPage extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(12.0),
                               ),
                               onPressed: () {
-                                controller.addCarPageController.nextPage(
-                                  duration: const Duration(milliseconds: 500),
-                                  curve: Curves.easeInOut,
-                                );
+                                controller.addCarPageController.nextPage(duration: const Duration(milliseconds: 500), curve: Curves.easeInOut);
                               },
-                              child: const Text(
-                                "İleri",
-                                style: TextStyle(color: Colors.white),
-                              ),
+                              child: const Text("İleri", style: TextStyle(color: Colors.white)),
                             ),
                           ),
                         ],
@@ -353,6 +336,7 @@ class AddCarPage extends StatelessWidget {
   }
 }
 
+/*
 class carAddPage4 extends StatelessWidget {
   const carAddPage4({
     super.key,
@@ -1705,3 +1689,6 @@ class SelectLoactionCarOwner extends GetView<AddCarController> {
     );
   }
 }
+
+*/
+

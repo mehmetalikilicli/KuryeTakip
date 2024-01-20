@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:kurye_takip/app_constants/app_colors.dart';
 import 'package:kurye_takip/pages/add_car/add_car.dart';
+import 'package:kurye_takip/pages/add_car/test_add.dart';
 import 'package:kurye_takip/pages/auth/login.dart';
 import 'package:kurye_takip/pages/auth/register.dart';
 import 'package:kurye_takip/pages/dashboard/dashboard.dart';
@@ -31,7 +32,6 @@ class MyApp extends StatelessWidget {
       //home: LoginPage(),renteker
       //GoogleNavBar(),
       //home: GoogleNavBar(),
-      home: AddCarPage(),
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
@@ -39,6 +39,8 @@ class MyApp extends StatelessWidget {
       ],
       supportedLocales: const [Locale('en'), Locale('tr')],
       locale: const Locale("tr"),
+      //home: AddCarPage(),
+      home: TestAddCarView(),
     );
   }
 }

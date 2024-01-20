@@ -29,8 +29,10 @@ dependencies:
   map_picker: ^0.0.3
   flutter_image_compress: ^2.1.0
   intl: ^0.18.1
-  dropdown_button2: ^2.3.9
+  #dropdown_button2: ^2.3.9
+  dropdown_button2: ^1.4.0
   permission_handler: ^11.1.0
+  image_cropper: ^5.0.1
 
   cupertino_icons: ^1.0.2
 
