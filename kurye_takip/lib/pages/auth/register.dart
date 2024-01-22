@@ -12,6 +12,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:kurye_takip/app_constants/app_colors.dart';
+import 'package:kurye_takip/pages/add_car/test_add.dart';
 import 'package:kurye_takip/pages/auth/authentication.dart';
 import 'package:kurye_takip/helpers/custom_dialog.dart';
 import 'package:kurye_takip/helpers/helpers.dart';
@@ -42,7 +43,7 @@ class RegisterPage extends StatelessWidget {
           //physics: const NeverScrollableScrollPhysics(),
           children: [
             PageView(
-              physics: const NeverScrollableScrollPhysics(),
+              //physics: const NeverScrollableScrollPhysics(),
               controller: controller.rentPageController,
               children: [
                 SafeArea(
@@ -348,22 +349,12 @@ class RegisterPage extends StatelessWidget {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           child: const Text("Ehliyet Ön Yüzünü Yükle", style: TextStyle(color: Colors.white)),
                           onPressed: () async {
-                            final XFile? image = await ImagePicker().pickImage(source: ImageSource.camera);
-                            if (image != null) {
-                              final bytes = await image.readAsBytes();
-                              var result = await FlutterImageCompress.compressWithList(bytes, minWidth: 720, minHeight: 480, quality: 50, rotate: 0);
-                              final byteLength = result.lengthInBytes;
-                              final kByte = byteLength / 1024;
-                              final mByte = kByte / 1024;
-                              if (mByte > 2.5) {
-                                log("Maksimum boyut 2.5 mb olabilir.");
-                              } else {
-                                controller.image1 = base64.encode(result);
-                                controller.image1ext = image.path.split(".").last;
-                              }
-                            } else {
-                              log("Kullanıcı kamera ile fotoğraf seçmedi.");
-                            }
+                            String result = await Get.bottomSheet(const SelectImageFromBottomSheet()) ?? "";
+                            if (result == "Camera") {
+                              controller.pickImageAtFrontOrBack(ImageSource.camera, 0);
+                            } else if (result == "Gallery") {
+                              controller.pickImageAtFrontOrBack(ImageSource.gallery, 0);
+                            } else {}
                           },
                         ),
                         const SizedBox(height: 4),
@@ -372,19 +363,11 @@ class RegisterPage extends StatelessWidget {
                           minWidth: Get.width,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           onPressed: () async {
-                            final XFile? image = await ImagePicker().pickImage(source: ImageSource.camera);
-                            if (!image.isNull) {
-                              final bytes = await image!.readAsBytes();
-                              var result = await FlutterImageCompress.compressWithList(bytes, minWidth: 720, minHeight: 480, quality: 50, rotate: 0);
-                              final byteLength = result.lengthInBytes;
-                              final kByte = byteLength / 1024;
-                              final mByte = kByte / 1024;
-                              if (mByte > 2.5) {
-                                log("Maksimum boyut 2.5 mb olabilir.");
-                              } else {
-                                controller.image2 = base64.encode(result);
-                                controller.image2ext = image.path.split(".").last;
-                              }
+                            String result = await Get.bottomSheet(const SelectImageFromBottomSheet()) ?? "";
+                            if (result == "Camera") {
+                              controller.pickImageAtFrontOrBack(ImageSource.camera, 1);
+                            } else if (result == "Gallery") {
+                              controller.pickImageAtFrontOrBack(ImageSource.gallery, 1);
                             } else {}
                           },
                           child: const Text("Ehliyet Arka Yüzünü Yükle", style: TextStyle(color: Colors.white)),
@@ -424,16 +407,6 @@ class RegisterPage extends StatelessWidget {
                                   onPressed: () {
                                     if (controller.rentForm2.currentState!.validate()) {
                                       if (controller.image1.isEmpty) {
-                                        //Will be deleted
-
-                                        controller.registerModel.driving_license_number = controller.rentDLnumber.text;
-                                        controller.registerModel.driving_license_date = controller.rentDLdate;
-
-                                        controller.rentPageController.nextPage(
-                                          duration: const Duration(milliseconds: 500),
-                                          curve: Curves.easeInOut,
-                                        );
-
                                         ScaffoldMessenger.of(context).showSnackBar(
                                           const SnackBar(content: Text('Ehliyetinizin ön yüzünü yükleyiniz.')),
                                         );
@@ -442,14 +415,12 @@ class RegisterPage extends StatelessWidget {
                                           const SnackBar(content: Text("Ehliyetinizin arka yüzünü yükleyiniz.")),
                                         );
                                       } else {
-                                        //Şu an için simulatorden resim alamadığımız için bilgileri controllera
                                         controller.registerModel.driving_license_number = controller.rentDLnumber.text;
                                         controller.registerModel.driving_license_date = controller.rentDLdate;
-
-                                        controller.registerModel.driving_license_front_image = controller.image1;
-                                        controller.registerModel.driving_license_front_image_ext = controller.image1ext;
-                                        controller.registerModel.driving_license_back_image = controller.image2;
-                                        controller.registerModel.driving_license_back_image_ext = controller.image2ext;
+                                        controller.registerModel.driving_license_front = controller.image1;
+                                        controller.registerModel.driving_license_front_ext = controller.image1ext;
+                                        controller.registerModel.driving_license_back = controller.image2;
+                                        controller.registerModel.driving_license_back_ext = controller.image2ext;
 
                                         controller.rentPageController.nextPage(
                                           duration: const Duration(milliseconds: 500),
@@ -598,13 +569,13 @@ class RegisterPage extends StatelessWidget {
                               onChanged: (String? newValue) {
                                 controller.rentGender.value = newValue ?? "";
                               },
-                              items: <String>['', 'Erkek', 'Kadın'].map((String value) {
+                              items: <String>['', 'Erkek', 'Kadın', 'Belirtmek İstemiyorum'].map((String value) {
                                 return DropdownMenuItem<String>(
                                   value: value,
                                   child: Row(
                                     children: [
                                       Icon(
-                                        value == 'Erkek' ? Icons.male : Icons.female,
+                                        value == 'Erkek' ? Icons.male : (value == 'Kadın' ? Icons.female : Icons.question_mark),
                                         color: AppColors.softPrimaryColor,
                                       ),
                                       SizedBox(width: 8),

@@ -11,7 +11,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Profili Düzenle")),
+      appBar: AppBar(title: Text("ARAÇLARIM")),
       body: Column(
           //container
           //foto and button,

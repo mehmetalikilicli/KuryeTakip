@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:kurye_takip/app_constants/app_colors.dart';
@@ -39,8 +41,8 @@ class GoogleNavBar extends StatelessWidget {
                     text: "Araçlarım",
                   ),
                   GButton(
-                    icon: Icons.person,
-                    text: "Profil",
+                    icon: IconData(0xe44f, fontFamily: 'MaterialIcons'),
+                    text: "Bildirimler",
                   ),
                   GButton(
                     icon: Icons.person,

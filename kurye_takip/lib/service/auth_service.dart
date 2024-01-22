@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:http/http.dart' as http;
 import 'package:kurye_takip/model/login.dart';
 import 'package:kurye_takip/model/register.dart';
@@ -42,10 +43,10 @@ class AuthService {
       "address": registerData.address,
       "driving_license_number": registerData.driving_license_number,
       "driving_license_date": registerData.driving_license_date?.toIso8601String() ?? '',
-      "driving_license_front_image": registerData.driving_license_front_image,
-      "driving_license_front_image_ext": registerData.driving_license_front_image_ext,
-      "driving_license_back_image": registerData.driving_license_back_image,
-      "driving_license_back_image_ext": registerData.driving_license_back_image_ext,
+      "driving_license_front": registerData.driving_license_front,
+      "driving_license_front_ext": registerData.driving_license_front_ext,
+      "driving_license_back": registerData.driving_license_back,
+      "driving_license_back_ext": registerData.driving_license_back_ext,
     };
 
     final String requestBody = json.encode(requestData);

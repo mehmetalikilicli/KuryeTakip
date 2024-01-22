@@ -40,7 +40,8 @@ class MyApp extends StatelessWidget {
       supportedLocales: const [Locale('en'), Locale('tr')],
       locale: const Locale("tr"),
       //home: AddCarPage(),
-      home: TestAddCarView(),
+      //home: TestAddCarView(),
+      home: LoginPage(),
     );
   }
 }

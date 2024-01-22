@@ -32,6 +32,22 @@ class InputWidgets {
     );
   }
 
+  InputDecoration dateDecoration(Color borderColor, Color errorBorderColor, String hint) {
+    return InputDecoration(
+      isCollapsed: true,
+      errorStyle: const TextStyle(color: CupertinoColors.systemRed, fontSize: 10),
+      contentPadding: const EdgeInsets.fromLTRB(8, 14, 8, 12),
+      border: _inputBorder(borderColor, 0.5, 8),
+      enabledBorder: _inputBorder(borderColor, 0.5, 8),
+      focusedBorder: _inputBorder(borderColor, 1, 8),
+      errorBorder: _inputBorder(borderColor, 0.5, 8),
+      focusedErrorBorder: _inputBorder(borderColor, 1, 8),
+      hintText: hint,
+      hintStyle: const TextStyle(fontSize: 12),
+      // constraints: const BoxConstraints(minHeight: 30, maxHeight: 30),
+    );
+  }
+
   InputDecoration noteDecoration(Color borderColor, Color errorBorderColor, String hint) {
     return InputDecoration(
       isCollapsed: true,

@@ -14,6 +14,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:kurye_takip/helpers/helpers.dart';
+import 'package:kurye_takip/model/car_add.dart';
+import 'package:kurye_takip/model/general_response.dart';
 import 'package:kurye_takip/model/login.dart';
 import 'package:kurye_takip/pages/add_car/test_add.dart';
 import 'package:kurye_takip/pages/widgets/images.dart';
@@ -35,7 +37,6 @@ class TestAddController extends GetxController {
   List<String> carYearList = ['2020', '2021', '2022', "2023", "2024"];
   List<String> carFuelTypeList = ['Hybrid', 'Benzin', 'Dizel'];
   List<String> carTransmissionTypeList = ['Otomatik', 'Manuel', 'Yarı Otomatik'];
-  TextEditingController dailyRentPrice = TextEditingController();
 
   String? carBrand, carModel, carYear, carFuel, carTransmission;
 
@@ -65,15 +66,6 @@ class TestAddController extends GetxController {
       log("Error fetching models: $e");
     }
     loadingModels.value = false;
-  }
-
-  Future<void> monthlyRentPriceCalculator() async {
-    if (testAddPageOneFormKey.currentState!.validate()) {
-      double monthlyPrice = double.parse(dailyRentPrice.text.trim()) * 30;
-      Get.dialog(AppCustomDialog(title: "Aylık Kira Ücreti", message: "${monthlyPrice.toStringAsFixed(2)} ₺"));
-    } else {
-      Helpers.showSnackbar("Uyarı!", "Lütfen gerekli alanları doldurunuz.");
-    }
   }
 
   void checkPageOneComplete() async {
@@ -165,12 +157,6 @@ class TestAddController extends GetxController {
   TimeOfDay availableSundayStartTime = TimeOfDay.now();
   TimeOfDay availableSundayEndTime = TimeOfDay.now();
 
-  DateTime availableDateStartDate = DateTime.now();
-  DateTime availableDateEndDate = DateTime.now();
-
-  TextEditingController availableDateStart = TextEditingController();
-  TextEditingController availableDateEnd = TextEditingController();
-
   TextEditingController availableWeekdayStart = TextEditingController();
   TextEditingController availableWeekdayEnd = TextEditingController();
   TextEditingController availableWeekendStart = TextEditingController();
@@ -261,6 +247,17 @@ class TestAddController extends GetxController {
   String? weeklyDiscount, monthlyDiscount;
   final testAddPageSixFormKey = GlobalKey<FormState>();
 
+  TextEditingController dailyRentPrice = TextEditingController();
+
+  Future<void> monthlyRentPriceCalculator() async {
+    if (testAddPageSixFormKey.currentState!.validate()) {
+      double monthlyPrice = double.parse(dailyRentPrice.text.trim()) * 30;
+      Get.dialog(AppCustomDialog(title: "Aylık Kira Ücreti", message: "${monthlyPrice.toStringAsFixed(2)} ₺"));
+    } else {
+      Helpers.showSnackbar("Uyarı!", "Lütfen gerekli alanları doldurunuz.");
+    }
+  }
+
   void checkPageSixComplete() async {
     if (testAddPageSixFormKey.currentState!.validate()) {
       pageController.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.ease);
@@ -280,24 +277,81 @@ class TestAddController extends GetxController {
   //Once araç kaydı
   //Sonra fotoğraflarının kaydı
   Future saveCar() async {
-    Map<String, String> carJson = {
-      "user_id": getLocalUserID(),
-      "brand_id": carBrand.toString(),
-      "model_id": carModel.toString(),
+    Map<String, dynamic> carMap = {
+      "user_id": int.parse(getLocalUserID()),
+      "brand_id": int.parse(carBrand.toString()),
+      "model_id": int.parse(carModel.toString()),
       "fuel_type": carFuel.toString(),
       "transmission_type": carTransmission.toString(),
-      "daily_price": dailyRentPrice.text,
+      "daily_price": int.parse(dailyRentPrice.text),
       "plate": carPlate.text,
       "km": selectedKm.toString(),
       "note": note.text,
-      "weekly_rent": weeklyDiscount.toString(),
-      "monthly_rent": monthlyDiscount.toString(),
-      "min_rent_day": minRentDay.text,
+      "weekly_rent": weeklyDiscount != null ? int.parse(weeklyDiscount!.replaceAll('%', '')) : 0,
+      "monthly_rent": monthlyDiscount != null ? int.parse(monthlyDiscount!.replaceAll('%', '')) : 0,
+      "min_rent_day": int.parse(minRentDay.text),
+      "user_name": name.text,
+      "user_surname": surname.text,
+      "user_email": email.text,
+      "user_phone": phone.text,
+      "is_long_term": 0,
+      "is_approved": 1
     };
 
-    carJson.forEach((key, value) {
-      print('$key: $value');
-    });
+    CarCreateResponse carCreateResponse = await ApiService.CarCreate(carMap);
+
+    if (carCreateResponse.success == true) {
+      log("araç başarıyla kaydedildi.");
+      saveCarPhotos(carCreateResponse.carId);
+      saveCarLocations(carCreateResponse.carId);
+      saveCarDeliveryTimes(carCreateResponse.carId);
+    }
+  }
+
+  Future<void> saveCarDeliveryTimes(int carId) async {
+    GeneralResponse generalResponse = GeneralResponse(success: false, message: "");
+
+    try {} catch (e) {
+      log(e.toString());
+    }
+  }
+
+  Future<void> saveCarPhotos(int carId) async {
+    GeneralResponse generalResponse = GeneralResponse(success: false, message: "");
+    try {
+      for (int i = 0; i < carImages.length; i++) {
+        Map<String, dynamic> carAddPhotoMap = {
+          "car_id": carId,
+          "base64_image": carImages[i].photo64,
+          "ext": carImages[i].ext,
+          "photo_type": i + 1,
+        };
+        generalResponse = await ApiService.CarAddPhoto(carAddPhotoMap);
+        log(generalResponse.message);
+      }
+    } catch (e) {
+      log(e.toString());
+    }
+  }
+
+  Future<void> saveCarLocations(int carId) async {
+    GeneralResponse generalResponse = GeneralResponse(success: false, message: "");
+
+    try {
+      for (int i = 0; i < locations.length; i++) {
+        Map<String, dynamic> carAddLocationMap = {
+          "city": locations[i].city,
+          "district": locations[i].district,
+          "address": locations[i].address,
+          "latitude": double.parse(locations[i].latitude),
+          "longitude": double.parse(locations[i].longitude)
+        };
+        generalResponse = await ApiService.CarAddLocations(carAddLocationMap);
+        log(generalResponse.message);
+      }
+    } catch (e) {
+      log(e.toString());
+    }
   }
 
   User user = User();

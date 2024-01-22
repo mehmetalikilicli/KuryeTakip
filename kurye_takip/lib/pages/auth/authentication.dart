@@ -1,11 +1,18 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:kurye_takip/helpers/helpers.dart';
 import 'package:kurye_takip/model/login.dart';
 import 'package:kurye_takip/model/register.dart';
+import 'package:kurye_takip/pages/widgets/images.dart';
 import 'package:kurye_takip/service/auth_service.dart';
 import 'package:map_picker/map_picker.dart';
 
@@ -69,6 +76,28 @@ class RegisterController extends GetxController {
     } catch (e) {
       Get.snackbar('Hata', 'Kayıt başarısız oldu. Lütfen tekrar deneyin.');
       throw Exception(e);
+    }
+  }
+
+  Future<void> pickImageAtFrontOrBack(ImageSource source, int frontOrBack) async {
+    final XFile? image = await ImagePicker().pickImage(source: source, imageQuality: 25);
+    if (image!.isNull == false) {
+      //0 front
+      frontOrBack == 0 ? image1ext = image.path.split(".").last : image2ext = image.path.split(".").last;
+      CroppedFile? croppedFile = await ImageCropper().cropImage(
+        sourcePath: image.path,
+        aspectRatioPresets: AppImages().cropRatios,
+        uiSettings: AppImages().cropSettings,
+      );
+      if (croppedFile != null) {
+        Uint8List bytes = await croppedFile.readAsBytes();
+        Uint8List compressedBytes = await FlutterImageCompress.compressWithList(bytes, minHeight: 400, minWidth: 300, quality: 50, rotate: 0);
+        if (compressedBytes.length > 2.5 * 1024 * 1024) {
+          Helpers.showSnackbar("Uyarı!", "Maksimum fotoğraf boyutunun üzerindedir. Lütfen daha düşük boyutlu fotoğraflar kullanınınz.");
+        } else {
+          frontOrBack == 0 ? image1 = base64Encode(compressedBytes) : image2 = base64Encode(compressedBytes);
+        }
+      }
     }
   }
 

@@ -9,6 +9,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:kurye_takip/pages/add_car/test_add_controller.dart';
 import 'package:kurye_takip/pages/widgets/images.dart';
 import 'package:kurye_takip/pages/widgets/inputs.dart';
@@ -28,8 +29,8 @@ class TestAddCarView extends StatelessWidget {
       body: PageView(
         controller: controller.pageController,
         children: const [
-          TestAddPageOne(),
           TestAddPageTwo(),
+          TestAddPageOne(),
           TestAddPageThree(),
           TestAddPageFour(),
           TestAddPageFive(),
@@ -169,22 +170,6 @@ class TestAddPageOne extends GetView<TestAddController> {
                     scrollbarAlwaysShow: true,
                   ),
                   const SizedBox(height: 8),
-                  TextFormField(
-                    controller: controller.dailyRentPrice,
-                    keyboardType: TextInputType.number,
-                    decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Günlük kira bedelini giriniz", Icons.car_rental, Colors.black),
-                    validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
-                  ),
-                  const SizedBox(height: 8),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: OutlinedButton(
-                      style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                      onPressed: () => controller.monthlyRentPriceCalculator(),
-                      child: const Text("Aylık kira getirisini hesapla"),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
                   Align(
                     alignment: Alignment.centerRight,
                     child: OutlinedButton(
@@ -214,7 +199,7 @@ class TestAddPageTwo extends GetView<TestAddController> {
         key: controller.testAddPageTwoFormKey,
         child: Column(
           children: [
-            const Align(alignment: Alignment.centerLeft, child: Text("Kişi Bilgileri", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600))),
+            const Align(alignment: Alignment.centerLeft, child: Text("Araç Sahibi Bilgileri", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600))),
             const Divider(height: 12),
             TextFormField(
               controller: controller.name,
@@ -647,6 +632,22 @@ class TestAddPageSix extends GetView<TestAddController> {
               keyboardType: TextInputType.number,
               decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Minimum Kira günü", CupertinoIcons.car_detailed, AppColors.primaryColor),
               validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
+            ),
+            const SizedBox(height: 8),
+            TextFormField(
+              controller: controller.dailyRentPrice,
+              keyboardType: TextInputType.number,
+              decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Günlük kira bedelini giriniz", Icons.car_rental, AppColors.primaryColor),
+              validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
+            ),
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerRight,
+              child: OutlinedButton(
+                style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                onPressed: () => controller.monthlyRentPriceCalculator(),
+                child: const Text("Aylık kira getirisini hesapla"),
+              ),
             ),
             const SizedBox(height: 8),
             Row(

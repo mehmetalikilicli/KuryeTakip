@@ -51,10 +51,10 @@ class RegisterModel {
   int? is_vehicle_owner;
   String? driving_license_number;
   DateTime? driving_license_date;
-  String? driving_license_front_image;
-  String? driving_license_front_image_ext;
-  String? driving_license_back_image;
-  String? driving_license_back_image_ext;
+  String? driving_license_front;
+  String? driving_license_front_ext;
+  String? driving_license_back;
+  String? driving_license_back_ext;
 
   RegisterModel({
     this.name,
@@ -73,9 +73,9 @@ class RegisterModel {
     this.address,
     this.driving_license_number,
     this.driving_license_date,
-    this.driving_license_front_image,
-    this.driving_license_front_image_ext,
-    this.driving_license_back_image,
-    this.driving_license_back_image_ext,
+    this.driving_license_front,
+    this.driving_license_front_ext,
+    this.driving_license_back,
+    this.driving_license_back_ext,
   });
 }

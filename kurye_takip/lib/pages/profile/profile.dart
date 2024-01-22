@@ -1,7 +1,10 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:kurye_takip/app_constants/app_colors.dart';
 import 'package:kurye_takip/model/register.dart';
+import 'package:kurye_takip/pages/add_car/test_add.dart';
 import 'package:kurye_takip/pages/auth/login.dart';
 import 'package:kurye_takip/pages/profile/profile_controller.dart';
 
@@ -24,138 +27,79 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Form(
-            key: controller.profileFormKey,
-            child: Column(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(8),
-                    bottomRight: Radius.circular(8),
-                  ),
-                  child: Container(
-                    height: Get.height * 0.15,
-                    width: Get.width,
-                    color: Colors.grey,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Column(
-                    children: [
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: IconButton(
-                          icon: Icon(Icons.edit),
-                          onPressed: () {
-                            controller.changeEditStatus();
-                          },
-                        ),
-                      ),
-                      Obx(
-                        () => TextFormField(
-                          controller: controller.profileName,
-                          enabled: controller.isTextEditorsEnabled.value,
-                          decoration: const InputDecoration(
-                            label: Text("İsim"),
-                            border: OutlineInputBorder(),
-                            prefixIcon: Icon(Icons.person, color: AppColors.primaryColor),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Obx(
-                        () => TextFormField(
-                          controller: controller.profileSurname,
-                          enabled: controller.isTextEditorsEnabled.value,
-                          decoration: const InputDecoration(
-                            label: Text("Soyisim"),
-                            border: OutlineInputBorder(),
-                            prefixIcon: Icon(Icons.person, color: AppColors.primaryColor),
-                          ),
-                          validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Obx(
-                        () => TextFormField(
-                          controller: controller.profileEmail,
-                          enabled: controller.isTextEditorsEnabled.value,
-                          decoration: const InputDecoration(
-                            label: Text("Eposta"),
-                            border: OutlineInputBorder(),
-                            prefixIcon: Icon(Icons.email, color: AppColors.primaryColor),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Obx(
-                        () => TextFormField(
-                          enabled: controller.isTextEditorsEnabled.value,
-                          controller: controller.profilePhone,
-                          decoration: const InputDecoration(
-                            label: Text("Telefon"),
-                            border: OutlineInputBorder(),
-                            prefixIcon: Icon(Icons.phone, color: AppColors.primaryColor),
-                          ),
-                          validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Align(
-                          alignment: Alignment.centerRight,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Obx(
-                              () => Visibility(
-                                visible: controller.isTextEditorsEnabled.value,
-                                child: MaterialButton(
-                                  color: AppColors.primaryColor,
-                                  child: Text(
-                                    "Kaydet",
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                  onPressed: () async {
-                                    controller.registerModel.name = controller.profileName.text;
-                                    controller.registerModel.surname = controller.profileSurname.text;
-                                    controller.registerModel.email = controller.profileEmail.text;
-                                    controller.registerModel.phone = controller.profilePhone.text;
-
-                                    RegisterResponse editProfileResponse = await controller.editUser(controller.registerModel);
-
-                                    //KONTROL
-                                  },
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(100),
-                  child: MaterialButton(
-                    height: 50,
-                    minWidth: Get.width * 0.6,
-                    color: Colors.red,
-                    onPressed: () {
-                      Get.offAll(LoginPage());
-                    },
-                    child: Text(
-                      "Logout",
-                      style: TextStyle(fontSize: 18, color: Colors.white),
+          child: Column(
+            children: [
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [CircleAvatar(maxRadius: 70, backgroundImage: AssetImage("assets/logo/logo_dark.png"))],
+              ),
+              const SizedBox(height: 15),
+              Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [Text(controller.profileName.text, style: TextStyle(fontWeight: FontWeight.w900, fontSize: 26))]),
+              Row(mainAxisAlignment: MainAxisAlignment.center, children: [Text(controller.profileEmail.text)]),
+              const SizedBox(height: 15),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    MaterialButton(
+                      onPressed: () {},
+                      color: Colors.white70,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      child: const ListTile(
+                          leading: Icon(Icons.info, color: Colors.black54),
+                          title: Text('Hakkımızda', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                          trailing: Icon(Icons.arrow_forward_ios_outlined, color: Colors.black54)),
                     ),
-                  ),
+                    const SizedBox(height: 10),
+                    MaterialButton(
+                      onPressed: () => Get.to(TestAddCarView()),
+                      color: Colors.white70,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      child: const ListTile(
+                        leading: Icon(Icons.car_repair_rounded, color: Colors.black54),
+                        title: Text('Aracını Kiraya Ver', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        trailing: Icon(Icons.arrow_forward_ios_outlined, color: Colors.black54),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    MaterialButton(
+                      onPressed: () {},
+                      color: Colors.white70,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      child: const ListTile(
+                          leading: Icon(Icons.privacy_tip_sharp, color: Colors.black54),
+                          title: Text('Ayarlar', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                          trailing: Icon(Icons.arrow_forward_ios_outlined)),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    MaterialButton(
+                      onPressed: () {},
+                      color: Colors.white70,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      child: const ListTile(
+                        leading: Icon(FontAwesomeIcons.question, color: Colors.black54),
+                        title: Text('Sorular/Cevaplar', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        trailing: Icon(Icons.arrow_forward_ios_outlined, color: Colors.black54),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    MaterialButton(
+                      onPressed: () => Get.offAll(LoginPage()),
+                      color: Colors.white70,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      child: const ListTile(
+                          leading: Icon(Icons.logout, color: Colors.black54),
+                          title: Text('Çıkış Yap', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                          trailing: Icon(Icons.arrow_forward_ios_outlined)),
+                    )
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
