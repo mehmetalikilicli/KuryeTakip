@@ -1,10 +1,6 @@
-// ignore_for_file: deprecated_member_use
-
-import 'dart:convert';
-import 'dart:developer';
+// ignore_for_file: deprecated_member_use, unnecessary_null_comparison, use_build_context_synchronously, duplicate_ignore, avoid_print
 
 import 'package:flutter/material.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
@@ -35,15 +31,15 @@ class RegisterPage extends StatelessWidget {
           bottom: const TabBar(
             tabs: [
               Tab(text: "Araç Kirala"),
-              Tab(text: "Aracını Kirala"),
+              Tab(text: "Aracını Kiraya Ver"),
             ],
           ),
         ),
         body: TabBarView(
-          //physics: const NeverScrollableScrollPhysics(),
+          physics: const NeverScrollableScrollPhysics(),
           children: [
             PageView(
-              //physics: const NeverScrollableScrollPhysics(),
+              physics: const NeverScrollableScrollPhysics(),
               controller: controller.rentPageController,
               children: [
                 SafeArea(
@@ -177,7 +173,7 @@ class RegisterPage extends StatelessWidget {
                                     context: context,
                                     title: "Aracın Teslim Konumu Gereklidir",
                                     message: "Lütfen aracın teslim konumunu seçiniz.",
-                                  ).then((value) => Get.dialog(SelectLoactionRegisterRent()));
+                                  ).then((value) => Get.dialog(const SelectLoactionRegisterRent()));
                                   return;
                                 }
                               } else if (permission == LocationPermission.whileInUse || permission == LocationPermission.always) {
@@ -186,16 +182,13 @@ class RegisterPage extends StatelessWidget {
                                 // Haritayı kullanıcının konumuna taşı
                                 if (position != null) {
                                   controller.cameraPosition = CameraPosition(target: LatLng(position.latitude, position.longitude), zoom: 14.4746);
-                                  Get.dialog(SelectLoactionRegisterRent());
+                                  Get.dialog(const SelectLoactionRegisterRent());
                                 }
                               } else {
-                                Get.dialog(SelectLoactionRegisterRent());
+                                Get.dialog(const SelectLoactionRegisterRent());
                               }
                             },
-                            child: const Text(
-                              "Konum Seç",
-                              style: TextStyle(color: Colors.white),
-                            ),
+                            child: const Text("Konum Seç", style: TextStyle(color: Colors.white)),
                           ),
                           const SizedBox(height: 8),
                           Obx(
@@ -219,7 +212,7 @@ class RegisterPage extends StatelessWidget {
                                       borderRadius: BorderRadius.circular(12.0),
                                     ),
                                     onPressed: () {
-                                      Get.offAll(LoginPage());
+                                      Get.offAll(const LoginPage());
                                     },
                                     child: const Text(
                                       "Girişe Dön",
@@ -286,12 +279,12 @@ class RegisterPage extends StatelessWidget {
                           decoration: InputDecoration(
                               label: const Text("Ehliyet Numarası"),
                               border: const OutlineInputBorder(),
-                              prefixIcon: Icon(Icons.credit_card, color: AppColors.primaryColor),
+                              prefixIcon: const Icon(Icons.credit_card, color: AppColors.primaryColor),
                               suffixIcon: GestureDetector(
                                 onTap: () {
                                   Get.dialog(
                                     AlertDialog(
-                                      contentPadding: EdgeInsets.all(16),
+                                      contentPadding: const EdgeInsets.all(16),
                                       content: Column(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
@@ -473,9 +466,9 @@ class RegisterPage extends StatelessWidget {
                           controller: controller.rentTC,
                           keyboardType: TextInputType.phone,
                           decoration: InputDecoration(
-                              label: Text("TC Kimlik Numarası"),
-                              border: OutlineInputBorder(),
-                              prefixIcon: Icon(
+                              label: const Text("TC Kimlik Numarası"),
+                              border: const OutlineInputBorder(),
+                              prefixIcon: const Icon(
                                 Icons.credit_card,
                                 color: AppColors.primaryColor,
                               ),
@@ -483,7 +476,7 @@ class RegisterPage extends StatelessWidget {
                                 onTap: () {
                                   Get.dialog(
                                     AlertDialog(
-                                      title: Center(child: Text("Bilgilendirme!")),
+                                      title: const Center(child: Text("Bilgilendirme!")),
                                       contentPadding: const EdgeInsets.all(20),
                                       content: Column(
                                         mainAxisSize: MainAxisSize.min,
@@ -492,19 +485,19 @@ class RegisterPage extends StatelessWidget {
                                             "Yasa gereği araç kiralayanların bilgileri KABİS(Kiralık Araç Bildirim Sistemi)'e bildirilmektedir.",
                                             textAlign: TextAlign.center,
                                           ),
-                                          SizedBox(height: 20),
+                                          const SizedBox(height: 20),
                                           ElevatedButton(
                                             onPressed: () {
                                               Get.back(); // Pencereyi kapat
                                             },
-                                            child: Text("Tamam"),
+                                            child: const Text("Tamam"),
                                           ),
                                         ],
                                       ),
                                     ),
                                   );
                                 },
-                                child: Icon(
+                                child: const Icon(
                                   Icons.warning_amber_outlined,
                                   color: Colors.red,
                                   size: 32,
@@ -551,17 +544,17 @@ class RegisterPage extends StatelessWidget {
                         const SizedBox(height: 8),
                         Obx(
                           () => Container(
-                            padding: EdgeInsets.symmetric(horizontal: 16),
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
                             decoration: BoxDecoration(
                               border: Border.all(color: Colors.black),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: DropdownButton<String>(
                               value: controller.rentGender.value,
-                              icon: Icon(Icons.keyboard_arrow_down, color: AppColors.softPrimaryColor),
+                              icon: const Icon(Icons.keyboard_arrow_down, color: AppColors.softPrimaryColor),
                               iconSize: 24,
                               elevation: 16,
-                              style: TextStyle(color: Colors.black),
+                              style: const TextStyle(color: Colors.black),
                               underline: Container(
                                 height: 2,
                                 color: AppColors.softPrimaryColor,
@@ -578,7 +571,7 @@ class RegisterPage extends StatelessWidget {
                                         value == 'Erkek' ? Icons.male : (value == 'Kadın' ? Icons.female : Icons.question_mark),
                                         color: AppColors.softPrimaryColor,
                                       ),
-                                      SizedBox(width: 8),
+                                      const SizedBox(width: 8),
                                       Text(value),
                                     ],
                                   ),
@@ -619,7 +612,7 @@ class RegisterPage extends StatelessWidget {
                                         title: "Kayıt Başarılı",
                                         message: "Kaydınız başarılı, admin onayından sonra giriş yapabilirsiniz.",
                                         onPositiveButtonPressed: () {
-                                          Get.offAll(LoginPage());
+                                          Get.offAll(const LoginPage());
                                         });
                                   } else {
                                     CustomDialog.showMessage(
@@ -730,9 +723,9 @@ class RegisterPage extends StatelessWidget {
                             controller: controller.ownerPassword,
                             keyboardType: TextInputType.text,
                             decoration: InputDecoration(
-                              label: Text("Şifre"),
-                              border: OutlineInputBorder(),
-                              prefixIcon: Icon(Icons.password, color: AppColors.primaryColor),
+                              label: const Text("Şifre"),
+                              border: const OutlineInputBorder(),
+                              prefixIcon: const Icon(Icons.password, color: AppColors.primaryColor),
                               suffixIcon: GestureDetector(
                                 onTap: () => controller.ownerPasswordHide.toggle(),
                                 child: Icon(controller.ownerPasswordHide.isTrue ? Icons.visibility : Icons.visibility_off),
@@ -751,9 +744,9 @@ class RegisterPage extends StatelessWidget {
                             controller: controller.ownerPassword2,
                             keyboardType: TextInputType.text,
                             decoration: InputDecoration(
-                              label: Text("Şifre tekrar"),
-                              border: OutlineInputBorder(),
-                              prefixIcon: Icon(Icons.password, color: AppColors.primaryColor),
+                              label: const Text("Şifre tekrar"),
+                              border: const OutlineInputBorder(),
+                              prefixIcon: const Icon(Icons.password, color: AppColors.primaryColor),
                               suffixIcon: GestureDetector(
                                   onTap: () => controller.ownerPassword2Hide.toggle(),
                                   child: Icon(controller.ownerPassword2Hide.isTrue ? Icons.visibility : Icons.visibility_off)),
@@ -765,55 +758,71 @@ class RegisterPage extends StatelessWidget {
                                     : null),
                       ),
                       Padding(
-                        padding: const EdgeInsets.only(right: 24.0, top: 8),
-                        child: Align(
-                          alignment: Alignment.centerRight,
-                          child: MaterialButton(
-                            color: AppColors.primaryColor,
-                            minWidth: Get.width / 3,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12.0),
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            MaterialButton(
+                              color: AppColors.primaryColor,
+                              minWidth: Get.width / 3,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              onPressed: () {
+                                Get.offAll(const LoginPage());
+                              },
+                              child: const Text(
+                                "Girişe Dön",
+                                style: TextStyle(color: Colors.white),
+                              ),
                             ),
-                            onPressed: () async {
-                              if (controller.ownerForm.currentState!.validate()) {
-                                controller.registerModel2.name = controller.ownerName.text;
-                                controller.registerModel2.surname = controller.ownerSurname.text;
-                                controller.registerModel2.phone = controller.ownerPhone.text;
-                                controller.registerModel2.email = controller.ownerMail.text;
-                                controller.registerModel2.password = Helpers.encryption(controller.ownerPassword.text);
-                                controller.registerModel2.is_vehicle_owner = 1;
-                                try {
-                                  RegisterResponse registerResponse = await controller.Register(controller.registerModel2);
+                            MaterialButton(
+                              color: AppColors.primaryColor,
+                              minWidth: Get.width / 3,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              onPressed: () async {
+                                if (controller.ownerForm.currentState!.validate()) {
+                                  controller.registerModel2.name = controller.ownerName.text;
+                                  controller.registerModel2.surname = controller.ownerSurname.text;
+                                  controller.registerModel2.phone = controller.ownerPhone.text;
+                                  controller.registerModel2.email = controller.ownerMail.text;
+                                  controller.registerModel2.password = Helpers.encryption(controller.ownerPassword.text);
+                                  controller.registerModel2.is_vehicle_owner = 1;
+                                  try {
+                                    RegisterResponse registerResponse = await controller.Register(controller.registerModel2);
 
-                                  if (registerResponse.success == true) {
-                                    // ignore: use_build_context_synchronously
-                                    CustomDialog.showMessage(
-                                        context: context,
-                                        title: "Kayıt Başarılı",
-                                        message: "Kaydınız başarılı, admin onayından sonra giriş yapabilirsiniz.",
-                                        onPositiveButtonPressed: () {
-                                          Get.offAll(LoginPage());
-                                        });
-                                  } else {
-                                    // ignore: use_build_context_synchronously
-                                    CustomDialog.showMessage(
-                                        context: context,
-                                        title: "Kayıt Başarısız",
-                                        message: registerResponse.message,
-                                        onPositiveButtonPressed: () {
-                                          //Get.offAll(LoginPage());
-                                        });
+                                    if (registerResponse.success == true) {
+                                      // ignore: use_build_context_synchronously
+                                      CustomDialog.showMessage(
+                                          context: context,
+                                          title: "Kayıt Başarılı",
+                                          message: "Kaydınız başarılı, admin onayından sonra giriş yapabilirsiniz.",
+                                          onPositiveButtonPressed: () {
+                                            Get.offAll(const LoginPage());
+                                          });
+                                    } else {
+                                      // ignore: use_build_context_synchronously
+                                      CustomDialog.showMessage(
+                                          context: context,
+                                          title: "Kayıt Başarısız",
+                                          message: registerResponse.message,
+                                          onPositiveButtonPressed: () {
+                                            //Get.offAll(LoginPage());
+                                          });
+                                    }
+                                  } catch (e) {
+                                    print(e);
                                   }
-                                } catch (e) {
-                                  print(e);
                                 }
-                              }
-                            },
-                            child: const Text(
-                              "Kaydol",
-                              style: TextStyle(color: Colors.white),
+                              },
+                              child: const Text(
+                                "Kaydol",
+                                style: TextStyle(color: Colors.white),
+                              ),
                             ),
-                          ),
+                          ],
                         ),
                       ),
                     ],
@@ -851,7 +860,11 @@ class SelectLoactionRegisterRent extends GetView<RegisterController> {
                 myLocationButtonEnabled: false,
                 mapType: MapType.normal,
                 initialCameraPosition: controller.cameraPosition,
-                onMapCreated: (GoogleMapController gmcontroller) => controller.googleMapController.complete(gmcontroller),
+                onMapCreated: (GoogleMapController gmcontroller) {
+                  if (!controller.googleMapController.isCompleted) {
+                    controller.googleMapController.complete(gmcontroller);
+                  }
+                },
                 onCameraMoveStarted: () {
                   controller.mapPickerController.mapMoving!();
                   controller.gmAddressText.value = "Kontrol Ediliyor...";
@@ -908,10 +921,18 @@ class SelectLoactionRegisterRent extends GetView<RegisterController> {
                 height: 50,
                 child: TextButton(
                   onPressed: () {
-                    controller.address.value = controller.gmAddressText.value;
-                    controller.city = controller.rxCity.value;
-                    controller.district = controller.rxDistrict.value;
-                    Get.back();
+                    if (controller.rxCity.value != "İzmir") {
+                      CustomDialog.showMessage(
+                        context: context,
+                        title: "Konum Yanlış",
+                        message: "Şu an sadece İzmir konumuna izin verilmektedir.",
+                      );
+                    } else {
+                      controller.address.value = controller.gmAddressText.value;
+                      controller.city = controller.rxCity.value;
+                      controller.district = controller.rxDistrict.value;
+                      Get.back();
+                    }
                   },
                   style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFFA3080C)),

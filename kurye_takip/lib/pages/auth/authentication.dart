@@ -1,3 +1,5 @@
+// ignore_for_file: non_constant_identifier_names, deprecated_member_use, avoid_print
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';

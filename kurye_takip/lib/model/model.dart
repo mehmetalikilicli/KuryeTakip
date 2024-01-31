@@ -2,6 +2,8 @@
 //
 //     final model = modelFromJson(jsonString);
 
+// ignore_for_file: non_constant_identifier_names
+
 import 'dart:convert';
 
 Model modelFromJson(String str) => Model.fromJson(json.decode(str));
@@ -37,12 +39,14 @@ class ModelElement {
   int brandId;
   String name;
   String segment;
+  int recomendation_price;
 
   ModelElement({
     required this.id,
     required this.brandId,
     required this.name,
     required this.segment,
+    required this.recomendation_price,
   });
 
   factory ModelElement.fromJson(Map<String, dynamic> json) => ModelElement(
@@ -50,6 +54,7 @@ class ModelElement {
         brandId: json["brand_id"],
         name: json["name"],
         segment: json["segment"],
+        recomendation_price: json["recomendation_price"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -57,5 +62,6 @@ class ModelElement {
         "brand_id": brandId,
         "name": name,
         "segment": segment,
+        "recomendation_price": recomendation_price,
       };
 }

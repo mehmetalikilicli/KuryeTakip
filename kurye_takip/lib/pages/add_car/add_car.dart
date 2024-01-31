@@ -1,21 +1,15 @@
+// ignore_for_file: unnecessary_null_comparison, avoid_print, use_build_context_synchronously
+
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
-import 'package:geocoding/geocoding.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:kurye_takip/app_constants/app_colors.dart';
-import 'package:kurye_takip/helpers/custom_dialog.dart';
 import 'package:kurye_takip/helpers/take_image.dart';
-import 'package:kurye_takip/model/brand.dart';
-import 'package:kurye_takip/model/model.dart';
 import 'package:kurye_takip/pages/add_car/add_car_controller.dart';
-import 'package:map_picker/map_picker.dart';
 
 class AddCarPage extends StatelessWidget {
   AddCarPage({super.key});
@@ -38,7 +32,7 @@ class AddCarPage extends StatelessWidget {
           //carAddPage4(controller: controller),
           SafeArea(
             child: Padding(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: SingleChildScrollView(
                 child: Form(
                   key: controller.addCarFormKey5,
@@ -51,14 +45,14 @@ class AddCarPage extends StatelessWidget {
                           const Expanded(
                             child: Text("Aracın Önden Fotoğrafını yükleyiniz.", style: TextStyle(fontSize: 16)),
                           ),
-                          SizedBox(height: 16),
+                          const SizedBox(height: 16),
                           GestureDetector(
                             onTap: () {
                               showDialog(
                                 context: context,
                                 builder: (BuildContext context) {
                                   return SimpleDialog(
-                                    title: Text("Fotoğraf Yükle"),
+                                    title: const Text("Fotoğraf Yükle"),
                                     children: [
                                       // Kamera
                                       SimpleDialogOption(
@@ -81,7 +75,7 @@ class AddCarPage extends StatelessWidget {
                                             log("Kullanıcı kamera ile fotoğraf seçmedi.");
                                           }
                                         },
-                                        child: Text("Kamera"),
+                                        child: const Text("Kamera"),
                                       ),
 
                                       // Kamera Deneme
@@ -98,7 +92,7 @@ class AddCarPage extends StatelessWidget {
                                             //showImageDialog(context, base64Image: result.imageData);
                                           }
                                         },
-                                        child: Text("Galeri"),
+                                        child: const Text("Galeri"),
                                       ),
 
                                       // Galeri
@@ -112,7 +106,7 @@ class AddCarPage extends StatelessWidget {
                                           }
                                           Navigator.pop(context);
                                         },
-                                        child: Text("Galeri"),
+                                        child: const Text("Galeri"),
                                       ),
 
                                       // Fotoğrafı kaldır
@@ -122,7 +116,7 @@ class AddCarPage extends StatelessWidget {
                                           // ...
                                           Navigator.pop(context);
                                         },
-                                        child: Text("Fotoğrafı Kaldır"),
+                                        child: const Text("Fotoğrafı Kaldır"),
                                       ),
                                     ],
                                   );
@@ -146,9 +140,9 @@ class AddCarPage extends StatelessWidget {
                                   if (controller.image1 != null)
                                     Image.memory(base64Decode(controller.image1), fit: BoxFit.cover, width: double.infinity, height: double.infinity),
                                   Container(
-                                    padding: EdgeInsets.all(8),
-                                    decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.blue),
-                                    child: Icon(Icons.add, color: Colors.white, size: 30),
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: const BoxDecoration(shape: BoxShape.circle, color: Colors.blue),
+                                    child: const Icon(Icons.add, color: Colors.white, size: 30),
                                   ),
                                 ],
                               ),
@@ -216,12 +210,12 @@ class AddCarPage extends StatelessWidget {
                   controller: controller.rentName,
                   keyboardType: TextInputType.name,
                   decoration: InputDecoration(
-                    label: Text("İsim"),
+                    label: const Text("İsim"),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10.0),
-                      borderSide: BorderSide(color: Colors.grey),
+                      borderSide: const BorderSide(color: Colors.grey),
                     ),
-                    prefixIcon: Icon(Icons.person, color: Colors.grey),
+                    prefixIcon: const Icon(Icons.person, color: Colors.grey),
                   ),
                   validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
                 ),
@@ -232,12 +226,12 @@ class AddCarPage extends StatelessWidget {
                   controller: controller.rentSurname,
                   keyboardType: TextInputType.name,
                   decoration: InputDecoration(
-                    label: Text("Soyisim"),
+                    label: const Text("Soyisim"),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10.0),
-                      borderSide: BorderSide(color: Colors.grey),
+                      borderSide: const BorderSide(color: Colors.grey),
                     ),
-                    prefixIcon: Icon(Icons.person, color: Colors.grey),
+                    prefixIcon: const Icon(Icons.person, color: Colors.grey),
                   ),
                   validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
                 ),
@@ -247,12 +241,12 @@ class AddCarPage extends StatelessWidget {
                   controller: controller.rentPhone,
                   keyboardType: TextInputType.phone,
                   decoration: InputDecoration(
-                    label: Text("Telefon"),
+                    label: const Text("Telefon"),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10.0),
-                      borderSide: BorderSide(color: Colors.grey),
+                      borderSide: const BorderSide(color: Colors.grey),
                     ),
-                    prefixIcon: Icon(Icons.person, color: const Color.fromARGB(255, 152, 176, 190)),
+                    prefixIcon: const Icon(Icons.person, color: Color.fromARGB(255, 152, 176, 190)),
                   ),
                   validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
                 ),
@@ -262,12 +256,12 @@ class AddCarPage extends StatelessWidget {
                   controller: controller.rentMail,
                   keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
-                    label: Text("Eposta"),
+                    label: const Text("Eposta"),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10.0),
-                      borderSide: BorderSide(color: Colors.grey),
+                      borderSide: const BorderSide(color: Colors.grey),
                     ),
-                    prefixIcon: Icon(Icons.email, color: Colors.grey),
+                    prefixIcon: const Icon(Icons.email, color: Colors.grey),
                   ),
                   validator: (value) => value!.isEmpty
                       ? "Boş bırakılamaz"

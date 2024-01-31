@@ -13,14 +13,14 @@ class CarCreateResponse {
   String message;
   int carId;
   int userId;
-  String carPlate;
+  String plate;
 
   CarCreateResponse({
     required this.success,
     required this.message,
     required this.carId,
     required this.userId,
-    required this.carPlate,
+    required this.plate,
   });
 
   factory CarCreateResponse.fromJson(Map<String, dynamic> json) => CarCreateResponse(
@@ -28,7 +28,7 @@ class CarCreateResponse {
         message: json["message"],
         carId: json["car_id"],
         userId: json["user_id"],
-        carPlate: json["car_plate"],
+        plate: json["plate"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -36,6 +36,6 @@ class CarCreateResponse {
         "message": message,
         "car_id": carId,
         "user_id": userId,
-        "car_plate": carPlate,
+        "car_plate": plate,
       };
 }

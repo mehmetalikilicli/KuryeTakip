@@ -25,7 +25,7 @@ class CustomDialog {
                   onNegativeButtonPressed();
                 }
               },
-              child: Text(negativeButtonText ?? 'Cancel'),
+              child: Text(negativeButtonText ?? 'Kapat'),
             ),
             TextButton(
               onPressed: () {
@@ -34,7 +34,7 @@ class CustomDialog {
                   onPositiveButtonPressed();
                 }
               },
-              child: Text(positiveButtonText ?? 'OK'),
+              child: Text(positiveButtonText ?? 'Tamam'),
             ),
           ],
         );

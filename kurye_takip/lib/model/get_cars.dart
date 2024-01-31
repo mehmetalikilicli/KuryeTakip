@@ -2,6 +2,8 @@
 //
 //     final getCars = getCarsFromJson(jsonString);
 
+// ignore_for_file: unnecessary_question_mark, constant_identifier_names
+
 import 'dart:convert';
 
 GetCars getCarsFromJson(String str) => GetCars.fromJson(json.decode(str));

@@ -1,4 +1,4 @@
-// ignore_for_file: invalid_use_of_protected_member, must_be_immutable
+// ignore_for_file: invalid_use_of_protected_member, must_be_immutable, unused_import, avoid_print, prefer_const_constructors
 
 import 'dart:convert';
 
@@ -7,10 +7,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:kurye_takip/helpers/custom_dialog.dart';
 import 'package:kurye_takip/pages/add_car/test_add_controller.dart';
+import 'package:kurye_takip/pages/dashboard/dashboard.dart';
+import 'package:kurye_takip/pages/gnav_bar/gnav_bar.dart';
+import 'package:kurye_takip/pages/profile/profile.dart';
 import 'package:kurye_takip/pages/widgets/images.dart';
 import 'package:kurye_takip/pages/widgets/inputs.dart';
 import 'package:map_picker/map_picker.dart';
@@ -27,6 +32,7 @@ class TestAddCarView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text("ARAÇ EKLEME")),
       body: PageView(
+        //physics: NeverScrollableScrollPhysics(),
         controller: controller.pageController,
         children: const [
           TestAddPageTwo(),
@@ -107,7 +113,11 @@ class TestAddPageOne extends GetView<TestAddController> {
                                 .map((item) => DropdownMenuItem<String>(value: item.id.toString(), child: Text(item.name)))
                                 .toList(),
                             selectedItemHighlightColor: AppColors.primaryColor,
-                            onChanged: (value) => controller.carModel = value,
+                            onChanged: (value) {
+                              controller.carModel = value;
+                              final selectedModel = controller.carModelList.value.firstWhere((item) => item.id.toString() == value);
+                              controller.recomendation_price = selectedModel.recomendation_price;
+                            },
                             validator: (value) => value == null ? "Lütfen araç modeli seçiniz" : null,
                             value: controller.carModel,
                             dropdownOverButton: true,
@@ -170,14 +180,48 @@ class TestAddPageOne extends GetView<TestAddController> {
                     scrollbarAlwaysShow: true,
                   ),
                   const SizedBox(height: 8),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: OutlinedButton(
-                      style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                      onPressed: () => controller.checkPageOneComplete(),
-                      child: const Text("İlerle"),
-                    ),
+                  DropdownButtonFormField2(
+                    decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Araç türünü seçiniz", Icons.list, Colors.black),
+                    isExpanded: true,
+                    icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
+                    iconSize: 20,
+                    buttonPadding: const EdgeInsets.only(),
+                    dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+                    dropdownPadding: EdgeInsets.zero,
+                    items: controller.carTypeList.map((item) => DropdownMenuItem<String>(value: item, child: Text(item))).toList(),
+                    selectedItemHighlightColor: AppColors.primaryColor,
+                    onChanged: (value) {
+                      if (value != null) {
+                        int selectedIndex = controller.carTypeList.indexOf(value.toString());
+                        print("Selected Index: $selectedIndex");
+                        controller.carType = selectedIndex + 1;
+                      }
+                    },
+                    validator: (value) => value == null ? "Lütfen araç türünü seçiniz" : null,
+                    value: controller.carType,
+                    dropdownOverButton: true,
+                    dropdownMaxHeight: Get.height * .25,
+                    scrollbarAlwaysShow: true,
                   ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      OutlinedButton(
+                        style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                        onPressed: () => controller.pageController.previousPage(duration: const Duration(milliseconds: 300), curve: Curves.ease),
+                        child: const Text("Geri"),
+                      ),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: OutlinedButton(
+                          style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                          onPressed: () => controller.checkPageOneComplete(),
+                          child: const Text("İlerle"),
+                        ),
+                      ),
+                    ],
+                  )
                 ],
               ),
             ),
@@ -234,20 +278,13 @@ class TestAddPageTwo extends GetView<TestAddController> {
                       : null,
             ),
             const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                OutlinedButton(
-                  style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                  onPressed: () => controller.pageController.previousPage(duration: const Duration(milliseconds: 300), curve: Curves.ease),
-                  child: const Text("Geri"),
-                ),
-                OutlinedButton(
-                  style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                  onPressed: () => controller.checkPageTwoComplete(),
-                  child: const Text("İlerle"),
-                ),
-              ],
+            Align(
+              alignment: Alignment.centerRight,
+              child: OutlinedButton(
+                style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                onPressed: () => controller.checkPageTwoComplete(),
+                child: const Text("İlerle"),
+              ),
             )
           ],
         ),
@@ -360,6 +397,35 @@ class TestAddPageFour extends GetView<TestAddController> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Column(
+              children: [
+                TextFormField(
+                  readOnly: true,
+                  controller: controller.availableCarDate,
+                  decoration: const InputDecoration(
+                    label: Text("Araç Uygunluk Takvimi"),
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.date_range_rounded, color: AppColors.primaryColor),
+                  ),
+                  validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
+                  onTap: () async {
+                    final result = await showDateRangePicker(
+                      context: context,
+                      firstDate: DateTime.now(),
+                      lastDate: DateTime.now().add(const Duration(days: 365)),
+                    );
+                    if (result != null) {
+                      controller.availableCarDateStart = result.start;
+                      controller.availableCarDateEnd = result.end;
+
+                      controller.availableCarDate.text = "${DateFormat('dd-MM-yyyy').format(result.start)} - ${DateFormat('dd-MM-yyyy').format(result.end)}";
+                    } else {}
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            const Divider(height: 2, color: Colors.black),
             Row(
               children: [
                 const Expanded(child: Text("Teslimat Saatleri ", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600))),
@@ -406,58 +472,58 @@ class TestAddPageFour extends GetView<TestAddController> {
                         const Divider(height: 12),
                         AddCarTimeRow(
                           date: 'Pazartesi',
-                          input1: controller.availableWeekdayStart,
-                          input2: controller.availableWeekdayEnd,
-                          time1: controller.availableWeekdayStartTime,
-                          time2: controller.availableWeekdayEndTime,
+                          input1: controller.availableMondayStart,
+                          input2: controller.availableMondayEnd,
+                          time1: controller.availableMondayStartTime,
+                          time2: controller.availableMondayEndTime,
                         ),
                         const Divider(height: 12),
                         AddCarTimeRow(
                           date: 'Salı',
-                          input1: controller.availableWeekendStart,
-                          input2: controller.availableWeekendEnd,
-                          time1: controller.availableWeekEndStartTime,
-                          time2: controller.availableWeekEndEndTime,
+                          input1: controller.availableTuesdayStart,
+                          input2: controller.availableTuesdayEnd,
+                          time1: controller.availableTuesdayStartTime,
+                          time2: controller.availableTuesdayEndTime,
                         ),
                         const Divider(height: 12),
                         AddCarTimeRow(
                           date: 'Çarşamba',
-                          input1: controller.availableWeekendStart,
-                          input2: controller.availableWeekendEnd,
-                          time1: controller.availableWeekEndStartTime,
-                          time2: controller.availableWeekEndEndTime,
+                          input1: controller.availableWednesdayStart,
+                          input2: controller.availableWednesdayEnd,
+                          time1: controller.availableWednesdayStartTime,
+                          time2: controller.availableWednesdayEndTime,
                         ),
                         const Divider(height: 12),
                         AddCarTimeRow(
                           date: 'Perşembe',
-                          input1: controller.availableWeekendStart,
-                          input2: controller.availableWeekendEnd,
-                          time1: controller.availableWeekEndStartTime,
-                          time2: controller.availableWeekEndEndTime,
+                          input1: controller.availableThursdayStart,
+                          input2: controller.availableThursdayEnd,
+                          time1: controller.availableThursdayStartTime,
+                          time2: controller.availableThursdayEndTime,
                         ),
                         const Divider(height: 12),
                         AddCarTimeRow(
                           date: 'Cuma',
-                          input1: controller.availableWeekendStart,
-                          input2: controller.availableWeekendEnd,
-                          time1: controller.availableWeekEndStartTime,
-                          time2: controller.availableWeekEndEndTime,
+                          input1: controller.availableFridayStart,
+                          input2: controller.availableFridayEnd,
+                          time1: controller.availableFridayStartTime,
+                          time2: controller.availableFridayEndTime,
                         ),
                         const Divider(height: 12),
                         AddCarTimeRow(
                           date: 'Cumartesi',
-                          input1: controller.availableWeekendStart,
-                          input2: controller.availableWeekendEnd,
-                          time1: controller.availableWeekEndStartTime,
-                          time2: controller.availableWeekEndEndTime,
+                          input1: controller.availableSaturdayStart,
+                          input2: controller.availableSaturdayEnd,
+                          time1: controller.availableSaturdayStartTime,
+                          time2: controller.availableSaturdayEndTime,
                         ),
                         const Divider(height: 12),
                         AddCarTimeRow(
                           date: 'Pazar',
-                          input1: controller.availableWeekendStart,
-                          input2: controller.availableWeekendEnd,
-                          time1: controller.availableWeekEndStartTime,
-                          time2: controller.availableWeekEndEndTime,
+                          input1: controller.availableSundayStart,
+                          input2: controller.availableSundayEnd,
+                          time1: controller.availableSundayStartTime,
+                          time2: controller.availableSundayEndTime,
                         ),
                         const Divider(height: 12),
                       ],
@@ -627,18 +693,30 @@ class TestAddPageSix extends GetView<TestAddController> {
               ],
             ),
             SizedBox(height: 8),
-            TextFormField(
-              controller: controller.minRentDay,
-              keyboardType: TextInputType.number,
-              decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Minimum Kira günü", CupertinoIcons.car_detailed, AppColors.primaryColor),
-              validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
+            Column(
+              children: [
+                const Align(alignment: Alignment.centerLeft, child: Text("Minimum kira günü")),
+                TextFormField(
+                  controller: controller.minRentDay,
+                  keyboardType: TextInputType.number,
+                  decoration:
+                      InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Minimum Kira günü", CupertinoIcons.car_detailed, AppColors.primaryColor),
+                  validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
+                ),
+              ],
             ),
             const SizedBox(height: 8),
-            TextFormField(
-              controller: controller.dailyRentPrice,
-              keyboardType: TextInputType.number,
-              decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Günlük kira bedelini giriniz", Icons.car_rental, AppColors.primaryColor),
-              validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
+            Column(
+              children: [
+                const Align(alignment: Alignment.centerLeft, child: Text("Günlük kira bedeli")),
+                TextFormField(
+                  controller: controller.dailyRentPrice,
+                  keyboardType: TextInputType.number,
+                  decoration: InputWidgets().dropdownDecoration(
+                      Colors.grey, Colors.red, "Tavsiye edilen fiyat: ${controller.recomendation_price} TL", Icons.car_rental, AppColors.primaryColor),
+                  validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
+                ),
+              ],
             ),
             const SizedBox(height: 8),
             Align(
@@ -648,6 +726,22 @@ class TestAddPageSix extends GetView<TestAddController> {
                 onPressed: () => controller.monthlyRentPriceCalculator(),
                 child: const Text("Aylık kira getirisini hesapla"),
               ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                    child: Text(
+                  "Aracınızı uzun dönem kiralamak ister misiniz?",
+                  style: TextStyle(fontSize: 12),
+                )),
+                Obx(() => Switch(
+                      value: controller.isLongTerm.value,
+                      onChanged: (value) {
+                        controller.isLongTerm.toggle();
+                      },
+                    )),
+              ],
             ),
             const SizedBox(height: 8),
             Row(
@@ -702,7 +796,28 @@ class TestAddPageSeven extends GetView<TestAddController> {
                 ),
                 OutlinedButton(
                   style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                  onPressed: () => controller.saveCar(),
+                  onPressed: () async {
+                    if (await controller.saveCar()) {
+                      // ignore: use_build_context_synchronously
+                      CustomDialog.showMessage(
+                          context: context,
+                          title: "Araç Kayıt Başarılı",
+                          message: "Araç kaydınız başarılı, admin onayından sonra \"Araçlarım\" kısmından bakabilirsiniz.",
+                          onPositiveButtonPressed: () {
+                            Get.offAll(Dashboard());
+                          });
+                    } else {
+                      // ignore: use_build_context_synchronously
+                      CustomDialog.showMessage(
+                        context: context,
+                        title: "Araç Kaydı Başarısız",
+                        message: "Araç kaydınız başarısız.",
+                        onPositiveButtonPressed: () {
+                          Get.off(ProfilePage());
+                        },
+                      );
+                    }
+                  },
                   child: const Text("Kaydet"),
                 ),
               ],

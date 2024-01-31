@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
+
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -37,8 +38,10 @@ class TestAddController extends GetxController {
   List<String> carYearList = ['2020', '2021', '2022', "2023", "2024"];
   List<String> carFuelTypeList = ['Hybrid', 'Benzin', 'Dizel'];
   List<String> carTransmissionTypeList = ['Otomatik', 'Manuel', 'Yarı Otomatik'];
+  List<String> carTypeList = ['Otomobil', 'Motosiklet', 'Ticari', 'Karavan'];
 
   String? carBrand, carModel, carYear, carFuel, carTransmission;
+  int? carType;
 
   void changeBrand(value) {
     carBrand = value;
@@ -98,7 +101,7 @@ class TestAddController extends GetxController {
   RxList<AddCarLocation> locations = <AddCarLocation>[].obs;
 
   MapPickerController mapPickerController = MapPickerController();
-  CameraPosition cameraPosition = const CameraPosition(target: LatLng(38.4237, 27.1428), zoom: 14.4746);
+  CameraPosition cameraPosition = const CameraPosition(target: LatLng(38.4192, 27.1287), zoom: 14.0);
   final googleMapController = Completer<GoogleMapController>();
   RxString gmAddressText = "".obs, rxCity = "".obs, rxDistrict = "".obs, address = "".obs;
   String district = "", city = "";
@@ -136,6 +139,11 @@ class TestAddController extends GetxController {
   RxBool isGeneralTime = true.obs;
 
   TimeOfDay selectedTime = const TimeOfDay(hour: 8, minute: 0);
+
+  DateTime availableCarDateStart = DateTime.now();
+  DateTime availableCarDateEnd = DateTime.now();
+
+  TextEditingController availableCarDate = TextEditingController();
 
   TimeOfDay availableWeekdayStartTime = TimeOfDay.now();
   TimeOfDay availableWeekdayEndTime = TimeOfDay.now();
@@ -249,6 +257,10 @@ class TestAddController extends GetxController {
 
   TextEditingController dailyRentPrice = TextEditingController();
 
+  RxBool isLongTerm = false.obs;
+
+  int recomendation_price = 0;
+
   Future<void> monthlyRentPriceCalculator() async {
     if (testAddPageSixFormKey.currentState!.validate()) {
       double monthlyPrice = double.parse(dailyRentPrice.text.trim()) * 30;
@@ -276,47 +288,107 @@ class TestAddController extends GetxController {
 
   //Once araç kaydı
   //Sonra fotoğraflarının kaydı
-  Future saveCar() async {
+  Future<bool> saveCar() async {
     Map<String, dynamic> carMap = {
       "user_id": int.parse(getLocalUserID()),
       "brand_id": int.parse(carBrand.toString()),
       "model_id": int.parse(carModel.toString()),
       "fuel_type": carFuel.toString(),
       "transmission_type": carTransmission.toString(),
+      "car_type": carType,
       "daily_price": int.parse(dailyRentPrice.text),
+      "year": carYear,
       "plate": carPlate.text,
       "km": selectedKm.toString(),
       "note": note.text,
-      "weekly_rent": weeklyDiscount != null ? int.parse(weeklyDiscount!.replaceAll('%', '')) : 0,
-      "monthly_rent": monthlyDiscount != null ? int.parse(monthlyDiscount!.replaceAll('%', '')) : 0,
+      "weekly_rent_discount": weeklyDiscount != null ? int.parse(weeklyDiscount!.replaceAll('%', '')) : 0,
+      "monthly_rent_discount": monthlyDiscount != null ? int.parse(monthlyDiscount!.replaceAll('%', '')) : 0,
       "min_rent_day": int.parse(minRentDay.text),
       "user_name": name.text,
       "user_surname": surname.text,
       "user_email": email.text,
       "user_phone": phone.text,
-      "is_long_term": 0,
-      "is_approved": 1
+      "is_long_term": isLongTerm.value ? 1 : 0,
+      "is_approved": 1,
+      "is_available_date_start": availableCarDateStart.toIso8601String(),
+      "is_available_date_end": availableCarDateEnd.toIso8601String(),
     };
 
     CarCreateResponse carCreateResponse = await ApiService.CarCreate(carMap);
 
     if (carCreateResponse.success == true) {
-      log("araç başarıyla kaydedildi.");
-      saveCarPhotos(carCreateResponse.carId);
-      saveCarLocations(carCreateResponse.carId);
-      saveCarDeliveryTimes(carCreateResponse.carId);
+      try {
+        log("araç başarıyla kaydedildi.");
+        bool isPhotosSaved = await saveCarPhotos(carCreateResponse.carId);
+        bool isLocationsSaved = await saveCarLocations(carCreateResponse.carId);
+        await saveCarDeliveryTimes(carCreateResponse.carId);
+        return true;
+      } catch (e) {
+        log(e.toString());
+        return false;
+      }
     }
+    return false;
   }
 
   Future<void> saveCarDeliveryTimes(int carId) async {
     GeneralResponse generalResponse = GeneralResponse(success: false, message: "");
+    List<String> weekDay = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma"];
+    List<String> weekEndDay = ["Cumartesi", "Pazar"];
 
-    try {} catch (e) {
-      log(e.toString());
+    Map<String, Map<String, TimeOfDay>> dayTimeMap = {
+      "Pazartesi": {"start": availableMondayStartTime, "end": availableMondayEndTime},
+      "Salı": {"start": availableTuesdayStartTime, "end": availableTuesdayEndTime},
+      "Çarşamba": {"start": availableWednesdayStartTime, "end": availableWednesdayEndTime},
+      "Perşembe": {"start": availableThursdayStartTime, "end": availableThursdayEndTime},
+      "Cuma": {"start": availableFridayStartTime, "end": availableFridayEndTime},
+      "Cumartesi": {"start": availableSaturdayStartTime, "end": availableSaturdayEndTime},
+      "Pazar": {"start": availableSundayStartTime, "end": availableSundayStartTime},
+    };
+
+    if (isGeneralTime.value) {
+      //For WeekDay
+      for (int i = 0; i < weekDay.length; i++) {
+        Map<String, dynamic> carAddDeliveryTime = {
+          "car_id": carId,
+          "delivery_type": weekDay[i],
+          "start_time":
+              "${availableWeekdayStartTime.hour.toString().padLeft(2, '0')}:${availableWeekdayStartTime.minute.toString().padLeft(2, '0')}:00.0000000",
+          "end_time": "${availableWeekdayEndTime.hour.toString().padLeft(2, '0')}:${availableWeekdayEndTime.minute.toString().padLeft(2, '0')}:00.0000000",
+        };
+
+        generalResponse = await ApiService.CarDerliveryTime(carAddDeliveryTime);
+        log(generalResponse.message);
+      }
+
+      //For WeekEnd
+      for (int i = 0; i < weekEndDay.length; i++) {
+        Map<String, dynamic> carAddDeliveryTime = {
+          "car_id": carId,
+          "delivery_type": weekEndDay[i],
+          "start_time":
+              "${availableWeekEndStartTime.hour.toString().padLeft(2, '0')}:${availableWeekEndStartTime.minute.toString().padLeft(2, '0')}:00.0000000",
+          "end_time": "${availableWeekdayEndTime.hour.toString().padLeft(2, '0')}:${availableWeekdayEndTime.minute.toString().padLeft(2, '0')}:00.0000000",
+        };
+        generalResponse = await ApiService.CarDerliveryTime(carAddDeliveryTime);
+        log(generalResponse.message);
+      }
+    } else {
+      for (String day in dayTimeMap.keys) {
+        Map<String, dynamic> carAddDeliveryTime = {
+          "car_id": carId,
+          "delivery_type": day,
+          "start_time":
+              "${dayTimeMap[day]!["start"]?.hour.toString().padLeft(2, '0')}:${availableWeekEndStartTime.minute.toString().padLeft(2, '0')}:00.0000000",
+          "end_time": "${dayTimeMap[day]!["end"]?.hour.toString().padLeft(2, '0')}:${dayTimeMap[day]!["end"]?.minute.toString().padLeft(2, '0')}:00.0000000",
+        };
+        generalResponse = await ApiService.CarDerliveryTime(carAddDeliveryTime);
+        log(generalResponse.message);
+      }
     }
   }
 
-  Future<void> saveCarPhotos(int carId) async {
+  Future<bool> saveCarPhotos(int carId) async {
     GeneralResponse generalResponse = GeneralResponse(success: false, message: "");
     try {
       for (int i = 0; i < carImages.length; i++) {
@@ -329,17 +401,20 @@ class TestAddController extends GetxController {
         generalResponse = await ApiService.CarAddPhoto(carAddPhotoMap);
         log(generalResponse.message);
       }
+      return true;
     } catch (e) {
       log(e.toString());
+      return false;
     }
   }
 
-  Future<void> saveCarLocations(int carId) async {
+  Future<bool> saveCarLocations(int carId) async {
     GeneralResponse generalResponse = GeneralResponse(success: false, message: "");
 
     try {
       for (int i = 0; i < locations.length; i++) {
         Map<String, dynamic> carAddLocationMap = {
+          "car_id": carId,
           "city": locations[i].city,
           "district": locations[i].district,
           "address": locations[i].address,
@@ -349,8 +424,10 @@ class TestAddController extends GetxController {
         generalResponse = await ApiService.CarAddLocations(carAddLocationMap);
         log(generalResponse.message);
       }
+      return true;
     } catch (e) {
       log(e.toString());
+      return false;
     }
   }
 
@@ -391,5 +468,11 @@ class AddCarLocation {
   String latitude;
   String longitude;
 
-  AddCarLocation({required this.latitude, required this.address, required this.city, required this.district, required this.longitude});
+  AddCarLocation({
+    required this.latitude,
+    required this.address,
+    required this.city,
+    required this.district,
+    required this.longitude,
+  });
 }

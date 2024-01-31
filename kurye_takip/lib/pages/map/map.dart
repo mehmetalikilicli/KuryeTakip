@@ -1,4 +1,5 @@
-import 'dart:async';
+// ignore_for_file: avoid_print, use_key_in_widget_constructors
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -24,9 +25,9 @@ class MapController extends GetxController {
     print("City: $city, District: $district");
 
     markers.add(Marker(
-      markerId: MarkerId("selected_location"),
+      markerId: const MarkerId("selected_location"),
       position: location,
-      infoWindow: InfoWindow(title: "Seçilen Konum"),
+      infoWindow: const InfoWindow(title: "Seçilen Konum"),
     ));
   }
 }
@@ -39,7 +40,7 @@ class MapSample extends StatelessWidget {
     return Scaffold(
       body: GoogleMap(
         mapType: MapType.normal,
-        initialCameraPosition: CameraPosition(
+        initialCameraPosition: const CameraPosition(
           target: LatLng(38.4237, 27.1428),
           zoom: 14.4746,
         ),
@@ -61,13 +62,13 @@ class MapSample extends StatelessWidget {
 
   void _showBottomSheet() {
     Get.bottomSheet(
-      Container(
+      SizedBox(
         height: 200,
         child: Column(
           children: [
             ListTile(
-              leading: Icon(Icons.location_on),
-              title: Text('Konumu Seç'),
+              leading: const Icon(Icons.location_on),
+              title: const Text('Konumu Seç'),
               onTap: () {
                 Get.back();
                 mapController.selectLocation(mapController.selectedLocation);

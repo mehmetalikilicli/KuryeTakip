@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:kurye_takip/app_constants/app_colors.dart';
@@ -6,10 +8,10 @@ import 'package:kurye_takip/helpers/custom_dialog.dart';
 import 'package:kurye_takip/helpers/helpers.dart';
 import 'package:kurye_takip/model/login.dart';
 import 'package:kurye_takip/pages/auth/register.dart';
-import 'package:kurye_takip/pages/gnav_bar/gnav_bar.dart';
+import 'package:kurye_takip/pages/dashboard/dashboard.dart';
 
 class LoginPage extends StatefulWidget {
-  LoginPage({super.key});
+  const LoginPage({super.key});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -35,7 +37,7 @@ class _LoginPageState extends State<LoginPage> {
             key: authController.loginFormKey,
             child: Column(
               children: [
-                ImageAndText(),
+                const ImageAndText(),
                 EmailAndPassword(
                   authController: authController,
                 ),
@@ -64,7 +66,7 @@ class ImageAndText extends StatelessWidget {
         const SizedBox(height: 30),
         ClipRRect(
           borderRadius: BorderRadius.circular(8),
-          child: Container(
+          child: SizedBox(
             height: 150,
             width: Get.width * 0.9,
             child: Image.asset(
@@ -75,7 +77,7 @@ class ImageAndText extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 15),
-        Text("Giriş Yap", style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
+        const Text("Giriş Yap", style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
       ],
     );
   }
@@ -91,11 +93,11 @@ class LoginWithGoogleAndApple extends StatelessWidget {
     return Column(
       children: [
         const SizedBox(height: 30),
-        Text(
+        const Text(
           "Google yada Apple ile Giriş Yap",
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
-        SizedBox(
+        const SizedBox(
           height: 30.0,
         ),
         Row(
@@ -110,7 +112,7 @@ class LoginWithGoogleAndApple extends StatelessWidget {
                 fit: BoxFit.cover,
               ),
             ),
-            SizedBox(
+            const SizedBox(
               width: 30.0,
             ),
             GestureDetector(
@@ -146,7 +148,7 @@ class LoginAndRegisterButton extends StatelessWidget {
             foregroundColor: MaterialStateProperty.all(Colors.black),
             backgroundColor: MaterialStateProperty.all(AppColors.primaryColor),
             padding: MaterialStateProperty.all(
-              EdgeInsets.symmetric(horizontal: 80.0),
+              const EdgeInsets.symmetric(horizontal: 80.0),
             ),
           ),
           onPressed: () async {
@@ -157,7 +159,7 @@ class LoginAndRegisterButton extends StatelessWidget {
                   Helpers.encryption(authController.loginPasswordController.text),
                 );
                 if (loginResult.success && loginResult.user.isApproved == 1) {
-                  Get.offAll(GoogleNavBar());
+                  Get.offAll(const Dashboard());
                 } else {
                   // ignore: use_build_context_synchronously
                   CustomDialog.showMessage(
@@ -172,7 +174,7 @@ class LoginAndRegisterButton extends StatelessWidget {
               }
             }
           },
-          child: Text(
+          child: const Text(
             "Giriş Yap",
             style: TextStyle(fontSize: 16),
           ),
@@ -183,13 +185,13 @@ class LoginAndRegisterButton extends StatelessWidget {
             foregroundColor: MaterialStateProperty.all(Colors.black),
             backgroundColor: MaterialStateProperty.all(AppColors.primaryColor),
             padding: MaterialStateProperty.all(
-              EdgeInsets.symmetric(horizontal: 80.0),
+              const EdgeInsets.symmetric(horizontal: 80.0),
             ),
           ),
           onPressed: () {
             Get.off(() => RegisterPage());
           },
-          child: Text("Kayıt Ol"),
+          child: const Text("Kayıt Ol"),
         ),
       ],
     );

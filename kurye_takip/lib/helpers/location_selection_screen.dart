@@ -1,7 +1,8 @@
+// ignore_for_file: invalid_use_of_protected_member, library_private_types_in_public_api
+
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -14,7 +15,7 @@ class MapController extends GetxController {
       Marker(
         markerId: MarkerId(DateTime.now().millisecondsSinceEpoch.toString()),
         position: _generateRandomPosition(),
-        infoWindow: InfoWindow(title: "Random Marker"),
+        infoWindow: const InfoWindow(title: "Random Marker"),
         icon: BitmapDescriptor.defaultMarker,
       ),
     );
@@ -42,6 +43,8 @@ class MapController extends GetxController {
 
 //View
 class LocationSelectionScreen extends StatefulWidget {
+  const LocationSelectionScreen({super.key});
+
   @override
   _LocationSelectionScreenState createState() => _LocationSelectionScreenState();
 }
@@ -62,7 +65,7 @@ class _LocationSelectionScreenState extends State<LocationSelectionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Konumunuzu Seçin"),
+        title: const Text("Konumunuzu Seçin"),
       ),
       body: Stack(
         children: [
@@ -155,7 +158,7 @@ class ZoomOutButton extends StatelessWidget {
         onPressed: () {
           _controller?.animateCamera(CameraUpdate.zoomOut());
         },
-        child: Icon(Icons.remove),
+        child: const Icon(Icons.remove),
       ),
     );
   }
@@ -178,7 +181,7 @@ class ZoomInButton extends StatelessWidget {
         onPressed: () {
           _controller?.animateCamera(CameraUpdate.zoomIn());
         },
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
     );
   }

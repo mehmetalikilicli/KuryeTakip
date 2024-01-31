@@ -1,6 +1,7 @@
+// ignore_for_file: unnecessary_import
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:kurye_takip/app_constants/app_colors.dart';
@@ -23,7 +24,7 @@ class GoogleNavBar extends StatelessWidget {
           bottomNavigationBar: Container(
             color: AppColors.primaryColor,
             child: Padding(
-              padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+              padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
               child: GNav(
                 color: Colors.white,
                 activeColor: Colors.white,
@@ -42,7 +43,7 @@ class GoogleNavBar extends StatelessWidget {
                   ),
                   GButton(
                     icon: IconData(0xe44f, fontFamily: 'MaterialIcons'),
-                    text: "Bildirimler",
+                    text: "Taleplerim",
                   ),
                   GButton(
                     icon: Icons.person,
