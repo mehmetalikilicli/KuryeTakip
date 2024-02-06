@@ -6,11 +6,14 @@ import 'package:kurye_takip/model/cars_list.dart';
 import 'package:kurye_takip/service/api_service.dart';
 
 class MyCarsController extends GetxController {
-  Cars cars = Cars(success: false, message: "", cars: []);
+  RxList<CarElement> carList = <CarElement>[].obs;
+
+  RxInt isActive = 0.obs;
 
   Future<void> fetchData() async {
     try {
-      cars = await ApiService.fetchMyCars(getLocalUserID());
+      Cars cars = await ApiService.fetchMyCars(getLocalUserID());
+      carList.value = cars.cars;
     } catch (e) {
       print('Error: $e');
     }

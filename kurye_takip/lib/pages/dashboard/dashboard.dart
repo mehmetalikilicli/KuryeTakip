@@ -1,5 +1,6 @@
-// ignore_for_file: unnecessary_null_comparison, sized_box_for_whitespace, deprecated_member_use
+// ignore_for_file: unnecessary_null_comparison, sized_box_for_whitespace, deprecated_member_use, invalid_use_of_protected_member, unused_local_variable
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/cupertino.dart';
@@ -8,6 +9,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:kurye_takip/app_constants/app_colors.dart';
+import 'package:kurye_takip/components/lists.dart';
 import 'package:kurye_takip/model/cars_list.dart';
 import 'package:kurye_takip/pages/cars_detail/car_detail.dart';
 import 'package:kurye_takip/pages/dashboard/dashboard_controller.dart';
@@ -106,193 +108,254 @@ class DashboardDrawer extends GetView<DashboardController> {
     return Drawer(
       child: SafeArea(
         child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
           child: Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
-                child: Column(
-                  children: [
-                    const Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text("Filtreler", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    ),
-                    const Divider(height: 2, color: Colors.black),
-                    const SizedBox(height: 4),
-                    Column(
-                      children: [
-                        const Align(alignment: Alignment.centerLeft, child: Text("Tarih Aralığı")),
-                        Stack(
-                          children: [
-                            TextFormField(
-                              readOnly: true,
-                              controller: controller.filterDateText,
-                              decoration: InputWidgets().dateDecoration(Colors.grey, Colors.red, "Takvim Aralığı Seçiniz"),
-                              onTap: () async {
-                                final result = await showDateRangePicker(
-                                  context: context,
-                                  firstDate: DateTime.now(),
-                                  lastDate: DateTime.now().add(const Duration(days: 365)),
-                                );
-                                if (result != null) {
-                                  controller.filterDateStart = result.start;
-                                  controller.filterDateEnd = result.end;
-
-                                  controller.filterDateText.text =
-                                      "${DateFormat('dd.MM.yyyy').format(result.start)} - ${DateFormat('dd.MM.yyyy').format(result.end)}";
-                                } else {}
-                              },
+              Column(
+                children: [
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text("Filtreler", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  ),
+                  const Divider(height: 0, color: Colors.black),
+                  const SizedBox(height: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.fromLTRB(4, 8, 0, 2),
+                        child: Text("Tarih Aralığı", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                      ),
+                      TextFormField(
+                        readOnly: true,
+                        controller: controller.filterDateText,
+                        decoration: InputWidgets().dateDecoration(Colors.grey, Colors.red, "Takvim Aralığı Seçiniz").copyWith(
+                              suffixIcon: IconButton(onPressed: () => controller.clearDate(), icon: const Icon(Icons.close)),
                             ),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: IconButton(
-                                  onPressed: () {
-                                    controller.clearDate();
-                                  },
-                                  icon: const Icon(Icons.close)),
-                            ),
-                          ],
-                        )
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Column(
-                      children: [
-                        const Align(alignment: Alignment.centerLeft, child: Text("Yakıt türü")),
-                        DropdownButtonFormField2(
-                          decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Yakıt türü seçiniz", Icons.list, Colors.black),
+                        onTap: () async {
+                          final result = await showDateRangePicker(
+                            context: context,
+                            firstDate: DateTime.now(),
+                            lastDate: DateTime.now().add(const Duration(days: 365)),
+                          );
+                          if (result != null) {
+                            controller.filterDateStart = result.start;
+                            controller.filterDateEnd = result.end;
+                            controller.filterDateText.text =
+                                "${DateFormat('dd.MM.yyyy').format(result.start)} - ${DateFormat('dd.MM.yyyy').format(result.end)}";
+                          } else {}
+                        },
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.fromLTRB(4, 8, 0, 2),
+                        child: Text("Marka", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                      ),
+                      Obx(
+                        () => DropdownButtonFormField2(
+                          decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Marka seçiniz", Icons.list, Colors.black),
                           isExpanded: true,
                           icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
                           iconSize: 20,
                           buttonPadding: const EdgeInsets.only(),
                           dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
                           dropdownPadding: EdgeInsets.zero,
-                          items: controller.carFuelTypeList.map((item) => DropdownMenuItem<String>(value: item, child: Text(item))).toList(),
+                          items: controller.carBrandsList.value
+                              .map((item) => DropdownMenuItem<String>(value: item.brandId.toString(), child: Text(item.brandName)))
+                              .toList(),
                           selectedItemHighlightColor: AppColors.primaryColor,
-                          onChanged: (value) => controller.carFuel = value,
-                          value: controller.carFuel,
+                          onChanged: (value) => controller.changeBrand(value),
+                          validator: (value) => value == null ? "Lütfen araç markası seçiniz" : null,
+                          value: controller.carBrand,
                           dropdownOverButton: true,
                           dropdownMaxHeight: Get.height * .25,
                           scrollbarAlwaysShow: true,
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Column(
-                      children: [
-                        const Align(alignment: Alignment.centerLeft, child: Text("Vites Türü")),
-                        DropdownButtonFormField2(
-                          decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Vites türü", Icons.list, Colors.black),
-                          isExpanded: true,
-                          icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
-                          iconSize: 20,
-                          buttonPadding: const EdgeInsets.only(),
-                          dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
-                          dropdownPadding: EdgeInsets.zero,
-                          items: controller.carTransmissionTypeList.map((item) => DropdownMenuItem<String>(value: item, child: Text(item))).toList(),
-                          selectedItemHighlightColor: AppColors.primaryColor,
-                          onChanged: (value) => controller.carTransmission = value,
-                          value: controller.carTransmission,
-                          dropdownOverButton: true,
-                          dropdownMaxHeight: Get.height * .25,
-                          scrollbarAlwaysShow: true,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Column(
-                      children: [
-                        const Align(alignment: Alignment.centerLeft, child: Text("Minimum kira günü")),
-                        TextFormField(
-                          controller: controller.minRentDay,
-                          keyboardType: TextInputType.number,
-                          decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Minimum Kira günü", CupertinoIcons.calendar, Colors.black),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(width: 8),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.fromLTRB(4, 8, 0, 2),
+                        child: Text("Model", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                      ),
+                      Obx(
+                        () => controller.loadingModels.isTrue
+                            ? DropdownButtonFormField2(
+                                decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Model seçiniz", Icons.list, Colors.black),
+                                isExpanded: true,
+                                icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
+                                iconSize: 20,
+                                buttonPadding: const EdgeInsets.only(),
+                                dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+                                dropdownPadding: EdgeInsets.zero,
+                                items: const [],
+                              )
+                            : DropdownButtonFormField2(
+                                decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Model seçiniz", Icons.list, Colors.black),
+                                isExpanded: true,
+                                icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
+                                iconSize: 20,
+                                buttonPadding: const EdgeInsets.only(),
+                                dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+                                dropdownPadding: EdgeInsets.zero,
+                                items: controller.carModelList.value
+                                    .map((item) => DropdownMenuItem<String>(value: item.id.toString(), child: Text(item.name)))
+                                    .toList(),
+                                selectedItemHighlightColor: AppColors.primaryColor,
+                                onChanged: (value) {
+                                  controller.carModel = value;
+                                  final selectedModel = controller.carModelList.value.firstWhere((item) => item.id.toString() == value);
+                                  //controller.carTypeIndex = selectedModel.car_type;
+                                },
+                                validator: (value) => value == null ? "Lütfen araç modeli seçiniz" : null,
+                                value: controller.carModel,
+                                dropdownOverButton: true,
+                                dropdownMaxHeight: Get.height * .25,
+                                scrollbarAlwaysShow: true,
+                              ),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.fromLTRB(4, 8, 0, 2),
+                        child: Text("Yakıt Türü", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                      ),
+                      DropdownButtonFormField2(
+                        decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Yakıt türü seçiniz", Icons.list, Colors.black),
+                        isExpanded: true,
+                        icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
+                        iconSize: 20,
+                        buttonPadding: const EdgeInsets.only(),
+                        dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+                        dropdownPadding: EdgeInsets.zero,
+                        items: Lists.carFuelTypeList.map((item) => DropdownMenuItem<String>(value: item, child: Text(item))).toList(),
+                        selectedItemHighlightColor: AppColors.primaryColor,
+                        onChanged: (value) => controller.carFuel = value,
+                        value: controller.carFuel,
+                        dropdownOverButton: true,
+                        dropdownMaxHeight: Get.height * .25,
+                        scrollbarAlwaysShow: true,
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.fromLTRB(4, 8, 0, 2),
+                        child: Text("Vites  Türü", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                      ),
+                      DropdownButtonFormField2(
+                        decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Vites türü", Icons.list, Colors.black),
+                        isExpanded: true,
+                        icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
+                        iconSize: 20,
+                        buttonPadding: const EdgeInsets.only(),
+                        dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+                        dropdownPadding: EdgeInsets.zero,
+                        items: Lists.carTransmissionTypeList.map((item) => DropdownMenuItem<String>(value: item, child: Text(item))).toList(),
+                        selectedItemHighlightColor: AppColors.primaryColor,
+                        onChanged: (value) => controller.carTransmission = value,
+                        value: controller.carTransmission,
+                        dropdownOverButton: true,
+                        dropdownMaxHeight: Get.height * .25,
+                        scrollbarAlwaysShow: true,
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.fromLTRB(4, 8, 0, 2),
+                        child: Text("Min. Kiralama Süresi (Gün)", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                      ),
+                      TextFormField(
+                        controller: controller.minRentDay,
+                        keyboardType: TextInputType.number,
+                        decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Minimum Kira günü", CupertinoIcons.calendar, Colors.black),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.fromLTRB(4, 8, 0, 2),
+                        child: Text("Fiyat Aralığı", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          const Text("Fiyat"),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Container(
-                                width: Get.width * .25,
-                                child: TextFormField(
-                                  keyboardType: TextInputType.number,
-                                  controller: controller.minPrice,
-                                  onTap: () async {},
-                                  decoration: InputWidgets().timeDecoration(Colors.grey, Colors.red, "00:00"),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Container(
-                                width: Get.width * .25,
-                                child: TextFormField(
-                                  keyboardType: TextInputType.number,
-                                  controller: controller.maxPrice,
-                                  decoration: InputWidgets().timeDecoration(Colors.grey, Colors.red, "00:00"),
-                                ),
-                              ),
-                            ],
+                          Expanded(
+                            child: TextFormField(
+                              keyboardType: TextInputType.number,
+                              controller: controller.minPrice,
+                              onTap: () async {},
+                              decoration: InputWidgets().noteDecoration(Colors.grey, Colors.red, "En Az").copyWith(filled: false),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: TextFormField(
+                              keyboardType: TextInputType.number,
+                              controller: controller.maxPrice,
+                              decoration: InputWidgets().noteDecoration(Colors.grey, Colors.red, "En Çok").copyWith(filled: false),
+                            ),
                           ),
                         ],
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text("Uzun Dönem"),
-                        Obx(() => Switch(
-                              value: controller.filterIsLongTerm.value,
-                              onChanged: (value) {
-                                controller.filterIsLongTerm.value = value;
-                                if (!value && controller.filterIsShortTerm.value == false) {
-                                  controller.filterIsShortTerm.value = true;
-                                }
-                              },
-                            )),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text("Kısa Dönem"),
-                        Obx(() => Switch(
-                              value: controller.filterIsShortTerm.value,
-                              onChanged: (value) {
-                                controller.filterIsShortTerm.value = value;
-                                if (!value && controller.filterIsLongTerm.value == false) {
-                                  controller.filterIsLongTerm.value = true;
-                                }
-                              },
-                            )),
-                      ],
-                    ),
-                    ButtonBar(
-                      buttonPadding: const EdgeInsets.only(left: 4),
-                      children: [
-                        OutlinedButton(
+                      const Padding(
+                        padding: EdgeInsets.fromLTRB(4, 12, 0, 2),
+                        child: Text("Ek Özellikler", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text("Uzun Dönem Kiralama", style: TextStyle(fontSize: 13)),
+                          Transform.scale(
+                            scale: 0.9,
+                            child: Obx(
+                              () => Switch(
+                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                value: controller.filterIsLongTerm.value,
+                                onChanged: (value) {
+                                  controller.filterIsLongTerm.value = value;
+                                  if (!value && controller.filterIsShortTerm.value == false) {
+                                    controller.filterIsShortTerm.value = true;
+                                  }
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text("Kısa Dönem Kiralama", style: TextStyle(fontSize: 13)),
+                          const SizedBox(width: 8),
+                          Transform.scale(
+                            scale: 0.9,
+                            child: Obx(
+                              () => Switch(
+                                value: controller.filterIsShortTerm.value,
+                                onChanged: (value) {
+                                  controller.filterIsShortTerm.value = value;
+                                  if (!value && controller.filterIsLongTerm.value == false) {
+                                    controller.filterIsLongTerm.value = true;
+                                  }
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
                           style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.only(bottom: 4, top: 4),
                             foregroundColor: Colors.blue.shade800,
-                            visualDensity: VisualDensity.compact,
+                            visualDensity: VisualDensity.comfortable,
                             side: BorderSide(color: Colors.blue.shade800),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           ),
                           onPressed: () {
                             controller.clearFilters();
                           },
-                          child: const Text("Filtreleri Temizle"),
+                          child: const AutoSizeText("Filtreleri Temizle", minFontSize: 10, maxFontSize: 16, maxLines: 1),
                         ),
-                        const SizedBox(width: 2),
-                        OutlinedButton(
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: OutlinedButton(
                           style: OutlinedButton.styleFrom(
                             foregroundColor: Colors.green,
-                            visualDensity: VisualDensity.compact,
+                            visualDensity: VisualDensity.comfortable,
                             side: const BorderSide(color: Colors.green),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           ),
@@ -301,11 +364,11 @@ class DashboardDrawer extends GetView<DashboardController> {
                             Get.back();
                           },
                           child: const Text("Uygula", style: TextStyle(color: Colors.green)),
-                        )
-                      ],
-                    ),
-                  ],
-                ),
+                        ),
+                      )
+                    ],
+                  ),
+                ],
               ),
             ],
           ),
@@ -456,14 +519,14 @@ class CarElementCard extends GetView<DashboardController> {
           Image.network(
             carItem.carAddPhotos != null && carItem.carAddPhotos!.isNotEmpty && carItem.carAddPhotos!.first.photoPath != null
                 ? carItem.carAddPhotos!.first.photoPath
-                : "assets/logo/_dart.png",
+                : "assets/logo/logo_dark.png",
             fit: BoxFit.cover,
             height: Get.width * 9 / 16,
             width: Get.width,
             errorBuilder: (context, error, stackTrace) {
               return AspectRatio(
                 aspectRatio: 16 / 9,
-                child: SvgPicture.asset("assets/logo/_dart.png"),
+                child: SvgPicture.asset("assets/logo/logo_dark.png"),
               );
             },
           ),
@@ -651,9 +714,9 @@ class CarCategoryButton extends GetView<DashboardController> {
           style: OutlinedButton.styleFrom(
             //shape: const RoundedRectangleBorder(),
             side: BorderSide(
-              color: controller.selectedTypes.contains(id) ? AppColors.primaryColor : Colors.grey,
+              color: controller.selectedType.value == id ? AppColors.primaryColor : Colors.grey,
             ),
-            foregroundColor: controller.selectedTypes.contains(id) ? AppColors.primaryColor : Colors.grey,
+            foregroundColor: controller.selectedType.value == id ? AppColors.primaryColor : Colors.grey,
           ),
           onPressed: () => controller.toggleCarType(id),
           child: Row(

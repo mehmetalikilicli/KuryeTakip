@@ -41,7 +41,10 @@ class RentNotification {
   int renterId;
   int rentStatus;
   String plate;
+  double price;
   DateTime createdDate;
+  DateTime rentStartDate;
+  DateTime rentEndDate;
   String? renterNote;
   String? cancelNote;
   String? brandName;
@@ -50,6 +53,15 @@ class RentNotification {
   String? ownerSurname;
   String? ownerEmail;
   String? ownerPhone;
+  String? renterName;
+  String? renterSurname;
+  String? renterEmail;
+  String? renterPhone;
+  int? isRenterLoadAfterPhoto;
+  int? isRenterLoadBeforePhoto;
+  int? isOwnerLoadAfterPhoto;
+  int? isOwnerLoadBeforePhoto;
+  int? paymentStatus;
   Car? car;
 
   RentNotification({
@@ -60,6 +72,9 @@ class RentNotification {
     required this.rentStatus,
     required this.plate,
     required this.createdDate,
+    required this.rentStartDate,
+    required this.rentEndDate,
+    required this.price,
     this.renterNote,
     this.cancelNote,
     this.brandName,
@@ -68,6 +83,15 @@ class RentNotification {
     this.ownerSurname,
     this.ownerEmail,
     this.ownerPhone,
+    this.renterName,
+    this.renterSurname,
+    this.renterEmail,
+    this.renterPhone,
+    this.isRenterLoadAfterPhoto,
+    this.isRenterLoadBeforePhoto,
+    this.isOwnerLoadAfterPhoto,
+    this.isOwnerLoadBeforePhoto,
+    this.paymentStatus,
     this.car,
   });
 
@@ -79,7 +103,10 @@ class RentNotification {
         rentStatus: json["rent_status"],
         plate: json["plate"],
         createdDate: DateTime.parse(json["created_date"]),
+        rentStartDate: DateTime.parse(json["rent_start_date"]),
+        rentEndDate: DateTime.parse(json["rent_end_date"]),
         renterNote: json["renter_note"],
+        price: json["price"],
         cancelNote: json["cancel_note"],
         brandName: json["brand_name"],
         modelName: json["model_name"],
@@ -87,6 +114,15 @@ class RentNotification {
         ownerSurname: json["owner_surname"],
         ownerEmail: json["owner_email"],
         ownerPhone: json["owner_phone"],
+        renterName: json["renter_name"],
+        renterSurname: json["renter_surname"],
+        renterEmail: json["renter_email"],
+        renterPhone: json["renter_phone"],
+        isOwnerLoadAfterPhoto: json["is_owner_load_after_photo"],
+        isOwnerLoadBeforePhoto: json["is_owner_load_before_photo"],
+        isRenterLoadAfterPhoto: json["is_renter_load_after_photo"],
+        isRenterLoadBeforePhoto: json["is_renter_load_before_photo"],
+        paymentStatus: json["payment_status"],
         car: Car.fromJson(json["car"]),
       );
 
@@ -98,6 +134,9 @@ class RentNotification {
         "rent_status": rentStatus,
         "plate": plate,
         "created_date": createdDate.toIso8601String(),
+        "rent_start_date": rentStartDate.toIso8601String(),
+        "rent_end_date": rentEndDate.toIso8601String(),
+        "price": price,
         "renter_note": renterNote,
         "cancel_note": cancelNote,
         "brand_name": brandName,
@@ -106,6 +145,11 @@ class RentNotification {
         "owner_surname": ownerSurname,
         "owner_email": ownerEmail,
         "owner_phone": ownerPhone,
+        "is_owner_load_after_photo": isOwnerLoadAfterPhoto,
+        "is_owner_load_before_photo": isOwnerLoadBeforePhoto,
+        "is_renter_load_after_photo": isRenterLoadAfterPhoto,
+        "is_renter_load_before_photo": isRenterLoadBeforePhoto,
+        "payment_status": paymentStatus,
         "car": car!.toJson(),
       };
 }
@@ -122,8 +166,7 @@ class Car {
   int modelId;
   String fuelType;
   String transmissionType;
-  int carType;
-  int dailyPrice;
+  double dailyPrice;
   String plate;
   String km;
   String note;
@@ -148,7 +191,6 @@ class Car {
     required this.modelId,
     required this.fuelType,
     required this.transmissionType,
-    required this.carType,
     required this.dailyPrice,
     required this.plate,
     required this.km,
@@ -175,7 +217,6 @@ class Car {
         modelId: json["model_id"],
         fuelType: json["fuel_type"],
         transmissionType: json["transmission_type"],
-        carType: json["car_type"],
         dailyPrice: json["daily_price"],
         plate: json["plate"],
         km: json["km"],
@@ -202,7 +243,6 @@ class Car {
         "model_id": modelId,
         "fuel_type": fuelType,
         "transmission_type": transmissionType,
-        "car_type": carType,
         "daily_price": dailyPrice,
         "plate": plate,
         "km": km,

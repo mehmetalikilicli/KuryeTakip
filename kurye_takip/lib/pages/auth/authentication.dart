@@ -51,6 +51,8 @@ class RegisterController extends GetxController {
   RegisterModel registerModel = RegisterModel();
   RegisterModel registerModel2 = RegisterModel();
 
+  RxBool isCommercial = true.obs;
+
   DateTime rentDLdate = DateTime.now();
   DateTime rentBirthDate = DateTime.now();
 

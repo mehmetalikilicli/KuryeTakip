@@ -51,6 +51,7 @@ class RegisterModel {
   String? district;
   String? address;
   int? is_vehicle_owner;
+  int? is_commercial;
   String? driving_license_number;
   DateTime? driving_license_date;
   String? driving_license_front;
@@ -72,6 +73,7 @@ class RegisterModel {
     this.district,
     this.password,
     this.is_vehicle_owner,
+    this.is_commercial,
     this.address,
     this.driving_license_number,
     this.driving_license_date,

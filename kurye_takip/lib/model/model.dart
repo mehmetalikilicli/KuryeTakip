@@ -38,15 +38,19 @@ class ModelElement {
   int id;
   int brandId;
   String name;
-  String segment;
-  int recomendation_price;
+  String? segment;
+  int? min_recomendation_price;
+  int? max_recomendation_price;
+  int? car_type;
 
   ModelElement({
     required this.id,
     required this.brandId,
     required this.name,
-    required this.segment,
-    required this.recomendation_price,
+    this.segment,
+    this.car_type,
+    this.min_recomendation_price,
+    this.max_recomendation_price,
   });
 
   factory ModelElement.fromJson(Map<String, dynamic> json) => ModelElement(
@@ -54,7 +58,9 @@ class ModelElement {
         brandId: json["brand_id"],
         name: json["name"],
         segment: json["segment"],
-        recomendation_price: json["recomendation_price"],
+        car_type: json["car_type"],
+        min_recomendation_price: json["min_recomendation_price"],
+        max_recomendation_price: json["max_recomendation_price"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -62,6 +68,8 @@ class ModelElement {
         "brand_id": brandId,
         "name": name,
         "segment": segment,
-        "recomendation_price": recomendation_price,
+        "car_type": car_type,
+        "min_recomendation_price": min_recomendation_price,
+        "max_recomendation_price": min_recomendation_price,
       };
 }

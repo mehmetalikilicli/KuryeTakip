@@ -48,17 +48,18 @@ class CarElement {
   String? modelName;
   String? fuelType;
   String? transmissionType;
-  int? carType;
-  int? dailyPrice;
+  double? dailyPrice;
   String? plate;
   String? km;
   String? note;
+  int? carType;
   int? weeklyRent;
   int? monthlyRent;
   int? minRentDay;
   int? isActive;
   int? isApproved;
   int? isLongTerm;
+  int? isCommercial;
   DateTime? is_available_date_start;
   DateTime? is_available_date_end;
   List<CarAddPhoto>? carAddPhotos;
@@ -79,7 +80,6 @@ class CarElement {
     this.modelName,
     this.fuelType,
     this.transmissionType,
-    this.carType,
     this.dailyPrice,
     this.plate,
     this.km,
@@ -90,6 +90,8 @@ class CarElement {
     this.isActive,
     this.isApproved,
     this.isLongTerm,
+    this.isCommercial,
+    this.carType,
     this.is_available_date_start,
     this.is_available_date_end,
     this.carAddPhotos,
@@ -111,7 +113,6 @@ class CarElement {
         modelName: json["model_name"],
         fuelType: json["fuel_type"],
         transmissionType: json["transmission_type"],
-        carType: json["car_type"],
         dailyPrice: json["daily_price"],
         plate: json["plate"],
         km: json["km"],
@@ -122,6 +123,8 @@ class CarElement {
         isActive: json["is_active"],
         isApproved: json["is_approved"],
         isLongTerm: json["is_long_term"],
+        isCommercial: json["is_commercial"],
+        carType: json["car_type"],
         is_available_date_start: json["is_available_date_start"] != null ? DateTime.parse(json["is_available_date_start"]) : null,
         is_available_date_end: json["is_available_date_end"] != null ? DateTime.parse(json["is_available_date_end"]) : null,
         carAddPhotos: List<CarAddPhoto>.from(json["carAddPhotos"].map((x) => CarAddPhoto.fromJson(x))),
@@ -143,7 +146,6 @@ class CarElement {
         "model_name": modelName,
         "fuel_type": fuelType,
         "transmission_type": transmissionType,
-        "car_type": carType,
         "daily_price": dailyPrice,
         "plate": plate,
         "km": km,
@@ -154,6 +156,8 @@ class CarElement {
         "is_active": isActive,
         "is_approved": isApproved,
         "is_long_term": isLongTerm,
+        "is_commercial": isCommercial,
+        "car_type": carType,
         "is_available_date_start": is_available_date_start,
         "is_available_date_end": is_available_date_end,
         "carAddPhotos": List<dynamic>.from(carAddPhotos!.map((x) => x.toJson())),

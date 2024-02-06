@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, prefer_is_empty, prefer_const_literals_to_create_immutables
+// ignore_for_file: prefer_const_constructors, prefer_is_empty, prefer_const_literals_to_create_immutables, invalid_use_of_protected_member
 
 import 'dart:developer';
 
@@ -31,63 +31,61 @@ class MyCarsPage extends StatelessWidget {
             } else if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CupertinoActivityIndicator(color: Colors.black));
             } else {
-              return controller.cars.cars.length == 0
+              return controller.carList.value.length == 0
                   ? Center(child: Text("Herhangi bir aracınız bulunmamaktadır."))
-                  : ListView.separated(
-                      padding: const EdgeInsets.only(top: 8),
-                      itemCount: controller.cars.cars.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return Column(
-                          children: [
-                            ListTile(
-                              contentPadding: EdgeInsets.symmetric(horizontal: 12),
-                              onTap: () async {
-                                try {
-                                  Get.to(MyCarsDetailPage(carElement: controller.cars.cars[index]));
-                                } catch (e) {
-                                  log("Bildirim detayı getirilirken hata oluştur $e", name: "Bildirim detay hatası");
-                                }
-                              },
-                              title: Text(
-                                "${controller.cars.cars[index].brandName ?? ""} - ${controller.cars.cars[index].modelName ?? ""} - ${controller.cars.cars[index].plate ?? ""}",
-                              ),
-                              subtitle: controller.cars.cars[index].isActive == 0
-                                  ? Row(
-                                      children: [
-                                        Container(
-                                          padding: EdgeInsets.fromLTRB(8, 2, 8, 2),
-                                          decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(6.0)),
-                                          child: Text("Yayında Değil", style: TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.w600)),
-                                        ),
-                                      ],
-                                    )
-                                  : Row(
-                                      children: [
-                                        Container(
-                                          padding: EdgeInsets.fromLTRB(8, 2, 8, 2),
-                                          decoration: BoxDecoration(color: Colors.green, borderRadius: BorderRadius.circular(6.0)),
-                                          child: Text("Yayında", style: TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.w600)),
-                                        ),
-                                      ],
+                  : Obx(
+                      () => ListView.separated(
+                        padding: const EdgeInsets.only(top: 8),
+                        itemCount: controller.carList.value.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          return Column(
+                            children: [
+                              ListTile(
+                                contentPadding: EdgeInsets.symmetric(horizontal: 12),
+                                onTap: () async {
+                                  try {
+                                    await Get.to(MyCarsDetailPage(carElement: controller.carList.value[index]));
+                                    controller.fetchData();
+                                  } catch (e) {
+                                    log("Bildirim detayı getirilirken hata oluştur $e", name: "Bildirim detay hatası");
+                                  }
+                                },
+                                title: Text(
+                                  "${controller.carList.value[index].brandName ?? ""} - ${controller.carList.value[index].modelName ?? ""} - ${controller.carList.value[index].plate ?? ""}",
+                                ),
+                                subtitle: Row(
+                                  children: [
+                                    Container(
+                                      padding: EdgeInsets.fromLTRB(8, 2, 8, 2),
+                                      decoration: BoxDecoration(
+                                          color: controller.carList.value[index].isActive == 0 ? Colors.red : Colors.green,
+                                          borderRadius: BorderRadius.circular(6.0)),
+                                      child: Text(
+                                        controller.carList.value[index].isActive == 0 ? "Yayında Değil" : "Yayında",
+                                        style: TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.w600),
+                                      ),
                                     ),
-                              leading: AspectRatio(
-                                aspectRatio: 16 / 9,
-                                child: Container(
-                                  width: Get.width * 0.24,
-                                  decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
-                                  child: Image.network(
-                                    controller.cars.cars[index].carAddPhotos![0].photoPath,
-                                    fit: BoxFit.cover,
-                                    width: Get.width - 8,
+                                  ],
+                                ),
+                                leading: AspectRatio(
+                                  aspectRatio: 16 / 9,
+                                  child: Container(
+                                    width: Get.width * 0.24,
+                                    decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
+                                    child: Image.network(
+                                      controller.carList.value[index].carAddPhotos![0].photoPath,
+                                      fit: BoxFit.cover,
+                                      width: Get.width - 8,
+                                    ),
                                   ),
                                 ),
+                                trailing: Icon(Icons.arrow_forward_ios_sharp),
                               ),
-                              trailing: Icon(Icons.arrow_forward_ios_sharp),
-                            ),
-                          ],
-                        );
-                      },
-                      separatorBuilder: (context, index) => const Divider(height: 0),
+                            ],
+                          );
+                        },
+                        separatorBuilder: (context, index) => const Divider(height: 0),
+                      ),
                     );
             }
           },

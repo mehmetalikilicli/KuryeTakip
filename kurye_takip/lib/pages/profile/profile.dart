@@ -8,6 +8,7 @@ import 'package:kurye_takip/app_constants/app_colors.dart';
 import 'package:kurye_takip/model/register.dart';
 import 'package:kurye_takip/pages/add_car/test_add.dart';
 import 'package:kurye_takip/pages/auth/login.dart';
+import 'package:kurye_takip/pages/zzz/car_rentals/car_rentals.dart';
 import 'package:kurye_takip/pages/my_cars/my_cars.dart';
 import 'package:kurye_takip/pages/owner_notifications/owner_notifications.dart';
 import 'package:kurye_takip/pages/rent_notifications/rent_notification.dart';
@@ -97,10 +98,23 @@ class _ProfilePageState extends State<ProfilePage> {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       child: const ListTile(
                           contentPadding: EdgeInsets.symmetric(horizontal: 0),
-                          leading: Icon(Icons.privacy_tip_sharp, color: Colors.black54),
+                          leading: Icon(CupertinoIcons.car_detailed, color: Colors.black54),
                           title: Text('Araçlarım', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                           trailing: Icon(Icons.arrow_forward_ios_outlined)),
                     ),
+                    /*const SizedBox(height: 10),
+                    MaterialButton(
+                      onPressed: () {
+                        Get.to(CarRentalsPage());
+                      },
+                      color: Colors.grey.shade100,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      child: const ListTile(
+                          contentPadding: EdgeInsets.symmetric(horizontal: 0),
+                          leading: Icon(CupertinoIcons.rectangle_stack_fill, color: Colors.black54),
+                          title: Text('Kiralama işlemlerim', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                          trailing: Icon(Icons.arrow_forward_ios_outlined, color: Colors.black54)),
+                    ),*/
                     const SizedBox(height: 10),
                     MaterialButton(
                       onPressed: () {},
@@ -108,7 +122,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       child: const ListTile(
                           contentPadding: EdgeInsets.symmetric(horizontal: 0),
-                          leading: Icon(Icons.privacy_tip_sharp, color: Colors.black54),
+                          leading: Icon(CupertinoIcons.profile_circled, color: Colors.black54),
                           title: Text('Profili Düzenle', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                           trailing: Icon(Icons.arrow_forward_ios_outlined)),
                     ),
@@ -119,7 +133,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       child: const ListTile(
                           contentPadding: EdgeInsets.symmetric(horizontal: 0),
-                          leading: Icon(Icons.privacy_tip_sharp, color: Colors.black54),
+                          leading: Icon(CupertinoIcons.settings_solid, color: Colors.black54),
                           title: Text('Ayarlar', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                           trailing: Icon(Icons.arrow_forward_ios_outlined)),
                     ),
@@ -144,7 +158,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       child: const ListTile(
                           contentPadding: EdgeInsets.symmetric(horizontal: 0),
-                          leading: Icon(Icons.info, color: Colors.black54),
+                          leading: Icon(Icons.info_outline, color: Colors.black54),
                           title: Text('Hakkımızda', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                           trailing: Icon(Icons.arrow_forward_ios_outlined, color: Colors.black54)),
                     ),

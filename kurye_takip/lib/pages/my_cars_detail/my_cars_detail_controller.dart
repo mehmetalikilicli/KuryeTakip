@@ -1,7 +1,8 @@
+// ignore_for_file: unused_local_variable, invalid_use_of_protected_member, deprecated_member_use, non_constant_identifier_names, duplicate_ignore
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
-import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -12,6 +13,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:kurye_takip/components/lists.dart';
 import 'package:kurye_takip/helpers/helpers.dart';
 import 'package:kurye_takip/model/brand.dart';
 import 'package:kurye_takip/model/cars_list.dart';
@@ -50,6 +52,8 @@ class MyCarsDetailController extends GetxController {
     getLocations();
     fillPriceAndDiscount();
     fillPhotos(carElement.carAddPhotos!);
+
+    isActive.value = carElement.isActive!;
   }
 
   void fillPhotos(List<CarAddPhoto> carAddPhotos) {
@@ -163,61 +167,74 @@ class MyCarsDetailController extends GetxController {
 
   final carInfoEditKey = GlobalKey<FormState>();
 
+  RxBool loadingBrands = false.obs;
   RxBool loadingModels = false.obs;
   RxList<BrandElement> carBrandsList = <BrandElement>[].obs;
   RxList<ModelElement> carModelList = <ModelElement>[].obs;
-  List<String> carYearList = ['2020', '2021', '2022', "2023", "2024"];
-  List<String> carFuelTypeList = ['Hybrid', 'Benzin', 'Dizel'];
-  List<String> carTransmissionTypeList = ['Otomatik', 'Manuel', 'Yarı Otomatik'];
-  List<String> carTypeList = ['Otomobil', 'Motosiklet', 'Ticari', 'Karavan'];
 
   String? carBrand, carModel, carYear, carFuel, carTransmission, carTypeText;
   int? carType;
 
-  List<String> kmList = ['0 - 29.999', '30.000 - 59.999', '60.000 - 89.999', '90.000 ve üzeri'];
   TextEditingController carPlate = TextEditingController();
   String? selectedKm;
 
+  Future<void> changeCarType(value) async {
+    carType = Lists.carTypeList.indexOf(value) + 1;
+    carTypeText = Lists.carTypeList[carType! - 1];
+
+    loadingBrands.value = true;
+    loadingModels.value = true;
+
+    carBrand = null;
+    carModel = null;
+
+    carBrandsList.clear();
+    carModelList.clear();
+    await fetchBrands(carType!);
+  }
+
   Future<void> changeBrand(value) async {
-    log(value);
+    log(value, name: "value");
     carBrand = value;
     loadingModels.value = true;
     carModel = null;
+    carModelList.clear();
     await fetchModels(int.parse(value));
   }
 
   Future<void> getCarEditInformations() async {
-    await fetchBrands();
-    carBrand = findBrandID(carElement.brandName);
+    if (carElement.carType! == 0) carElement.carType = 1;
+    log(carElement.carType!.toString());
+    carTypeText = Lists.carTypeList[carElement.carType! - 1];
+    carType = carElement.carType;
+    await fetchBrands(carType!);
+    carBrand = getBrandName(carElement.brandName);
     await changeBrand(carBrand);
-    carModel = findModelID(carElement.modelName);
+    carModel = getModelName(carElement.modelName);
 
     carYear = carElement.year.toString();
     carFuel = carElement.fuelType;
     carTransmission = carElement.transmissionType;
-    carTypeText = getCarType(carElement.carType!);
 
     carPlate.text = carElement.plate ?? "";
     selectedKm = carElement.km;
   }
 
-  String findBrandID(value) => carBrandsList.firstWhere((element) => element.name == value).id.toString();
-  String findModelID(value) => carModelList.firstWhere((element) => element.name == value).id.toString();
+  String getBrandName(value) => carBrandsList.firstWhere((element) => element.brandName == value).brandId.toString();
+  String getModelName(value) => carModelList.firstWhere((element) => element.name == value).id.toString();
 
-  Future<void> fetchBrands() async {
+  Future<void> fetchBrands(int carType) async {
     try {
-      List<BrandElement> brandList = await ApiService.fetchBrands();
-      log(brandList.length.toString(), name: "");
-      carBrandsList.assignAll(brandList);
-    } catch (e) {
-      log("Error fetching brands: $e");
+      carBrandsList.value = await ApiService.fetchBrands(carType);
+    } catch (e, stackTrace) {
+      log("Error fetching brands: $e\n$stackTrace");
     }
+    loadingBrands.value = false;
   }
 
   Future<void> fetchModels(int brandId) async {
     try {
-      List<ModelElement> modelList = await ApiService.fetchModels(brandId);
-      carModelList.assignAll(modelList);
+      carModelList.value = await ApiService.fetchModels(brandId, carType!);
     } catch (e) {
       log("Error fetching models: $e");
     }
@@ -227,13 +244,13 @@ class MyCarsDetailController extends GetxController {
   Future checkCarInfoAndSave() async {
     if (carInfoEditKey.currentState!.validate()) {
       Map<String, dynamic> saveCarInfoMap = {
+        "car_type": carType,
         "car_id": carElement.carId,
-        "brand_id": carElement.brandId,
-        "model_id": carElement.modelId,
+        "brand_id": int.parse(carBrand!),
+        "model_id": int.parse(carModel!),
         "year": carYear,
         "fuel_type": carFuel,
         "transmission_type": carTransmission,
-        "car_type": carType,
         "plate": carPlate.text,
         "km": selectedKm,
       };
@@ -243,23 +260,6 @@ class MyCarsDetailController extends GetxController {
     } else {
       Helpers.showSnackbar("Uyarı!", "Lütfen gerekli alanları doldurunuz.");
     }
-  }
-
-  String getCarType(int carType) {
-    if (carType case 1) {
-      carTypeText = carTypeList[0];
-      return carTypeList[0];
-    } else if (carType case 2) {
-      carTypeText = carTypeList[1];
-      return carTypeList[1];
-    } else if (carType case 3) {
-      carTypeText = carTypeList[2];
-      return carTypeList[2];
-    } else if (carType case 4) {
-      carTypeText = carTypeList[3];
-      return carTypeList[3];
-    }
-    return carTypeList.first;
   }
 
   //DATE AND TIME EDIT
@@ -429,8 +429,8 @@ class MyCarsDetailController extends GetxController {
     }
   }
 
-  Future<void> deleteLocation(int location_id) async {
-    GeneralResponse generalResponse = await ApiService.DeleteLocation(location_id);
+  Future<void> deleteLocation(int locationId) async {
+    GeneralResponse generalResponse = await ApiService.DeleteLocation(locationId);
     log(generalResponse.message);
   }
 
@@ -606,7 +606,7 @@ class MyCarsDetailController extends GetxController {
         "weekly_rent": weeklyDiscount != null ? int.parse(weeklyDiscount!.replaceAll('%', '')) : 0,
         "monthly_rent": monthlyDiscount != null ? int.parse(monthlyDiscount!.replaceAll('%', '')) : 0,
         "min_day": int.parse(minRentDay.text),
-        "price": int.parse(dailyRentPrice.text),
+        "price": double.parse(dailyRentPrice.text),
         "is_long_term": isLongTerm.value ? 1 : 0,
       };
 
@@ -630,6 +630,27 @@ class MyCarsDetailController extends GetxController {
 
     GeneralResponse generalResponse = await ApiService.CarNoteEdit(editNoteMap);
     log(generalResponse.message, name: "Not edited");
+    return generalResponse;
+  }
+
+  //Active And Delete Car
+
+  RxInt isActive = 0.obs;
+
+  Future<GeneralResponse> changeActivity() async {
+    if (isActive.value == 0) {
+      isActive.value = 1;
+    } else {
+      isActive.value = 0;
+    }
+    Map<String, dynamic> activityMap = {
+      "car_id": carElement.carId,
+      "is_active": isActive.value,
+    };
+
+    GeneralResponse generalResponse = await ApiService.EditActivity(activityMap);
+    log(generalResponse.message, name: "Activity edited");
+
     return generalResponse;
   }
 }

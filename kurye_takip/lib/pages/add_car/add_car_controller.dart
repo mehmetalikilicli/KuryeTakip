@@ -55,8 +55,8 @@ class AddCarController extends GetxController {
 
   Future<void> fetchBrands() async {
     try {
-      List<BrandElement> brandList = await ApiService.fetchBrands();
-      carBrandsList.assignAll(brandList);
+      //List<BrandElement> brandList = await ApiService.fetchBrands();
+      //carBrandsList.assignAll(brandList);
     } catch (e) {
       print("Error fetching brands: $e");
     }
@@ -64,7 +64,7 @@ class AddCarController extends GetxController {
 
   Future<void> fetchModels(int brandId) async {
     try {
-      List<ModelElement> modelList = await ApiService.fetchModels(brandId);
+      List<ModelElement> modelList = await ApiService.fetchModels(brandId, 1);
       carModelList.assignAll(modelList);
     } catch (e) {
       print("Error fetching models: $e");

@@ -20,34 +20,34 @@ class Brand {
   });
 
   factory Brand.fromJson(Map<String, dynamic> json) => Brand(
-        success: json["success"],
-        message: json["message"],
-        brands: List<BrandElement>.from(json["brands"].map((x) => BrandElement.fromJson(x))),
+        success: json["Success"],
+        message: json["Message"],
+        brands: List<BrandElement>.from(json["Brands"].map((x) => BrandElement.fromJson(x))),
       );
 
   Map<String, dynamic> toJson() => {
-        "success": success,
-        "message": message,
-        "brands": List<dynamic>.from(brands.map((x) => x.toJson())),
+        "Success": success,
+        "Message": message,
+        "Brands": List<dynamic>.from(brands.map((x) => x.toJson())),
       };
 }
 
 class BrandElement {
-  int id;
-  String name;
+  String brandName;
+  int brandId;
 
   BrandElement({
-    required this.id,
-    required this.name,
+    required this.brandName,
+    required this.brandId,
   });
 
   factory BrandElement.fromJson(Map<String, dynamic> json) => BrandElement(
-        id: json["ID"],
-        name: json["name"],
+        brandName: json["BrandName"],
+        brandId: json["BrandID"],
       );
 
   Map<String, dynamic> toJson() => {
-        "ID": id,
-        "name": name,
+        "BrandName": brandName,
+        "BrandID": brandId,
       };
 }

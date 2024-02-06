@@ -1,4 +1,4 @@
-// ignore_for_file: invalid_use_of_protected_member, deprecated_member_use
+// ignore_for_file: invalid_use_of_protected_member, deprecated_member_use, non_constant_identifier_names, unused_local_variable, override_on_non_overriding_member
 
 import 'dart:async';
 import 'dart:convert';
@@ -14,6 +14,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:kurye_takip/components/lists.dart';
 import 'package:kurye_takip/helpers/helpers.dart';
 import 'package:kurye_takip/model/car_add.dart';
 import 'package:kurye_takip/model/general_response.dart';
@@ -27,43 +28,56 @@ import '../../model/model.dart';
 import '../../service/api_service.dart';
 
 class TestAddController extends GetxController {
+  @override
+  void initState() {
+    //clearAll
+  }
   //General
   PageController pageController = PageController();
 
   // PAGE-1
   final testAddPageOneFormKey = GlobalKey<FormState>();
   RxBool loadingModels = false.obs;
+  RxBool loadingBrands = false.obs;
   RxList<BrandElement> carBrandsList = <BrandElement>[].obs;
   RxList<ModelElement> carModelList = <ModelElement>[].obs;
-  List<String> carYearList = ['2020', '2021', '2022', "2023", "2024"];
-  List<String> carFuelTypeList = ['Hybrid', 'Benzin', 'Dizel'];
-  List<String> carTransmissionTypeList = ['Otomatik', 'Manuel', 'Yarı Otomatik'];
-  List<String> carTypeList = ['Otomobil', 'Motosiklet', 'Ticari', 'Karavan'];
 
-  String? carBrand, carModel, carYear, carFuel, carTransmission;
-  int? carType;
+  String? carBrand, carModel, carYear, carFuel, carTransmission, carTypeText;
+  int? carTypeIndex;
 
-  void changeBrand(value) {
-    carBrand = value;
+  Future<void> changeCarType(value) async {
+    carTypeIndex = Lists.carTypeList.indexOf(value) + 1;
+    carTypeText = Lists.carTypeList[carTypeIndex! - 1];
+
+    loadingBrands.value = true;
+    carBrand = null;
+    carModel = null;
+    carBrandsList.clear();
+    carModelList.clear();
+
+    await fetchBrands(carTypeIndex!);
+  }
+
+  //Modelde eklenmeli
+  Future<void> changeBrand(selectedBrand) async {
+    carBrand = selectedBrand;
     loadingModels.value = true;
     carModel = null;
-    fetchModels(int.parse(value));
+    await fetchModels(int.parse(selectedBrand), carTypeIndex!);
   }
 
-  Future<void> fetchBrands() async {
-    if (carBrandsList.value.isEmpty) {
-      try {
-        List<BrandElement> brandList = await ApiService.fetchBrands();
-        carBrandsList.assignAll(brandList);
-      } catch (e) {
-        log("Error fetching brands: $e");
-      }
-    }
-  }
-
-  Future<void> fetchModels(int brandId) async {
+  Future<void> fetchBrands(int carType) async {
     try {
-      List<ModelElement> modelList = await ApiService.fetchModels(brandId);
+      carBrandsList.value = await ApiService.fetchBrands(carType);
+    } catch (e) {
+      log("Error fetching brands: $e");
+    }
+    loadingBrands.value = false;
+  }
+
+  Future<void> fetchModels(int brandId, int carType) async {
+    try {
+      List<ModelElement> modelList = await ApiService.fetchModels(brandId, carType);
       carModelList.assignAll(modelList);
     } catch (e) {
       log("Error fetching models: $e");
@@ -87,6 +101,8 @@ class TestAddController extends GetxController {
   TextEditingController phone = TextEditingController();
   TextEditingController email = TextEditingController();
 
+  String? userName, userSurname, userPhone, userEmail;
+
   void checkPageTwoComplete() async {
     if (testAddPageTwoFormKey.currentState!.validate()) {
       pageController.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.ease);
@@ -105,7 +121,6 @@ class TestAddController extends GetxController {
   final googleMapController = Completer<GoogleMapController>();
   RxString gmAddressText = "".obs, rxCity = "".obs, rxDistrict = "".obs, address = "".obs;
   String district = "", city = "";
-  List<String> kmList = ['0 - 29.999', '30.000 - 59.999', '60.000 - 89.999', '90.000 ve üzeri'];
   TextEditingController carPlate = TextEditingController();
   String? selectedKm;
 
@@ -259,12 +274,12 @@ class TestAddController extends GetxController {
 
   RxBool isLongTerm = false.obs;
 
-  int recomendation_price = 0;
+  String recomendation_price = "";
 
   Future<void> monthlyRentPriceCalculator() async {
     if (testAddPageSixFormKey.currentState!.validate()) {
       double monthlyPrice = double.parse(dailyRentPrice.text.trim()) * 30;
-      Get.dialog(AppCustomDialog(title: "Aylık Kira Ücreti", message: "${monthlyPrice.toStringAsFixed(2)} ₺"));
+      Get.dialog(AppCustomDialog(title: "Aylık kira getirisi", message: "${monthlyPrice.toStringAsFixed(2)} ₺"));
     } else {
       Helpers.showSnackbar("Uyarı!", "Lütfen gerekli alanları doldurunuz.");
     }
@@ -290,24 +305,24 @@ class TestAddController extends GetxController {
   //Sonra fotoğraflarının kaydı
   Future<bool> saveCar() async {
     Map<String, dynamic> carMap = {
-      "user_id": int.parse(getLocalUserID()),
+      "user_id": int.parse(getLocalUserInfo()),
       "brand_id": int.parse(carBrand.toString()),
       "model_id": int.parse(carModel.toString()),
       "fuel_type": carFuel.toString(),
       "transmission_type": carTransmission.toString(),
-      "car_type": carType,
       "daily_price": int.parse(dailyRentPrice.text),
       "year": carYear,
       "plate": carPlate.text,
       "km": selectedKm.toString(),
       "note": note.text,
+      "car_type": carTypeIndex,
       "weekly_rent_discount": weeklyDiscount != null ? int.parse(weeklyDiscount!.replaceAll('%', '')) : 0,
       "monthly_rent_discount": monthlyDiscount != null ? int.parse(monthlyDiscount!.replaceAll('%', '')) : 0,
       "min_rent_day": int.parse(minRentDay.text),
-      "user_name": name.text,
-      "user_surname": surname.text,
-      "user_email": email.text,
-      "user_phone": phone.text,
+      "user_name": userName,
+      "user_surname": userSurname,
+      "user_email": userEmail,
+      "user_phone": userPhone,
       "is_long_term": isLongTerm.value ? 1 : 0,
       "is_approved": 1,
       "is_available_date_start": availableCarDateStart.toIso8601String(),
@@ -431,14 +446,17 @@ class TestAddController extends GetxController {
     }
   }
 
-  User user = User();
-
-  String getLocalUserID() {
+  String getLocalUserInfo() {
+    User user = User();
     final box = GetStorage();
     final userData = box.read('user_data');
     if (userData != null) {
       user = User.fromJson(userData);
       userId = Helpers.decryption(user.code.toString());
+      userName = user.name;
+      userSurname = user.surname;
+      userEmail = user.email;
+      userPhone = user.phone;
       return userId.toString();
     }
     return "";

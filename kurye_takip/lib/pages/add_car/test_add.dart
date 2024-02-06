@@ -1,6 +1,7 @@
 // ignore_for_file: invalid_use_of_protected_member, must_be_immutable, unused_import, avoid_print, prefer_const_constructors
 
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,6 +12,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:kurye_takip/components/lists.dart';
 import 'package:kurye_takip/helpers/custom_dialog.dart';
 import 'package:kurye_takip/pages/add_car/test_add_controller.dart';
 import 'package:kurye_takip/pages/dashboard/dashboard.dart';
@@ -32,10 +34,10 @@ class TestAddCarView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text("ARAÇ EKLEME")),
       body: PageView(
-        //physics: NeverScrollableScrollPhysics(),
+        physics: NeverScrollableScrollPhysics(),
         controller: controller.pageController,
         children: const [
-          TestAddPageTwo(),
+          //TestAddPageTwo(),
           TestAddPageOne(),
           TestAddPageThree(),
           TestAddPageFour(),
@@ -53,24 +55,35 @@ class TestAddPageOne extends GetView<TestAddController> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: controller.fetchBrands(),
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return const FutureErrorWidget();
-        } else if (snapshot.connectionState == ConnectionState.waiting) {
-          return const FutureLoadingWidget();
-        } else {
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Form(
-              key: controller.testAddPageOneFormKey,
-              child: Column(
-                children: [
-                  const Align(alignment: Alignment.centerLeft, child: Text("Araç Bilgileri - 1", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600))),
-                  const Divider(height: 12),
-                  Obx(
-                    () => DropdownButtonFormField2(
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Form(
+        key: controller.testAddPageOneFormKey,
+        child: Column(
+          children: [
+            const Align(alignment: Alignment.centerLeft, child: Text("Araç Bilgileri - 1", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600))),
+            const Divider(height: 12),
+            DropdownButtonFormField2(
+              decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Araç türünü seçiniz", Icons.list, Colors.black),
+              isExpanded: true,
+              icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
+              iconSize: 20,
+              buttonPadding: const EdgeInsets.only(),
+              dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+              dropdownPadding: EdgeInsets.zero,
+              items: Lists.carTypeList.map((item) => DropdownMenuItem<String>(value: item, child: Text(item))).toList(),
+              selectedItemHighlightColor: AppColors.primaryColor,
+              onChanged: (value) => controller.changeCarType(value),
+              validator: (value) => value == null ? "Lütfen araç türünü seçiniz" : null,
+              value: controller.carTypeText,
+              dropdownOverButton: true,
+              dropdownMaxHeight: Get.height * .25,
+              scrollbarAlwaysShow: true,
+            ),
+            const SizedBox(height: 8),
+            Obx(
+              () => controller.loadingBrands.isTrue
+                  ? DropdownButtonFormField2(
                       decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Marka seçiniz", Icons.list, Colors.black),
                       isExpanded: true,
                       icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
@@ -78,7 +91,19 @@ class TestAddPageOne extends GetView<TestAddController> {
                       buttonPadding: const EdgeInsets.only(),
                       dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
                       dropdownPadding: EdgeInsets.zero,
-                      items: controller.carBrandsList.value.map((item) => DropdownMenuItem<String>(value: item.id.toString(), child: Text(item.name))).toList(),
+                      items: const [],
+                    )
+                  : DropdownButtonFormField2(
+                      decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Marka seçiniz", Icons.list, Colors.black),
+                      isExpanded: true,
+                      icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
+                      iconSize: 20,
+                      buttonPadding: const EdgeInsets.only(),
+                      dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+                      dropdownPadding: EdgeInsets.zero,
+                      items: controller.carBrandsList.value
+                          .map((item) => DropdownMenuItem<String>(value: item.brandId.toString(), child: Text(item.brandName)))
+                          .toList(),
                       selectedItemHighlightColor: AppColors.primaryColor,
                       onChanged: (value) => controller.changeBrand(value),
                       validator: (value) => value == null ? "Lütfen araç markası seçiniz" : null,
@@ -87,147 +112,119 @@ class TestAddPageOne extends GetView<TestAddController> {
                       dropdownMaxHeight: Get.height * .25,
                       scrollbarAlwaysShow: true,
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Obx(
-                    () => controller.loadingModels.isTrue
-                        ? DropdownButtonFormField2(
-                            decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Model seçiniz", Icons.list, Colors.black),
-                            isExpanded: true,
-                            icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
-                            iconSize: 20,
-                            buttonPadding: const EdgeInsets.only(),
-                            dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
-                            dropdownPadding: EdgeInsets.zero,
-                            items: const [],
-                          )
-                        : DropdownButtonFormField2(
-                            decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Model seçiniz", Icons.list, Colors.black),
-                            isExpanded: true,
-                            icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
-                            iconSize: 20,
-                            buttonPadding: const EdgeInsets.only(),
-                            dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
-                            dropdownPadding: EdgeInsets.zero,
-                            items: controller.carModelList.value
-                                .map((item) => DropdownMenuItem<String>(value: item.id.toString(), child: Text(item.name)))
-                                .toList(),
-                            selectedItemHighlightColor: AppColors.primaryColor,
-                            onChanged: (value) {
-                              controller.carModel = value;
-                              final selectedModel = controller.carModelList.value.firstWhere((item) => item.id.toString() == value);
-                              controller.recomendation_price = selectedModel.recomendation_price;
-                            },
-                            validator: (value) => value == null ? "Lütfen araç modeli seçiniz" : null,
-                            value: controller.carModel,
-                            dropdownOverButton: true,
-                            dropdownMaxHeight: Get.height * .25,
-                            scrollbarAlwaysShow: true,
-                          ),
-                  ),
-                  const SizedBox(height: 8),
-                  DropdownButtonFormField2(
-                    decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Model yılı seçiniz", Icons.list, Colors.black),
-                    isExpanded: true,
-                    icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
-                    iconSize: 20,
-                    buttonPadding: const EdgeInsets.only(),
-                    dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
-                    dropdownPadding: EdgeInsets.zero,
-                    items: controller.carYearList.map((item) => DropdownMenuItem<String>(value: item, child: Text(item))).toList(),
-                    selectedItemHighlightColor: AppColors.primaryColor,
-                    onChanged: (value) => controller.carYear = value,
-                    validator: (value) => value == null ? "Lütfen araç model yılını seçiniz" : null,
-                    value: controller.carYear,
-                    dropdownOverButton: true,
-                    dropdownMaxHeight: Get.height * .25,
-                    scrollbarAlwaysShow: true,
-                  ),
-                  const SizedBox(height: 8),
-                  DropdownButtonFormField2(
-                    decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Yakıt türü seçiniz", Icons.list, Colors.black),
-                    isExpanded: true,
-                    icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
-                    iconSize: 20,
-                    buttonPadding: const EdgeInsets.only(),
-                    dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
-                    dropdownPadding: EdgeInsets.zero,
-                    items: controller.carFuelTypeList.map((item) => DropdownMenuItem<String>(value: item, child: Text(item))).toList(),
-                    selectedItemHighlightColor: AppColors.primaryColor,
-                    onChanged: (value) => controller.carFuel = value,
-                    validator: (value) => value == null ? "Lütfen yakıt türünü seçiniz" : null,
-                    value: controller.carFuel,
-                    dropdownOverButton: true,
-                    dropdownMaxHeight: Get.height * .25,
-                    scrollbarAlwaysShow: true,
-                  ),
-                  const SizedBox(height: 8),
-                  DropdownButtonFormField2(
-                    decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Vites türü seçiniz", Icons.list, Colors.black),
-                    isExpanded: true,
-                    icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
-                    iconSize: 20,
-                    buttonPadding: const EdgeInsets.only(),
-                    dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
-                    dropdownPadding: EdgeInsets.zero,
-                    items: controller.carTransmissionTypeList.map((item) => DropdownMenuItem<String>(value: item, child: Text(item))).toList(),
-                    selectedItemHighlightColor: AppColors.primaryColor,
-                    onChanged: (value) => controller.carTransmission = value,
-                    validator: (value) => value == null ? "Lütfen vites türünü seçiniz" : null,
-                    value: controller.carTransmission,
-                    dropdownOverButton: true,
-                    dropdownMaxHeight: Get.height * .25,
-                    scrollbarAlwaysShow: true,
-                  ),
-                  const SizedBox(height: 8),
-                  DropdownButtonFormField2(
-                    decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Araç türünü seçiniz", Icons.list, Colors.black),
-                    isExpanded: true,
-                    icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
-                    iconSize: 20,
-                    buttonPadding: const EdgeInsets.only(),
-                    dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
-                    dropdownPadding: EdgeInsets.zero,
-                    items: controller.carTypeList.map((item) => DropdownMenuItem<String>(value: item, child: Text(item))).toList(),
-                    selectedItemHighlightColor: AppColors.primaryColor,
-                    onChanged: (value) {
-                      if (value != null) {
-                        int selectedIndex = controller.carTypeList.indexOf(value.toString());
-                        print("Selected Index: $selectedIndex");
-                        controller.carType = selectedIndex + 1;
-                      }
-                    },
-                    validator: (value) => value == null ? "Lütfen araç türünü seçiniz" : null,
-                    value: controller.carType,
-                    dropdownOverButton: true,
-                    dropdownMaxHeight: Get.height * .25,
-                    scrollbarAlwaysShow: true,
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      OutlinedButton(
-                        style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                        onPressed: () => controller.pageController.previousPage(duration: const Duration(milliseconds: 300), curve: Curves.ease),
-                        child: const Text("Geri"),
-                      ),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: OutlinedButton(
-                          style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                          onPressed: () => controller.checkPageOneComplete(),
-                          child: const Text("İlerle"),
-                        ),
-                      ),
-                    ],
-                  )
-                ],
-              ),
             ),
-          );
-        }
-      },
+            const SizedBox(height: 8),
+            Obx(
+              () => controller.loadingModels.isTrue
+                  ? DropdownButtonFormField2(
+                      decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Model seçiniz", Icons.list, Colors.black),
+                      isExpanded: true,
+                      icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
+                      iconSize: 20,
+                      buttonPadding: const EdgeInsets.only(),
+                      dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+                      dropdownPadding: EdgeInsets.zero,
+                      items: const [],
+                    )
+                  : DropdownButtonFormField2(
+                      decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Model seçiniz", Icons.list, Colors.black),
+                      isExpanded: true,
+                      icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
+                      iconSize: 20,
+                      buttonPadding: const EdgeInsets.only(),
+                      dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+                      dropdownPadding: EdgeInsets.zero,
+                      items: controller.carModelList.value.map((item) => DropdownMenuItem<String>(value: item.id.toString(), child: Text(item.name))).toList(),
+                      selectedItemHighlightColor: AppColors.primaryColor,
+                      onChanged: (value) {
+                        controller.carModel = value;
+                        final selectedModel = controller.carModelList.value.firstWhere((item) => item.id.toString() == value);
+                        controller.recomendation_price = "${selectedModel.min_recomendation_price ?? 0} - ${selectedModel.max_recomendation_price ?? 0}";
+                        controller.carTypeIndex = selectedModel.car_type;
+                      },
+                      validator: (value) => value == null ? "Lütfen araç modeli seçiniz" : null,
+                      value: controller.carModel,
+                      dropdownOverButton: true,
+                      dropdownMaxHeight: Get.height * .25,
+                      scrollbarAlwaysShow: true,
+                    ),
+            ),
+            const SizedBox(height: 8),
+            DropdownButtonFormField2(
+              decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Model yılı seçiniz", Icons.list, Colors.black),
+              isExpanded: true,
+              icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
+              iconSize: 20,
+              buttonPadding: const EdgeInsets.only(),
+              dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+              dropdownPadding: EdgeInsets.zero,
+              items: Lists.generateCarYearList().map((item) => DropdownMenuItem<String>(value: item, child: Text(item))).toList(),
+              selectedItemHighlightColor: AppColors.primaryColor,
+              onChanged: (value) => controller.carYear = value,
+              validator: (value) => value == null ? "Lütfen araç model yılını seçiniz" : null,
+              value: controller.carYear,
+              dropdownOverButton: true,
+              dropdownMaxHeight: Get.height * .25,
+              scrollbarAlwaysShow: true,
+            ),
+            const SizedBox(height: 8),
+            DropdownButtonFormField2(
+              decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Yakıt türü seçiniz", Icons.list, Colors.black),
+              isExpanded: true,
+              icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
+              iconSize: 20,
+              buttonPadding: const EdgeInsets.only(),
+              dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+              dropdownPadding: EdgeInsets.zero,
+              items: Lists.carFuelTypeList.map((item) => DropdownMenuItem<String>(value: item, child: Text(item))).toList(),
+              selectedItemHighlightColor: AppColors.primaryColor,
+              onChanged: (value) => controller.carFuel = value,
+              validator: (value) => value == null ? "Lütfen yakıt türünü seçiniz" : null,
+              value: controller.carFuel,
+              dropdownOverButton: true,
+              dropdownMaxHeight: Get.height * .25,
+              scrollbarAlwaysShow: true,
+            ),
+            const SizedBox(height: 8),
+            DropdownButtonFormField2(
+              decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Vites türü seçiniz", Icons.list, Colors.black),
+              isExpanded: true,
+              icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
+              iconSize: 20,
+              buttonPadding: const EdgeInsets.only(),
+              dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+              dropdownPadding: EdgeInsets.zero,
+              items: Lists.carTransmissionTypeList.map((item) => DropdownMenuItem<String>(value: item, child: Text(item))).toList(),
+              selectedItemHighlightColor: AppColors.primaryColor,
+              onChanged: (value) => controller.carTransmission = value,
+              validator: (value) => value == null ? "Lütfen vites türünü seçiniz" : null,
+              value: controller.carTransmission,
+              dropdownOverButton: true,
+              dropdownMaxHeight: Get.height * .25,
+              scrollbarAlwaysShow: true,
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                /*OutlinedButton(
+                  style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                  onPressed: () => controller.pageController.previousPage(duration: const Duration(milliseconds: 300), curve: Curves.ease),
+                  child: const Text("Geri"),
+                ),*/
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                    onPressed: () => controller.checkPageOneComplete(),
+                    child: const Text("İlerle"),
+                  ),
+                ),
+              ],
+            )
+          ],
+        ),
+      ),
     );
   }
 }
@@ -322,7 +319,7 @@ class TestAddPageThree extends GetView<TestAddController> {
               buttonPadding: const EdgeInsets.only(),
               dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
               dropdownPadding: EdgeInsets.zero,
-              items: controller.kmList.map((item) => DropdownMenuItem<String>(value: item, child: Text(item))).toList(),
+              items: Lists.kmList.map((item) => DropdownMenuItem<String>(value: item, child: Text(item))).toList(),
               selectedItemHighlightColor: AppColors.primaryColor,
               onChanged: (value) => controller.selectedKm = value,
               validator: (value) => value == null ? "Lütfen km bilgisi seçiniz." : null,
@@ -418,7 +415,7 @@ class TestAddPageFour extends GetView<TestAddController> {
                       controller.availableCarDateStart = result.start;
                       controller.availableCarDateEnd = result.end;
 
-                      controller.availableCarDate.text = "${DateFormat('dd-MM-yyyy').format(result.start)} - ${DateFormat('dd-MM-yyyy').format(result.end)}";
+                      controller.availableCarDate.text = "${DateFormat('dd.MM.yyyy').format(result.start)} - ${DateFormat('dd.MM.yyyy').format(result.end)}";
                     } else {}
                   },
                 ),
@@ -868,7 +865,12 @@ class AppCustomDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: title != null ? Text(title!) : null,
+      title: title != null
+          ? Text(
+              title!,
+              textAlign: TextAlign.center,
+            )
+          : null,
       content: message != null ? Text(message!) : null,
       actions: <Widget>[
         TextButton(
@@ -958,8 +960,17 @@ class TestAddSelectLocationCarOwner extends GetView<TestAddController> {
                       city: controller.rxCity.value,
                       district: controller.rxDistrict.value,
                     );
-                    controller.locations.add(carLocation);
-                    Get.back();
+
+                    if (carLocation.city != "İzmir") {
+                      CustomDialog.showMessage(
+                        context: context,
+                        title: "Konum Yanlış",
+                        message: "Şu an sadece İzmir konumuna izin verilmektedir.",
+                      );
+                    } else {
+                      controller.locations.add(carLocation);
+                      Get.back();
+                    }
                   },
                   style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFFA3080C)),

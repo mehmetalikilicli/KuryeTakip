@@ -2,6 +2,7 @@
 // ignore_for_file: depend_on_referenced_packages, duplicate_ignore, non_constant_identifier_names, unnecessary_brace_in_string_interps
 
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:http/http.dart' as http;
 import 'package:kurye_takip/model/brand.dart';
@@ -17,8 +18,8 @@ class ApiService {
   static const String baseUrl = 'https://rentekerapi.takipsa.com';
 
   //Brand
-  static Future<List<BrandElement>> fetchBrands() async {
-    final response = await http.get(Uri.parse("$baseUrl/Brand/GetBrands"));
+  static Future<List<BrandElement>> fetchBrands(int carType) async {
+    final response = await http.get(Uri.parse("$baseUrl/Brand/GetBrands?car_type=${carType}"));
 
     if (response.statusCode == 200) {
       return brandFromJson(response.body).brands;
@@ -28,9 +29,9 @@ class ApiService {
   }
 
   //Model
-  static Future<List<ModelElement>> fetchModels(int brandId) async {
+  static Future<List<ModelElement>> fetchModels(int brandId, int carType) async {
     final response = await http.post(
-      Uri.parse("$baseUrl/Model/GetModels?brandId=$brandId"),
+      Uri.parse("$baseUrl/Model/GetModels?brandId=$brandId&carType=$carType"),
     );
 
     if (response.statusCode == 200) {
@@ -158,7 +159,9 @@ class ApiService {
       Uri.parse("$baseUrl/Notification/GetRentNotifications?renter_id=$renter_id"),
     );
     if (response.statusCode == 200) {
-      return rentRequestNotificationFromJson(response.body);
+      final result = rentRequestNotificationFromJson(response.body);
+      log('Result Type: ${result.runtimeType}');
+      return result;
     } else {
       throw Exception('Failed to load data');
     }
@@ -226,7 +229,7 @@ class ApiService {
 
   static Future<GeneralResponse> editCarInfo(Map body) async {
     final String requestBody = json.encode(body);
-
+    log(requestBody, name: "Edit Body");
     final response = await http.post(
       Uri.parse('$baseUrl/Car/CarInfoEdit'),
       headers: {'Content-Type': 'application/json'},
@@ -299,4 +302,57 @@ class ApiService {
       throw Exception('Failed to load data');
     }
   }
+
+  static Future<GeneralResponse> EditActivity(Map body) async {
+    final String requestBody = json.encode(body);
+
+    final response = await http.post(
+      Uri.parse("$baseUrl/Car/ChangeActivity"),
+      headers: {'Content-Type': 'application/json'},
+      body: requestBody,
+    );
+    if (response.statusCode == 200) {
+      return GeneralResponse.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to load data');
+    }
+  }
+
+  static Future<GeneralResponse> CarRentPhoto(Map body) async {
+    final String requestBody = json.encode(body);
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/Photo/AddRentPhotos'),
+      headers: {'Content-Type': 'application/json'},
+      body: requestBody,
+    );
+
+    if (response.statusCode == 200) {
+      return GeneralResponse.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to create');
+    }
+  }
+
+  static Future<GeneralResponse> PayPrice(notificationId) async {
+    final response = await http.post(
+      Uri.parse("$baseUrl/Notification/PayPrice?notification_id=$notificationId"),
+    );
+    if (response.statusCode == 200) {
+      return GeneralResponse.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to load data');
+    }
+  }
+/*
+  static Future<GeneralResponse> GetRentPhotos(photoFrom, rentType) async {
+    final response = await http.post(
+      Uri.parse("$baseUrl/Photo/PayPrice?notification_id=$notificationId"),
+    );
+    if (response.statusCode == 200) {
+      return GeneralResponse.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to load data');
+    }
+  }*/
 }

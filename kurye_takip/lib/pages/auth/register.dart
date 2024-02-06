@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use, unnecessary_null_comparison, use_build_context_synchronously, duplicate_ignore, avoid_print
+// ignore_for_file: deprecated_member_use, unnecessary_null_comparison, use_build_context_synchronously, duplicate_ignore, avoid_print, unrelated_type_equality_checks
 
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
@@ -111,6 +111,7 @@ class RegisterPage extends StatelessWidget {
                           ),
                           validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
                         ),*/
+
                           const SizedBox(height: 8),
                           Obx(
                             () => TextFormField(
@@ -757,6 +758,18 @@ class RegisterPage extends StatelessWidget {
                                     ? "Şifreler uyuşmuyor"
                                     : null),
                       ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text("Ticari bir amacınız var mı?(Rentacar)"),
+                          Obx(() => Switch(
+                                value: controller.isCommercial.value,
+                                onChanged: (value) {
+                                  controller.isCommercial.value = value;
+                                },
+                              )),
+                        ],
+                      ),
                       Padding(
                         padding: const EdgeInsets.only(top: 8.0),
                         child: Row(
@@ -790,6 +803,7 @@ class RegisterPage extends StatelessWidget {
                                   controller.registerModel2.email = controller.ownerMail.text;
                                   controller.registerModel2.password = Helpers.encryption(controller.ownerPassword.text);
                                   controller.registerModel2.is_vehicle_owner = 1;
+                                  controller.registerModel2.is_commercial = controller.isCommercial == true ? 1 : 0;
                                   try {
                                     RegisterResponse registerResponse = await controller.Register(controller.registerModel2);
 
