@@ -1,4 +1,6 @@
-// ignore_for_file: unnecessary_null_comparison, sized_box_for_whitespace, deprecated_member_use, invalid_use_of_protected_member, unused_local_variable
+// ignore_for_file: invalid_use_of_protected_member, unused_local_variable, unnecessary_null_comparison, deprecated_member_use, unused_import
+
+import 'dart:developer';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -7,7 +9,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:kurye_takip/app_constants/app_colors.dart';
 import 'package:kurye_takip/components/lists.dart';
 import 'package:kurye_takip/model/cars_list.dart';
@@ -27,18 +29,37 @@ class _DashboardState extends State<Dashboard> {
   final DashboardController controller = Get.put(DashboardController());
 
   @override
+  void initState() {
+    super.initState();
+    controller.fetchData();
+    //log("controller.fetchData()");
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          controller.FillTheMarkers(controller.filteredCars);
+          Get.dialog(const SeeCarLocations());
+        },
+        child: const Icon(CupertinoIcons.location_solid),
+      ),
       drawer: const DashboardDrawer(),
       extendBodyBehindAppBar: false,
       backgroundColor: Colors.white,
       appBar: AppBar(
+        /*
+        leading: IconButton(
+          icon: Icon(Icons.filter_alt_outlined),
+          onPressed: () => Scaffold.of(context).openDrawer(),
+        ),*/
         actions: [
           ClipRRect(
             child: IconButton(
               icon: const Icon(Icons.person_2_outlined),
               onPressed: () {
-                Get.to(const ProfilePage());
+                Get.to(const ProfilePage())!.then((value) => controller.fetchData());
               },
             ),
           ),
@@ -66,28 +87,70 @@ class _DashboardState extends State<Dashboard> {
                       //CustomCarouselSlider(carController: carController),
                       DashboardSlider(dashboardController: controller),
                       const VehicleTypes(),
+
+                      const SizedBox(height: 4),
+                      TextFormField(
+                        readOnly: true,
+                        controller: controller.filterDateText,
+                        decoration: InputWidgets()
+                            .dateDecoration(Colors.grey, Colors.red, "Takvim Aralığı Seçiniz")
+                            .copyWith(suffixIcon: IconButton(onPressed: () => controller.clearDate(), icon: const Icon(Icons.close))),
+                        onTap: () async {
+                          final result = await showDateRangePicker(
+                            context: context,
+                            firstDate: DateTime.now(),
+                            lastDate: DateTime.now().add(const Duration(days: 365)),
+                          );
+                          if (result != null) {
+                            controller.dateChanged(result);
+                          } else {}
+                        },
+                      ),
+                      const SizedBox(height: 4),
+                      OutlinedButton(
+                        style: ButtonStyle(
+                          minimumSize: MaterialStateProperty.all(Size(Get.width, 40)),
+                          foregroundColor: MaterialStateProperty.all(Colors.blue.shade800),
+                          visualDensity: VisualDensity.comfortable,
+                          side: MaterialStateProperty.all(BorderSide(color: Colors.blue.shade800)),
+                          shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                        ),
+                        onPressed: () {
+                          Scaffold.of(context).openDrawer();
+                        },
+                        child: const AutoSizeText("Filtreler", minFontSize: 10, maxFontSize: 16, maxLines: 1),
+                      ),
                     ],
                   ),
                   Obx(
-                    () => ListView.separated(
-                      padding: const EdgeInsets.only(top: 8),
-                      shrinkWrap: true,
-                      primary: false,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: controller.filteredCars.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return GestureDetector(
-                          onTap: () {
-                            Get.to(
-                              () => CarDetailView(carElement: controller.filteredCars[index], isfloatingActionButtonActive: true, isAppBarActive: true),
-                            );
-                          },
-                          child: CarElementCard(carItem: controller.filteredCars[index], index: index),
-                        );
-                      },
-                      separatorBuilder: (context, index) => const SizedBox(height: 8),
-                    ),
-                  )
+                    () => controller.filteredCars.isNotEmpty
+                        ? ListView.separated(
+                            padding: const EdgeInsets.only(top: 4),
+                            shrinkWrap: true,
+                            primary: false,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: controller.filteredCars.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return GestureDetector(
+                                onTap: () {
+                                  Get.to(
+                                    () => CarDetailView(carElement: controller.filteredCars[index], isfloatingActionButtonActive: true, isAppBarActive: true),
+                                  );
+                                },
+                                child: CarElementCard(carItem: controller.filteredCars[index], index: index),
+                              );
+                            },
+                            separatorBuilder: (context, index) => const SizedBox(height: 8),
+                          )
+                        : const Column(
+                            children: [
+                              SizedBox(height: 100),
+                              Center(
+                                child: Text("Seçtiğiniz filtrelere uygun araç bulunmamaktadır."),
+                              ),
+                            ],
+                          ),
+                  ),
                 ],
               ),
             );
@@ -122,30 +185,31 @@ class DashboardDrawer extends GetView<DashboardController> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Padding(
+                      /*const Padding(
                         padding: EdgeInsets.fromLTRB(4, 8, 0, 2),
                         child: Text("Tarih Aralığı", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                       ),
-                      TextFormField(
-                        readOnly: true,
-                        controller: controller.filterDateText,
-                        decoration: InputWidgets().dateDecoration(Colors.grey, Colors.red, "Takvim Aralığı Seçiniz").copyWith(
-                              suffixIcon: IconButton(onPressed: () => controller.clearDate(), icon: const Icon(Icons.close)),
-                            ),
-                        onTap: () async {
-                          final result = await showDateRangePicker(
-                            context: context,
-                            firstDate: DateTime.now(),
-                            lastDate: DateTime.now().add(const Duration(days: 365)),
-                          );
-                          if (result != null) {
-                            controller.filterDateStart = result.start;
-                            controller.filterDateEnd = result.end;
-                            controller.filterDateText.text =
-                                "${DateFormat('dd.MM.yyyy').format(result.start)} - ${DateFormat('dd.MM.yyyy').format(result.end)}";
-                          } else {}
-                        },
-                      ),
+                      Obx(
+                        () => TextFormField(
+                          readOnly: true,
+                          controller: controller.filterDateText,
+                          decoration: InputWidgets().dateDecoration(Colors.grey, Colors.red, "Takvim Aralığı Seçiniz").copyWith(
+                                suffixIcon: controller.isDateCloseIconShow.value
+                                    ? IconButton(onPressed: () => controller.clearDate(), icon: const Icon(Icons.close))
+                                    : Container(),
+                              ),
+                          onTap: () async {
+                            final result = await showDateRangePicker(
+                              context: context,
+                              firstDate: DateTime.now(),
+                              lastDate: DateTime.now().add(const Duration(days: 365)),
+                            );
+                            if (result != null) {
+                              controller.dateChanged(result);
+                            } else {}
+                          },
+                        ),
+                      ),*/
                       const Padding(
                         padding: EdgeInsets.fromLTRB(4, 8, 0, 2),
                         child: Text("Marka", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
@@ -223,7 +287,7 @@ class DashboardDrawer extends GetView<DashboardController> {
                         buttonPadding: const EdgeInsets.only(),
                         dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
                         dropdownPadding: EdgeInsets.zero,
-                        items: Lists.carFuelTypeList.map((item) => DropdownMenuItem<String>(value: item, child: Text(item))).toList(),
+                        items: Lists.drawerCarFuelTypeList.map((item) => DropdownMenuItem<String>(value: item, child: Text(item))).toList(),
                         selectedItemHighlightColor: AppColors.primaryColor,
                         onChanged: (value) => controller.carFuel = value,
                         value: controller.carFuel,
@@ -243,7 +307,7 @@ class DashboardDrawer extends GetView<DashboardController> {
                         buttonPadding: const EdgeInsets.only(),
                         dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
                         dropdownPadding: EdgeInsets.zero,
-                        items: Lists.carTransmissionTypeList.map((item) => DropdownMenuItem<String>(value: item, child: Text(item))).toList(),
+                        items: Lists.drawerCarTransmissionTypeList.map((item) => DropdownMenuItem<String>(value: item, child: Text(item))).toList(),
                         selectedItemHighlightColor: AppColors.primaryColor,
                         onChanged: (value) => controller.carTransmission = value,
                         value: controller.carTransmission,
@@ -251,7 +315,7 @@ class DashboardDrawer extends GetView<DashboardController> {
                         dropdownMaxHeight: Get.height * .25,
                         scrollbarAlwaysShow: true,
                       ),
-                      const Padding(
+                      /*const Padding(
                         padding: EdgeInsets.fromLTRB(4, 8, 0, 2),
                         child: Text("Min. Kiralama Süresi (Gün)", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                       ),
@@ -259,7 +323,7 @@ class DashboardDrawer extends GetView<DashboardController> {
                         controller: controller.minRentDay,
                         keyboardType: TextInputType.number,
                         decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Minimum Kira günü", CupertinoIcons.calendar, Colors.black),
-                      ),
+                      ),*/
                       const Padding(
                         padding: EdgeInsets.fromLTRB(4, 8, 0, 2),
                         child: Text("Fiyat Aralığı", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
@@ -360,7 +424,7 @@ class DashboardDrawer extends GetView<DashboardController> {
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           ),
                           onPressed: () {
-                            controller.applyFilters();
+                            controller.applyFilters2();
                             Get.back();
                           },
                           child: const Text("Uygula", style: TextStyle(color: Colors.green)),
@@ -389,7 +453,7 @@ class DashboardSlider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CarouselSlider.builder(
-      itemCount: dashboardController.bannerSvgAssets.length,
+      itemCount: dashboardController.bannerSvgAssets2.length,
       options: CarouselOptions(
         viewportFraction: 1,
         autoPlay: true,
@@ -397,12 +461,12 @@ class DashboardSlider extends StatelessWidget {
         enlargeCenterPage: true,
       ),
       itemBuilder: (context, index, realIdx) {
-        if (index < dashboardController.bannerSvgAssets.length) {
+        if (index < dashboardController.bannerSvgAssets2.length) {
           return Center(
             child: ClipRRect(
               borderRadius: BorderRadius.circular(12),
-              child: SvgPicture.asset(
-                dashboardController.bannerSvgAssets[index],
+              child: Image.asset(
+                dashboardController.bannerSvgAssets2[index],
                 fit: BoxFit.cover,
                 width: MediaQuery.of(context).size.width - 8,
               ),
@@ -708,7 +772,7 @@ class CarCategoryButton extends GetView<DashboardController> {
     double buttonWidth = Get.width / 2 - 24;
 
     return Obx(
-      () => Container(
+      () => SizedBox(
         width: buttonWidth,
         child: OutlinedButton(
           style: OutlinedButton.styleFrom(
@@ -727,6 +791,58 @@ class CarCategoryButton extends GetView<DashboardController> {
               Text(title),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class SeeCarLocations extends GetView<DashboardController> {
+  const SeeCarLocations({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      insetPadding: const EdgeInsets.all(0),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+      contentPadding: const EdgeInsets.all(0),
+      content: SizedBox(
+        height: Get.height * 0.9,
+        width: Get.width * 0.9,
+        child: Stack(
+          alignment: Alignment.topCenter,
+          children: [
+            GoogleMap(
+              markers: controller.carsMarkers,
+              myLocationEnabled: true,
+              zoomControlsEnabled: false,
+              myLocationButtonEnabled: false,
+              mapType: MapType.normal,
+              initialCameraPosition: controller.cameraPosition,
+              onMapCreated: (GoogleMapController gmcontroller) {
+                if (!controller.googleMapController.isCompleted) {
+                  controller.googleMapController.complete(gmcontroller);
+                }
+              },
+              onTap: (LatLng latLng) {},
+              onCameraMove: (cameraPosition) => controller.cameraPosition = cameraPosition,
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 24, 8, 0),
+              child: Align(
+                alignment: Alignment.topRight,
+                child: IconButton(
+                  onPressed: () {
+                    Get.back();
+                  },
+                  icon: const Icon(
+                    CupertinoIcons.xmark_square_fill,
+                    size: 32,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

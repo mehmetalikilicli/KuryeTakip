@@ -4,8 +4,12 @@ import 'dart:typed_data';
 import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:kurye_takip/app_constants/app_colors.dart';
 import 'package:kurye_takip/app_constants/logic_constants.dart';
+
+import '../service/notification/fcm.dart';
+import '../service/notification/local.dart';
 
 class Helpers {
   static String encryption(String value) {
@@ -36,5 +40,15 @@ class Helpers {
       borderWidth: 1,
       borderColor: AppColors.primaryColor,
     );
+  }
+
+  static Future<bool> isLoggedIn() async {
+    final box = GetStorage();
+    final userData = box.read('user_data');
+    if (userData != null) {
+      return true;
+    } else {
+      return false;
+    }
   }
 }

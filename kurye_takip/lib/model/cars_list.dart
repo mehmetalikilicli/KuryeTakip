@@ -65,6 +65,7 @@ class CarElement {
   List<CarAddPhoto>? carAddPhotos;
   List<CarAvailableLocation>? carAvailableLocations;
   List<CarDeliveryTime>? carDeliveryTimes;
+  List<CarComment>? carComments;
 
   CarElement({
     this.carId,
@@ -97,6 +98,7 @@ class CarElement {
     this.carAddPhotos,
     this.carAvailableLocations,
     this.carDeliveryTimes,
+    this.carComments,
   });
 
   factory CarElement.fromJson(Map<String, dynamic> json) => CarElement(
@@ -130,6 +132,7 @@ class CarElement {
         carAddPhotos: List<CarAddPhoto>.from(json["carAddPhotos"].map((x) => CarAddPhoto.fromJson(x))),
         carAvailableLocations: List<CarAvailableLocation>.from(json["carAvailableLocations"].map((x) => CarAvailableLocation.fromJson(x))),
         carDeliveryTimes: List<CarDeliveryTime>.from(json["carDeliveryTimes"].map((x) => CarDeliveryTime.fromJson(x))),
+        carComments: List<CarComment>.from(json["carComments"].map((x) => CarComment.fromJson(x))),
       );
 
   Map<String, dynamic> toJson() => {
@@ -163,6 +166,7 @@ class CarElement {
         "carAddPhotos": List<dynamic>.from(carAddPhotos!.map((x) => x.toJson())),
         "carAvailableLocations": List<dynamic>.from(carAvailableLocations!.map((x) => x.toJson())),
         "carDeliveryTimes": List<dynamic>.from(carDeliveryTimes!.map((x) => x.toJson())),
+        "carComments": List<dynamic>.from(carComments!.map((x) => x.toJson())),
       };
 }
 
@@ -263,5 +267,49 @@ class CarDeliveryTime {
         "car_id": carId,
         "start_time": startTime,
         "end_time": endTime,
+      };
+}
+
+class CarComment {
+  int id;
+  int carId;
+  int commentedBy;
+  int rentId;
+  String comment;
+  int point;
+  int status;
+  DateTime createdDate;
+
+  CarComment({
+    required this.id,
+    required this.carId,
+    required this.commentedBy,
+    required this.rentId,
+    required this.comment,
+    required this.point,
+    required this.status,
+    required this.createdDate,
+  });
+
+  factory CarComment.fromJson(Map<String, dynamic> json) => CarComment(
+        id: json["ID"],
+        carId: json["CarID"],
+        commentedBy: json["CommentedBy"],
+        rentId: json["RentID"],
+        comment: json["Comment"],
+        point: json["Point"],
+        status: json["Status"],
+        createdDate: DateTime.parse(json["CreatedDate"]),
+      );
+
+  Map<String, dynamic> toJson() => {
+        "ID": id,
+        "CarID": carId,
+        "CommentedBy": commentedBy,
+        "RentID": rentId,
+        "Comment": comment,
+        "Point": point,
+        "Status": status,
+        "CreatedDate": createdDate.toIso8601String(),
       };
 }

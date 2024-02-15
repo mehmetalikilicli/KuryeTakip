@@ -5,6 +5,7 @@ import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:kurye_takip/helpers/get_local_user_id.dart';
 import 'package:kurye_takip/helpers/helpers.dart';
@@ -19,7 +20,6 @@ class CarDetailController extends GetxController {
   CameraPosition cameraPosition = const CameraPosition(target: LatLng(38.4237, 27.1428), zoom: 14.4746);
   Set<Marker> carAvailableLocationMarkers = Set<Marker>();
   final googleMapController = Completer<GoogleMapController>();
-
   final carDetailPageKey = GlobalKey<FormState>();
 
   TextEditingController rentCarDate = TextEditingController();
@@ -30,8 +30,6 @@ class CarDetailController extends GetxController {
   TextEditingController note = TextEditingController();
 
   List<String> FillCarPhotos(CarElement carElement) {
-//        if (carElement.carAvailableLocations!.isNotEmpty) {
-
     if (carElement.carAddPhotos!.isNotEmpty) {
       for (var photo in carElement.carAddPhotos!) {
         carPhotosList.add(photo.photoPath);
@@ -55,7 +53,8 @@ class CarDetailController extends GetxController {
     return carAvailableLocationMarkers;
   }
 
-  Future<bool> SendRentRequest(CarElement carElement) async {
+  Future<GeneralResponse> SendRentRequest(CarElement carElement) async {
+    GeneralResponse generalResponse = GeneralResponse(success: false, message: "Gönderilemedi");
     if (carDetailPageKey.currentState!.validate()) {
       Map<String, dynamic> requestMap = {
         "car_id": carElement.carId,
@@ -75,12 +74,12 @@ class CarDetailController extends GetxController {
         "is_owner_load_after_photo": 0,
         "payment_status": 0,
       };
-      GeneralResponse generalResponse = await ApiService.SendRentRequest(requestMap);
+      generalResponse = await ApiService.SendRentRequest(requestMap);
       log(generalResponse.message, name: "SendRentRequest");
-      return generalResponse.success;
+      return generalResponse;
     } else {
       Helpers.showSnackbar("Uyarı!", "Lütfen gerekli alanları doldurunuz.");
-      return false;
+      return generalResponse;
     }
   }
 
@@ -100,5 +99,29 @@ class CarDetailController extends GetxController {
       totalPrice = (carElement.dailyPrice! * daysDifference * (100 - carElement.monthlyRent!) / 100);
     }
     return totalPrice;
+  }
+
+  double calculateAverageRating() {
+    double totalRating = 0.0;
+    if (carElement.carComments!.isNotEmpty) {
+      for (var comment in carElement.carComments!) {
+        totalRating += comment.point;
+      }
+    }
+    if (carElement.carComments!.isNotEmpty) {
+      return totalRating / carElement.carComments!.length;
+    } else {
+      return totalRating;
+    }
+  }
+
+  Future<bool> isLoggedIn() async {
+    final box = GetStorage();
+    final userData = box.read('user_data');
+    if (userData != null) {
+      return true;
+    } else {
+      return false;
+    }
   }
 }

@@ -1,17 +1,21 @@
-// ignore_for_file: must_be_immutable, unnecessary_null_comparison, non_constant_identifier_names, unused_local_variable, prefer_typing_uninitialized_variables, avoid_function_literals_in_foreach_calls, unnecessary_brace_in_string_interps, no_leading_underscores_for_local_identifiers, avoid_unnecessary_containers
+// ignore_for_file: must_be_immutable, unnecessary_null_comparison, non_constant_identifier_names, unused_local_variable, prefer_typing_uninitialized_variables, avoid_function_literals_in_foreach_calls, unnecessary_brace_in_string_interps, no_leading_underscores_for_local_identifiers, avoid_unnecessary_containers, use_build_context_synchronously, duplicate_ignore
 
 import 'dart:developer';
 
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:kurye_takip/app_constants/app_colors.dart';
 import 'package:kurye_takip/helpers/custom_dialog.dart';
+import 'package:kurye_takip/helpers/helper_functions.dart';
 import 'package:kurye_takip/model/cars_list.dart';
+import 'package:kurye_takip/model/general_response.dart';
+import 'package:kurye_takip/pages/auth/register.dart';
 import 'package:kurye_takip/pages/cars_detail/car_detail_controller.dart';
 import 'package:kurye_takip/pages/widgets/inputs.dart';
 import 'package:photo_view/photo_view.dart';
@@ -40,7 +44,6 @@ class _CarDetailViewState extends State<CarDetailView> {
   void initState() {
     controller.FillCarPhotos(widget.carElement);
     controller.FillTheMarkers(widget.carElement.carAvailableLocations!);
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       precacheCarPhotos(widget.carElement.carAddPhotos!);
     });
@@ -64,138 +67,156 @@ class _CarDetailViewState extends State<CarDetailView> {
     final height = Get.height - 8;
     final width = Get.width - 8;
 
-    return Scaffold(
-      floatingActionButton: Visibility(
-        visible: widget.isfloatingActionButtonActive,
-        child: FloatingActionButton.extended(
-          onPressed: () async {
-            controller.rentCarDate.text = "";
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  title: const Text("Kiralama Talebi"),
-                  content: Form(
-                    key: controller.carDetailPageKey,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        TextFormField(
-                          readOnly: true,
-                          controller: controller.rentCarDate,
-                          decoration: const InputDecoration(
-                            label: Text(
-                              "Kiralama tarih aralığı seçiniz",
-                              style: TextStyle(fontSize: 12),
-                            ),
-                            border: OutlineInputBorder(),
-                            prefixIcon: Icon(Icons.date_range_rounded, color: AppColors.primaryColor),
-                          ),
-                          validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
-                          onTap: () async {
-                            final result = await showDateRangePicker(
-                              context: context,
-                              firstDate: DateTime.now(),
-                              lastDate: DateTime.now().add(const Duration(days: 365)),
-                            );
-                            if (result != null) {
-                              controller.rentCarDateStart = result.start;
-                              controller.rentCarDateEnd = result.end;
-
-                              controller.rentCarDate.text = "${DateFormat('dd.MM.yyyy').format(result.start)} - ${DateFormat('dd.MM.yyyy').format(result.end)}";
-                            } else {}
-                          },
-                        ),
-                        const SizedBox(height: 8),
-                        const Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text("Araç Sahibini Notunuz(Opsiyonel)", style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600))),
-                        const Divider(height: 4),
-                        TextField(
-                            controller: controller.note,
-                            keyboardType: TextInputType.multiline,
-                            maxLines: 6,
-                            decoration: InputWidgets().noteDecoration(Colors.grey, Colors.red, "Araç sahibine iletmek istediğiniz notu giriniz.")),
-                        const SizedBox(height: 8),
-                      ],
-                    ),
-                  ),
-                  actions: <Widget>[
-                    TextButton(
-                      onPressed: () {
-                        Get.back();
-                      },
-                      child: const Text("İptal"),
-                    ),
-                    TextButton(
-                      onPressed: () async {
-                        bool isSend = await controller.SendRentRequest(widget.carElement);
-
-                        if (isSend) {
-                          // ignore: use_build_context_synchronously
-                          CustomDialog.showMessage(
-                            context: context,
-                            title: "Talep Gönderildi",
-                            message: "Talep başarıyla gönderildi, talep cevabını \"Taleplerim\" sekmesinden takip edebilirisinz.",
-                            onPositiveButtonPressed: () {
-                              Get.back();
-                            },
-                          );
-                        } else {
-                          log("Talep Gonderilemedi!");
-                        }
-                      },
-                      child: const Text("Talebi Gönder"),
-                    ),
-                  ],
-                );
-              },
-            );
-            /*
-            if (await controller.SendRentRequest(widget.carElement)) {
-              // ignore: use_build_context_synchronously
-              CustomDialog.showMessage(
+    return GestureDetector(
+      onTap: () => HelpFunctions.closeKeyboard(),
+      child: Scaffold(
+        floatingActionButton: Visibility(
+          visible: widget.isfloatingActionButtonActive,
+          child: FloatingActionButton.extended(
+            onPressed: () async {
+              controller.rentCarDate.text = "";
+              if (await controller.isLoggedIn()) {
+                showDialog(
                   context: context,
-                  title: "Talep Gönderildi",
-                  message: "Talep başarıyla gönderildi, talep cevabını \"Taleplerim\" sekmesinden takip edebilirisinz.",
-                  onPositiveButtonPressed: () {});
-            } else {
-              // ignore: use_build_context_synchronously
-              CustomDialog.showMessage(
-                context: context,
-                title: "Hata",
-                message: "Talep gönderilemedi",
-                onPositiveButtonPressed: () {},
-              );
-            }*/
-          },
-          label: const Text("Kiralama Talebi Gönder"),
-          backgroundColor: AppColors.primaryColor,
-        ),
-      ),
-      appBar: widget.isAppBarActive
-          ? AppBar(
-              title: Text(
-                "${widget.carElement.brandName} - ${widget.carElement.modelName}",
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-            )
-          : null,
-      body: Column(
-        children: [
-          CarSlider(
-            widget: widget,
-            current: current,
-          ),
-          const SizedBox(height: 12),
-          Expanded(
-            child: CarDetailFeatured(
-              height: height,
-              width: width,
-              widget: widget,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text("Kiralama Talebi"),
+                      content: Form(
+                        key: controller.carDetailPageKey,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            TextFormField(
+                              readOnly: true,
+                              controller: controller.rentCarDate,
+                              decoration: const InputDecoration(
+                                label: Text(
+                                  "Kiralama tarih aralığı seçiniz",
+                                  style: TextStyle(fontSize: 12),
+                                ),
+                                border: OutlineInputBorder(),
+                                prefixIcon: Icon(Icons.date_range_rounded, color: AppColors.primaryColor),
+                              ),
+                              validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
+                              onTap: () async {
+                                final result = await showDateRangePicker(
+                                  context: context,
+                                  firstDate: DateTime.now(),
+                                  lastDate: DateTime.now().add(const Duration(days: 365)),
+                                );
+                                if (result != null) {
+                                  controller.rentCarDateStart = result.start;
+                                  controller.rentCarDateEnd = result.end;
+
+                                  controller.rentCarDate.text =
+                                      "${DateFormat('dd.MM.yyyy').format(result.start)} - ${DateFormat('dd.MM.yyyy').format(result.end)}";
+                                } else {}
+                              },
+                            ),
+                            const SizedBox(height: 8),
+                            const Align(
+                                alignment: Alignment.centerLeft,
+                                child: Text("Araç Sahibini Notunuz(Opsiyonel)", style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600))),
+                            const Divider(height: 4),
+                            TextField(
+                                controller: controller.note,
+                                keyboardType: TextInputType.multiline,
+                                maxLines: 6,
+                                decoration: InputWidgets().noteDecoration(Colors.grey, Colors.red, "Araç sahibine iletmek istediğiniz notu giriniz.")),
+                            const SizedBox(height: 8),
+                          ],
+                        ),
+                      ),
+                      actions: <Widget>[
+                        TextButton(
+                          onPressed: () {
+                            Get.back();
+                          },
+                          child: const Text("İptal"),
+                        ),
+                        TextButton(
+                          onPressed: () async {
+                            GeneralResponse generalResponse = await controller.SendRentRequest(widget.carElement);
+
+                            if (generalResponse.success) {
+                              // ignore: use_build_context_synchronously
+                              CustomDialog.showMessage(
+                                context: context,
+                                title: "Talep Gönderildi",
+                                message: "Talep başarıyla gönderildi, talep cevabını \"Taleplerim\" sekmesinden takip edebilirisinz.",
+                                onPositiveButtonPressed: () {
+                                  Get.back();
+                                },
+                              );
+                            } else {
+                              CustomDialog.showMessage(
+                                context: context,
+                                title: "Talep Gönderilemedi",
+                                message: generalResponse.message,
+                                onPositiveButtonPressed: () {
+                                  Get.back();
+                                },
+                              );
+                            }
+                          },
+                          child: const Text("Talebi Gönder"),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              } else {
+                CustomDialog.showMessage(
+                    context: context,
+                    message: "Kiralama talebi göndermek için önce kayıt olmalısınız.",
+                    positiveButtonText: "Kayıt Ol",
+                    onPositiveButtonPressed: () {
+                      Get.to(RegisterPage());
+                    },
+                    negativeButtonText: "İptal",
+                    onNegativeButtonPressed: () {
+                      Get.back();
+                    });
+              }
+            },
+            label: const Text("Kiralama Talebi Gönder", style: TextStyle(fontSize: 12)),
+            backgroundColor: AppColors.primaryColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
             ),
           ),
-        ],
+        ),
+        appBar: widget.isAppBarActive
+            ? AppBar(
+                title: Text(
+                  "${widget.carElement.brandName} - ${widget.carElement.modelName}",
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              )
+            : null,
+        body: SingleChildScrollView(
+          child: SafeArea(
+            child: SizedBox(
+              height: Get.height,
+              child: Column(
+                children: [
+                  CarSlider(
+                    widget: widget,
+                    current: current,
+                  ),
+                  const SizedBox(height: 12),
+                  Expanded(
+                    child: CarDetailFeatured(
+                      height: height,
+                      width: width,
+                      widget: widget,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -235,34 +256,86 @@ class CarDetailFeatured extends StatelessWidget {
                 children: [
                   Expanded(child: Text("${widget.carElement.dailyPrice}₺ / Günlük")),
                   const SizedBox(width: 8),
-                  IconButton(
-                    onPressed: () {
-                      Get.dialog(SeeAvailableDates(
-                        widget: widget,
-                      ));
-                    },
-                    icon: const Icon(CupertinoIcons.calendar_today, size: 32, color: Colors.green),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.5),
+                          spreadRadius: 2,
+                          blurRadius: 7,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: IconButton(
+                      onPressed: () {
+                        Get.dialog(SeeAvailableDates(
+                          widget: widget,
+                        ));
+                      },
+                      icon: const Icon(CupertinoIcons.calendar_today, size: 32, color: Colors.green),
+                    ),
                   ),
-                  IconButton(
-                    onPressed: () {
-                      Get.dialog(SeeAvailableTimes(
-                        widget: widget,
-                      ));
-                    },
-                    icon: const Icon(CupertinoIcons.time, size: 32, color: Colors.green),
+                  const SizedBox(width: 8),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.5),
+                          spreadRadius: 2,
+                          blurRadius: 7,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: IconButton(
+                      onPressed: () {
+                        Get.dialog(SeeAvailableTimes(
+                          widget: widget,
+                        ));
+                      },
+                      icon: const Icon(CupertinoIcons.time, size: 32, color: Colors.green),
+                    ),
                   ),
-                  IconButton(
-                    onPressed: () {
-                      Get.dialog(const SeeAvailableLocaitons());
-                    },
-                    icon: const Icon(CupertinoIcons.location_solid, size: 32, color: Colors.green),
+                  const SizedBox(width: 8),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.5),
+                          spreadRadius: 2,
+                          blurRadius: 7,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: IconButton(
+                      onPressed: () {
+                        Get.dialog(const SeeAvailableLocaitons());
+                      },
+                      icon: const Icon(CupertinoIcons.location_solid, size: 32, color: Colors.green),
+                    ),
                   ),
                 ],
               ),
-              Center(child: Text(widget.carElement.note ?? "")),
+              const Text(
+                "Açıklama",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              const SizedBox(height: 2),
+              Padding(
+                padding: const EdgeInsets.only(left: 8.0),
+                child: Text(widget.carElement.note ?? ""),
+              ),
               const SizedBox(height: 8),
               const Text(
-                "Featured",
+                "Detaylar",
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
               ),
               const SizedBox(height: 6),
@@ -299,7 +372,7 @@ class CarDetailFeatured extends StatelessWidget {
                           height: height,
                           width: width,
                           imageName: "weeklyDiscount",
-                          featuredTitle: "İndirim/Haftalık",
+                          featuredTitle: "İndirim/Hafta",
                           featuredData: "%${widget.carElement.weeklyRent} ",
                         ),
                       ],
@@ -337,7 +410,7 @@ class CarDetailFeatured extends StatelessWidget {
                           height: height,
                           width: width,
                           imageName: "weeklyDiscount",
-                          featuredTitle: "İndirim / Aylık",
+                          featuredTitle: "İndirim / Ay",
                           featuredData: "%${widget.carElement.monthlyRent}",
                         ),
                       ],
@@ -446,32 +519,53 @@ class CarBrandAndBrandModelText extends GetView<CarDetailController> {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Text(
-          "${widget.carElement.brandName}",
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 24,
-            color: AppColors.primaryColor,
+        Expanded(
+          child: Row(
+            children: [
+              Text(
+                "${widget.carElement.brandName}",
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                  color: AppColors.primaryColor,
+                ),
+              ),
+              const SizedBox(width: 9),
+              const Text(
+                "-",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                  color: AppColors.primaryColor,
+                ),
+              ),
+              const SizedBox(width: 9),
+              Text(
+                widget.carElement.modelName ?? "",
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                  color: AppColors.primaryColor,
+                ),
+              ),
+            ],
           ),
         ),
-        const SizedBox(width: 9),
-        const Text(
-          "-",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 24,
-            color: AppColors.primaryColor,
+        GestureDetector(
+          onTap: () {
+            CarCommentBottomSheet.showComments(context: context, carElement: controller.carElement);
+          },
+          child: RatingBarIndicator(
+            rating: controller.calculateAverageRating(),
+            itemCount: 5,
+            itemSize: 18.0,
+            itemBuilder: (context, _) => const Icon(
+              Icons.star,
+              color: Colors.orange,
+            ),
           ),
         ),
-        const SizedBox(width: 9),
-        Text(
-          widget.carElement.modelName ?? "",
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 24,
-            color: AppColors.primaryColor,
-          ),
-        ),
+        Text("(${controller.carElement.carComments!.length})", style: const TextStyle(fontSize: 12))
       ],
     );
   }

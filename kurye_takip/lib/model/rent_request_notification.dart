@@ -63,6 +63,7 @@ class RentNotification {
   int? isOwnerLoadBeforePhoto;
   int? paymentStatus;
   Car? car;
+  List<RenterComment>? renterComment;
 
   RentNotification({
     required this.ID,
@@ -93,6 +94,7 @@ class RentNotification {
     this.isOwnerLoadBeforePhoto,
     this.paymentStatus,
     this.car,
+    this.renterComment,
   });
 
   factory RentNotification.fromJson(Map<String, dynamic> json) => RentNotification(
@@ -124,6 +126,7 @@ class RentNotification {
         isRenterLoadBeforePhoto: json["is_renter_load_before_photo"],
         paymentStatus: json["payment_status"],
         car: Car.fromJson(json["car"]),
+        renterComment: List<RenterComment>.from(json["renterComment"].map((x) => RenterComment.fromJson(x))),
       );
 
   Map<String, dynamic> toJson() => {
@@ -151,6 +154,7 @@ class RentNotification {
         "is_renter_load_before_photo": isRenterLoadBeforePhoto,
         "payment_status": paymentStatus,
         "car": car!.toJson(),
+        "renterComment": renterComment != null ? List<dynamic>.from(renterComment!.map((x) => x.toJson())) : [],
       };
 }
 
@@ -255,5 +259,49 @@ class Car {
         "is_long_term": isLongTerm,
         "is_available_date_start": isAvailableDateStart,
         "is_available_date_end": isAvailableDateEnd,
+      };
+}
+
+class RenterComment {
+  int id;
+  int userId;
+  int commentedBy;
+  int rentId;
+  String comment;
+  int point;
+  int status;
+  DateTime createdDate;
+
+  RenterComment({
+    required this.id,
+    required this.userId,
+    required this.commentedBy,
+    required this.rentId,
+    required this.comment,
+    required this.point,
+    required this.status,
+    required this.createdDate,
+  });
+
+  factory RenterComment.fromJson(Map<String, dynamic> json) => RenterComment(
+        id: json["ID"],
+        userId: json["UserID"],
+        commentedBy: json["CommentedBy"],
+        rentId: json["RentID"],
+        comment: json["Comment"],
+        point: json["Point"],
+        status: json["Status"],
+        createdDate: DateTime.parse(json["CreatedDate"]),
+      );
+
+  Map<String, dynamic> toJson() => {
+        "ID": id,
+        "UserID": userId,
+        "CommentedBy": commentedBy,
+        "RentID": rentId,
+        "Comment": comment,
+        "Point": point,
+        "Status": status,
+        "CreatedDate": createdDate.toIso8601String(),
       };
 }

@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "102198727640",
+    "project_id": "rentekerpushnotification",
+    "storage_bucket": "rentekerpushnotification.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:102198727640:android:0367729bd803c700f798ad",
+        "android_client_info": {
+          "package_name": "com.sayazilim.renkteker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBn7d6CMJ6ktffHs8D3Qc8pL5EfZIsFGyQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:102198727640:android:c6a6e4be9d1dbce9f798ad",
+        "android_client_info": {
+          "package_name": "com.sayazilim.renteker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBn7d6CMJ6ktffHs8D3Qc8pL5EfZIsFGyQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

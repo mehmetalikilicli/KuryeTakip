@@ -14,9 +14,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:kurye_takip/components/lists.dart';
 import 'package:kurye_takip/helpers/custom_dialog.dart';
+import 'package:kurye_takip/helpers/helper_functions.dart';
 import 'package:kurye_takip/pages/add_car/test_add_controller.dart';
 import 'package:kurye_takip/pages/dashboard/dashboard.dart';
-import 'package:kurye_takip/pages/gnav_bar/gnav_bar.dart';
+import 'package:kurye_takip/pages/zzz/gnav_bar/gnav_bar.dart';
 import 'package:kurye_takip/pages/profile/profile.dart';
 import 'package:kurye_takip/pages/widgets/images.dart';
 import 'package:kurye_takip/pages/widgets/inputs.dart';
@@ -31,20 +32,23 @@ class TestAddCarView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("ARAÇ EKLEME")),
-      body: PageView(
-        physics: NeverScrollableScrollPhysics(),
-        controller: controller.pageController,
-        children: const [
-          //TestAddPageTwo(),
-          TestAddPageOne(),
-          TestAddPageThree(),
-          TestAddPageFour(),
-          TestAddPageFive(),
-          TestAddPageSix(),
-          TestAddPageSeven(),
-        ],
+    return GestureDetector(
+      onTap: () => HelpFunctions.closeKeyboard(),
+      child: Scaffold(
+        appBar: AppBar(title: const Text("ARAÇ EKLEME")),
+        body: PageView(
+          physics: NeverScrollableScrollPhysics(),
+          controller: controller.pageController,
+          children: const [
+            //TestAddPageTwo(),
+            TestAddPageOne(),
+            TestAddPageThree(),
+            TestAddPageFour(),
+            TestAddPageFive(),
+            TestAddPageSix(),
+            TestAddPageSeven(),
+          ],
+        ),
       ),
     );
   }
@@ -697,7 +701,7 @@ class TestAddPageSix extends GetView<TestAddController> {
                   controller: controller.minRentDay,
                   keyboardType: TextInputType.number,
                   decoration:
-                      InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Minimum Kira günü", CupertinoIcons.car_detailed, AppColors.primaryColor),
+                      InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Minimum kira günü", CupertinoIcons.car_detailed, AppColors.primaryColor),
                   validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
                 ),
               ],
@@ -709,8 +713,22 @@ class TestAddPageSix extends GetView<TestAddController> {
                 TextFormField(
                   controller: controller.dailyRentPrice,
                   keyboardType: TextInputType.number,
-                  decoration: InputWidgets().dropdownDecoration(
-                      Colors.grey, Colors.red, "Tavsiye edilen fiyat: ${controller.recomendation_price} TL", Icons.car_rental, AppColors.primaryColor),
+                  decoration:
+                      InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Günlük kira bedeli", Icons.car_rental, AppColors.primaryColor).copyWith(
+                            suffixIcon: GestureDetector(
+                              onTap: () {
+                                CustomDialog.showMessage(
+                                    context: context,
+                                    title: "Bilgilendirme",
+                                    message:
+                                        "Aracınızın talep görebilmesi için uygun bir kira bedeli belirlemenizi öneririz. Piyasa fiyatından yüksek kalan fiyatlar kullanıcılar tarafından aracınızın talep edilmemesine neden olabilir.");
+                              },
+                              child: Icon(
+                                Icons.info_outline,
+                                color: Colors.green,
+                              ),
+                            ),
+                          ),
                   validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
                 ),
               ],

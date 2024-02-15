@@ -10,6 +10,7 @@ import 'package:kurye_takip/model/car_add.dart';
 import 'package:kurye_takip/model/car_detail.dart';
 import 'package:kurye_takip/model/cars_list.dart';
 import 'package:kurye_takip/model/general_response.dart';
+import 'package:kurye_takip/model/get_rent_photo.dart';
 import 'package:kurye_takip/model/get_user.dart';
 import 'package:kurye_takip/model/model.dart';
 import 'package:kurye_takip/model/rent_request_notification.dart';
@@ -17,7 +18,6 @@ import 'package:kurye_takip/model/rent_request_notification.dart';
 class ApiService {
   static const String baseUrl = 'https://rentekerapi.takipsa.com';
 
-  //Brand
   static Future<List<BrandElement>> fetchBrands(int carType) async {
     final response = await http.get(Uri.parse("$baseUrl/Brand/GetBrands?car_type=${carType}"));
 
@@ -28,7 +28,6 @@ class ApiService {
     }
   }
 
-  //Model
   static Future<List<ModelElement>> fetchModels(int brandId, int carType) async {
     final response = await http.post(
       Uri.parse("$baseUrl/Model/GetModels?brandId=$brandId&carType=$carType"),
@@ -344,15 +343,68 @@ class ApiService {
       throw Exception('Failed to load data');
     }
   }
-/*
-  static Future<GeneralResponse> GetRentPhotos(photoFrom, rentType) async {
+
+  static Future<GetRentPhoto> GetRentPhotos(Map body) async {
+    final String requestBody = json.encode(body);
+
     final response = await http.post(
-      Uri.parse("$baseUrl/Photo/PayPrice?notification_id=$notificationId"),
+      Uri.parse('$baseUrl/Photo/GetRentPhotos'),
+      headers: {'Content-Type': 'application/json'},
+      body: requestBody,
     );
+
+    if (response.statusCode == 200) {
+      return GetRentPhoto.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to create');
+    }
+  }
+
+  static Future<GeneralResponse> GiveCarComment(Map body) async {
+    final String requestBody = json.encode(body);
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/Comment/GiveCarComment'),
+      headers: {'Content-Type': 'application/json'},
+      body: requestBody,
+    );
+
     if (response.statusCode == 200) {
       return GeneralResponse.fromJson(json.decode(response.body));
     } else {
-      throw Exception('Failed to load data');
+      throw Exception('Failed to create');
     }
-  }*/
+  }
+
+  static Future<GeneralResponse> GiveRenterComment(Map body) async {
+    final String requestBody = json.encode(body);
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/Comment/GiveRenterComment'),
+      headers: {'Content-Type': 'application/json'},
+      body: requestBody,
+    );
+
+    if (response.statusCode == 200) {
+      return GeneralResponse.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to create');
+    }
+  }
+
+  static Future<GeneralResponse> SaveNotificationToken(Map body) async {
+    final String requestBody = json.encode(body);
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/Users/SaveNotificationToken'),
+      headers: {'Content-Type': 'application/json'},
+      body: requestBody,
+    );
+
+    if (response.statusCode == 200) {
+      return GeneralResponse.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to create');
+    }
+  }
 }

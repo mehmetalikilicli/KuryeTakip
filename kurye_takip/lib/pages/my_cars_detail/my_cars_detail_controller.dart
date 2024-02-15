@@ -450,11 +450,25 @@ class MyCarsDetailController extends GetxController {
 
   RxList<EditCarUploadImage> carImages = <EditCarUploadImage>[
     EditCarUploadImage(
-        header: "Ön", description: "Aracın önden fotoğrafını yükleyiniz.", ext: "", load: true.obs, photo64: "", isChanged: false, path: "", photoType: 1),
+        header: "Aracın önden fotoğrafı",
+        description: "Aracın önden fotoğrafını yükleyiniz.",
+        ext: "",
+        load: true.obs,
+        photo64: "",
+        isChanged: false,
+        path: "",
+        photoType: 1),
     EditCarUploadImage(
-        header: "Arka", description: "Aracın arkadan fotoğrafını yükleyiniz.", ext: "", load: true.obs, photo64: "", isChanged: false, path: "", photoType: 2),
+        header: "Aracın arkadan fotoğrafı",
+        description: "Aracın arkadan fotoğrafını yükleyiniz.",
+        ext: "",
+        load: true.obs,
+        photo64: "",
+        isChanged: false,
+        path: "",
+        photoType: 2),
     EditCarUploadImage(
-        header: "Sağ",
+        header: "Aracın sağdan fotoğrafı",
         description: "Aracın sağ yandan fotoğrafını yükleyiniz.",
         ext: "",
         load: true.obs,
@@ -463,7 +477,7 @@ class MyCarsDetailController extends GetxController {
         path: "",
         photoType: 3),
     EditCarUploadImage(
-        header: "Sol",
+        header: "Aracın soldan fotoğrafı",
         description: "Aracın sol yandan fotoğrafını yükleyiniz.",
         ext: "",
         load: true.obs,
@@ -472,7 +486,7 @@ class MyCarsDetailController extends GetxController {
         path: "",
         photoType: 4),
     EditCarUploadImage(
-        header: "Ön İç",
+        header: "Araç içi ön kısım fotoğrafı",
         description: "Aracın araç iç ön kısmının fotoğrafını yükleyiniz.",
         ext: "",
         load: true.obs,
@@ -481,7 +495,7 @@ class MyCarsDetailController extends GetxController {
         path: "",
         photoType: 5),
     EditCarUploadImage(
-        header: "Arka İç",
+        header: "Araç içi arka kısım fotoğrafı",
         description: "Aracın araç iç arka kısmının fotoğrafını yükleyiniz.",
         ext: "",
         load: true.obs,
@@ -490,7 +504,7 @@ class MyCarsDetailController extends GetxController {
         path: "",
         photoType: 6),
     EditCarUploadImage(
-        header: "Bagaj",
+        header: "Araç bağaj fotoğrafı",
         description: "Aracın araç bagaj içi fotoğrafını yükleyiniz.",
         ext: "",
         load: true.obs,

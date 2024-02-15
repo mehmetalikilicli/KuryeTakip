@@ -52,56 +52,81 @@ class _ProfilePageState extends State<ProfilePage> {
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   children: [
-                    MaterialButton(
-                      onPressed: () {
-                        Get.to(RentNotificationPage());
-                      },
-                      color: Colors.grey.shade100,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      child: const ListTile(
-                          contentPadding: EdgeInsets.symmetric(horizontal: 0),
-                          leading: Icon(Icons.notifications_active_outlined, color: Colors.black54),
-                          title: Text('Taleplerim', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                          trailing: Icon(Icons.arrow_forward_ios_outlined, color: Colors.black54)),
-                    ),
-                    const SizedBox(height: 10),
-                    MaterialButton(
-                      onPressed: () {
-                        Get.to(OwnerNotificationsPage());
-                      },
-                      color: Colors.grey.shade100,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      child: const ListTile(
-                          contentPadding: EdgeInsets.symmetric(horizontal: 0),
-                          leading: Icon(IconData(0xe13c, fontFamily: 'MaterialIcons'), color: Colors.black54),
-                          title: Text('Araç Kiralama İstekleri', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                          trailing: Icon(Icons.arrow_forward_ios_outlined, color: Colors.black54)),
-                    ),
-                    const SizedBox(height: 10),
-                    MaterialButton(
-                      onPressed: () => Get.to(TestAddCarView()),
-                      color: Colors.grey.shade100,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      child: const ListTile(
-                        contentPadding: EdgeInsets.symmetric(horizontal: 0),
-                        leading: Icon(Icons.car_repair_rounded, color: Colors.black54),
-                        title: Text('Aracını Kiraya Ver', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                        trailing: Icon(Icons.arrow_forward_ios_outlined, color: Colors.black54),
+                    Visibility(
+                      visible: controller.isVehicleOwner == 0 && controller.isUserLogedIn == 1,
+                      child: MaterialButton(
+                        onPressed: () {
+                          Get.to(RentNotificationPage());
+                        },
+                        color: Colors.grey.shade100,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        child: const ListTile(
+                            contentPadding: EdgeInsets.symmetric(vertical: 0),
+                            leading: Icon(Icons.notifications_active_outlined, color: Colors.black54),
+                            title: Text('Taleplerim', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                            trailing: Icon(Icons.keyboard_arrow_right_rounded, color: Colors.black54)),
                       ),
                     ),
-                    const SizedBox(height: 10),
-                    MaterialButton(
-                      onPressed: () {
-                        Get.to(MyCarsPage());
-                      },
-                      color: Colors.grey.shade100,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      child: const ListTile(
-                          contentPadding: EdgeInsets.symmetric(horizontal: 0),
-                          leading: Icon(CupertinoIcons.car_detailed, color: Colors.black54),
-                          title: Text('Araçlarım', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                          trailing: Icon(Icons.arrow_forward_ios_outlined)),
+                    Visibility(
+                      visible: controller.isVehicleOwner == 1 && controller.isUserLogedIn == 1,
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 10),
+                          MaterialButton(
+                            onPressed: () {
+                              Get.to(OwnerNotificationsPage());
+                            },
+                            color: Colors.grey.shade100,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            child: const ListTile(
+                                contentPadding: EdgeInsets.symmetric(horizontal: 0),
+                                leading: Icon(IconData(0xe13c, fontFamily: 'MaterialIcons'), color: Colors.black54),
+                                title: Text('Araç Kiralama İstekleri', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                                trailing: Icon(Icons.keyboard_arrow_right_rounded, color: Colors.black54)),
+                          ),
+                        ],
+                      ),
                     ),
+                    Visibility(
+                      visible: controller.isVehicleOwner == 1 && controller.isUserLogedIn == 1,
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 10),
+                          MaterialButton(
+                            onPressed: () => Get.to(TestAddCarView()),
+                            color: Colors.grey.shade100,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            child: const ListTile(
+                              contentPadding: EdgeInsets.symmetric(horizontal: 0),
+                              leading: Icon(Icons.car_repair_rounded, color: Colors.black54),
+                              title: Text('Aracını Kiraya Ver', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                              trailing: Icon(Icons.keyboard_arrow_right_rounded, color: Colors.black54),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Visibility(
+                      visible: controller.isVehicleOwner == 1 && controller.isUserLogedIn == 1,
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 10),
+                          MaterialButton(
+                            onPressed: () {
+                              Get.to(MyCarsPage());
+                            },
+                            color: Colors.grey.shade100,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            child: const ListTile(
+                                contentPadding: EdgeInsets.symmetric(horizontal: 0),
+                                leading: Icon(CupertinoIcons.car_detailed, color: Colors.black54),
+                                title: Text('Araçlarım', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                                trailing: Icon(Icons.keyboard_arrow_right_rounded)),
+                          ),
+                        ],
+                      ),
+                    ),
+
                     /*const SizedBox(height: 10),
                     MaterialButton(
                       onPressed: () {
@@ -116,15 +141,18 @@ class _ProfilePageState extends State<ProfilePage> {
                           trailing: Icon(Icons.arrow_forward_ios_outlined, color: Colors.black54)),
                     ),*/
                     const SizedBox(height: 10),
-                    MaterialButton(
-                      onPressed: () {},
-                      color: Colors.grey.shade100,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      child: const ListTile(
-                          contentPadding: EdgeInsets.symmetric(horizontal: 0),
-                          leading: Icon(CupertinoIcons.profile_circled, color: Colors.black54),
-                          title: Text('Profili Düzenle', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                          trailing: Icon(Icons.arrow_forward_ios_outlined)),
+                    Visibility(
+                      visible: controller.isUserLogedIn == 1,
+                      child: MaterialButton(
+                        onPressed: () {},
+                        color: Colors.grey.shade100,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        child: const ListTile(
+                            contentPadding: EdgeInsets.symmetric(horizontal: 0),
+                            leading: Icon(CupertinoIcons.profile_circled, color: Colors.black54),
+                            title: Text('Profili Düzenle', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                            trailing: Icon(Icons.keyboard_arrow_right_rounded)),
+                      ),
                     ),
                     const SizedBox(height: 10),
                     MaterialButton(
@@ -134,8 +162,8 @@ class _ProfilePageState extends State<ProfilePage> {
                       child: const ListTile(
                           contentPadding: EdgeInsets.symmetric(horizontal: 0),
                           leading: Icon(CupertinoIcons.settings_solid, color: Colors.black54),
-                          title: Text('Ayarlar', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                          trailing: Icon(Icons.arrow_forward_ios_outlined)),
+                          title: Text('Ayarlar', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                          trailing: Icon(Icons.keyboard_arrow_right_rounded)),
                     ),
                     const SizedBox(
                       height: 10,
@@ -147,8 +175,8 @@ class _ProfilePageState extends State<ProfilePage> {
                       child: const ListTile(
                         contentPadding: EdgeInsets.symmetric(horizontal: 0),
                         leading: Icon(FontAwesomeIcons.question, color: Colors.black54),
-                        title: Text('Sorular/Cevaplar', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                        trailing: Icon(Icons.arrow_forward_ios_outlined, color: Colors.black54),
+                        title: Text('Sorular/Cevaplar', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                        trailing: Icon(Icons.keyboard_arrow_right_rounded, color: Colors.black54),
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -159,20 +187,31 @@ class _ProfilePageState extends State<ProfilePage> {
                       child: const ListTile(
                           contentPadding: EdgeInsets.symmetric(horizontal: 0),
                           leading: Icon(Icons.info_outline, color: Colors.black54),
-                          title: Text('Hakkımızda', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                          trailing: Icon(Icons.arrow_forward_ios_outlined, color: Colors.black54)),
+                          title: Text('Hakkımızda', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                          trailing: Icon(Icons.keyboard_arrow_right_rounded, color: Colors.black54)),
                     ),
                     const SizedBox(height: 10),
-                    MaterialButton(
-                      onPressed: () => Get.offAll(LoginPage()),
-                      color: Colors.grey.shade100,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      child: const ListTile(
-                          contentPadding: EdgeInsets.symmetric(horizontal: 0),
-                          leading: Icon(Icons.logout, color: Colors.black54),
-                          title: Text('Çıkış Yap', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                          trailing: Icon(Icons.arrow_forward_ios_outlined)),
-                    )
+                    controller.isUserLogedIn == 1
+                        ? MaterialButton(
+                            onPressed: () => controller.Logout(),
+                            color: Colors.grey.shade100,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            child: const ListTile(
+                                contentPadding: EdgeInsets.symmetric(horizontal: 0),
+                                leading: Icon(Icons.logout, color: Colors.black54),
+                                title: Text('Çıkış Yap', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                                trailing: Icon(Icons.keyboard_arrow_right_rounded)),
+                          )
+                        : MaterialButton(
+                            onPressed: () => Get.off(LoginPage()),
+                            color: Colors.grey.shade100,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            child: const ListTile(
+                                contentPadding: EdgeInsets.symmetric(horizontal: 0),
+                                leading: Icon(Icons.logout, color: Colors.black54),
+                                title: Text('Giriş Yap', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                                trailing: Icon(Icons.keyboard_arrow_right_rounded)),
+                          )
                   ],
                 ),
               ),

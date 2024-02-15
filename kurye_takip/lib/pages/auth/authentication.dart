@@ -16,7 +16,10 @@ import 'package:kurye_takip/model/login.dart';
 import 'package:kurye_takip/model/register.dart';
 import 'package:kurye_takip/pages/widgets/images.dart';
 import 'package:kurye_takip/service/auth_service.dart';
+import 'package:kurye_takip/service/notification/local.dart';
 import 'package:map_picker/map_picker.dart';
+
+import '../../service/notification/fcm.dart';
 
 class RegisterController extends GetxController {
   final AuthService _authService = AuthService();
@@ -144,7 +147,10 @@ class LoginController extends GetxController {
       LoginResponse result = await _authService.login(email, cyriptedPassword);
       final box = GetStorage();
       await box.write('user_data', result.user.toJson());
+      LocalNotifications.init();
+      FirebaseNotificationService().connectNotification();
       //await saveUserData(result.user);
+
       //print(result.user.code);
       return result;
     } catch (e) {

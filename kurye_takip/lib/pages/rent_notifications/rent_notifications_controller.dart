@@ -15,9 +15,11 @@ import 'package:kurye_takip/helpers/helpers.dart';
 import 'package:kurye_takip/model/car_detail.dart';
 import 'package:kurye_takip/model/cars_list.dart';
 import 'package:kurye_takip/model/general_response.dart';
+import 'package:kurye_takip/model/get_rent_photo.dart';
 import 'package:kurye_takip/model/get_user.dart';
 import 'package:kurye_takip/model/rent_request_notification.dart';
 import 'package:kurye_takip/pages/owner_notifications/owner_notifications_controller.dart';
+import 'package:kurye_takip/pages/rent_notifications/rent_notification.dart';
 import 'package:kurye_takip/pages/widgets/images.dart';
 import 'package:kurye_takip/service/api_service.dart';
 
@@ -26,8 +28,6 @@ class RentNotificationsController extends GetxController {
 
   RentNotification? selectedNotification;
   RxList<int> notificationApproveList = <int>[].obs;
-
-  PageController pageController = PageController();
 
   RxInt rentStatus = (-1).obs;
   RxInt paymnetStatus = (-1).obs;
@@ -58,8 +58,7 @@ class RentNotificationsController extends GetxController {
 
     rentStatus.value = selectedNotification!.rentStatus;
     paymnetStatus.value = selectedNotification!.paymentStatus!;
-
-    pageController.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.ease);
+    Get.to(RenterRequestDetail());
   }
 
   Future<void> fetchRentNotifications(int renter_id) async {
@@ -125,14 +124,15 @@ class RentNotificationsController extends GetxController {
       image.load.value = false;
       image.photo64 = "";
     });
-    pageController.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.ease);
+
+    Get.to(RenterAddRentPhoto());
   }
 
   RxList<RentImage> carAddImages = <RentImage>[
-    RentImage(header: "Ön", description: "Aracın önden fotoğrafını yükleyiniz.", ext: "", load: false.obs, photo64: ""),
-    RentImage(header: "Arka", description: "Aracın arkadan fotoğrafını yükleyiniz.", ext: "", load: false.obs, photo64: ""),
-    RentImage(header: "Sağ", description: "Aracın sağ yandan fotoğrafını yükleyiniz.", ext: "", load: false.obs, photo64: ""),
-    RentImage(header: "Sol", description: "Aracın sol yandan fotoğrafını yükleyiniz.", ext: "", load: false.obs, photo64: ""),
+    RentImage(header: "Aracın önden fotoğrafı", description: "Aracın önden fotoğrafını yükleyiniz.", ext: "", load: false.obs, photo64: ""),
+    RentImage(header: "Aracın arkadan fotoğrafı", description: "Aracın arkadan fotoğrafını yükleyiniz.", ext: "", load: false.obs, photo64: ""),
+    RentImage(header: "Aracın sağdan fotoğrafı", description: "Aracın sağ yandan fotoğrafını yükleyiniz.", ext: "", load: false.obs, photo64: ""),
+    RentImage(header: "Aracın soldan fotoğrafı", description: "Aracın sol yandan fotoğrafını yükleyiniz.", ext: "", load: false.obs, photo64: ""),
   ].obs;
 
   Future<void> pickImageAtIndex(ImageSource source, int index) async {
@@ -170,6 +170,7 @@ class RentNotificationsController extends GetxController {
       if (checkLoadImageComplete()) {
         for (int i = 0; i < carAddImages.length; i++) {
           Map<String, dynamic> carRentPhotoMap = {
+            "rent_id": selectedNotification!.ID,
             "car_id": carElement.carId,
             "base64_image": carAddImages[i].photo64,
             "ext": carAddImages[i].ext,
@@ -178,24 +179,25 @@ class RentNotificationsController extends GetxController {
             "rent_type": rent_type,
           };
           generalResponse = await ApiService.CarRentPhoto(carRentPhotoMap);
-          log(generalResponse.message);
+          log(generalResponse.message, name: "saveRentCarPhotos");
         }
+        //0 -> from owner, 0 -> before rent
+        if (photoFrom == 0 && rent_type == 0) {
+          isOwnerLoadBeforePhoto.value = 1;
+        } else if (photoFrom == 0 && rent_type == 1) {
+          isOwnerLoadAfterPhoto.value = 1;
+        } else if (photoFrom == 1 && rent_type == 0) {
+          isRenterLoadBeforePhoto.value = 1;
+        } else if (photoFrom == 1 && rent_type == 1) {
+          isRenterLoadAfterPhoto.value = 1;
+        }
+        Helpers.showSnackbar("Kaydedildi", "Fotoğraflar kaydedildi");
+        Get.back();
+        return true;
       } else {
         Helpers.showSnackbar("Uyarı!", "Lütfen gerekli fotoğrafları yükleyiniz.");
         return false;
       }
-      //0 -> from owner, 0 -> before rent
-      if (photoFrom == 0 && rent_type == 0) {
-        isOwnerLoadBeforePhoto.value = 1;
-      } else if (photoFrom == 0 && rent_type == 1) {
-        isOwnerLoadAfterPhoto.value = 1;
-      } else if (photoFrom == 1 && rent_type == 0) {
-        isRenterLoadBeforePhoto.value = 1;
-      } else if (photoFrom == 1 && rent_type == 1) {
-        isRenterLoadAfterPhoto.value = 1;
-      }
-
-      return true;
     } catch (e) {
       log(e.toString());
       return false;
@@ -205,29 +207,94 @@ class RentNotificationsController extends GetxController {
   //Show Photos
 
   RxList<RentImage> carShowImages = <RentImage>[
-    RentImage(header: "Ön", description: "Aracın önden fotoğrafını yükleyiniz.", ext: "", load: false.obs, photo64: "", path: "", photoFrom: -1, rentType: -1),
     RentImage(
-        header: "Arka", description: "Aracın arkadan fotoğrafını yükleyiniz.", ext: "", load: false.obs, photo64: "", path: "", photoFrom: -1, rentType: -1),
+        header: "Aracın önden fotoğrafı",
+        description: "Aracın önden fotoğrafını yükleyiniz.",
+        ext: "",
+        load: false.obs,
+        photo64: "",
+        path: "",
+        photoFrom: -1,
+        rentType: -1,
+        photoType: 1),
     RentImage(
-        header: "Sağ", description: "Aracın sağ yandan fotoğrafını yükleyiniz.", ext: "", load: false.obs, photo64: "", path: "", photoFrom: -1, rentType: -1),
+        header: "Aracın arkadan fotoğrafı",
+        description: "Aracın arkadan fotoğrafını yükleyiniz.",
+        ext: "",
+        load: false.obs,
+        photo64: "",
+        path: "",
+        photoFrom: -1,
+        rentType: -1,
+        photoType: 2),
     RentImage(
-        header: "Sol", description: "Aracın sol yandan fotoğrafını yükleyiniz.", ext: "", load: false.obs, photo64: "", path: "", photoFrom: -1, rentType: -1),
+        header: "Aracın sağdan fotoğrafı",
+        description: "Aracın sağ yandan fotoğrafını yükleyiniz.",
+        ext: "",
+        load: false.obs,
+        photo64: "",
+        path: "",
+        photoFrom: -1,
+        rentType: -1,
+        photoType: 3),
+    RentImage(
+        header: "Aracın soldan fotoğrafı",
+        description: "Aracın sol yandan fotoğrafını yükleyiniz.",
+        ext: "",
+        load: false.obs,
+        photo64: "",
+        path: "",
+        photoFrom: -1,
+        rentType: -1,
+        photoType: 4),
   ].obs;
-/*
-  Future<void> fillPhotos(List<RentImage> carShowImages) async {
-    awaitApiService.getRentPhotos();
+
+  Future<void> fillPhotos(int photoFrom, int rentType) async {
+    Map<String, dynamic> getRentPhotoMap = {
+      "car_id": carElement.carId,
+      "photo_from": photoFrom,
+      "rent_type": rentType,
+      "rent_id": selectedNotification!.ID,
+    };
+    log(getRentPhotoMap.toString(), name: "getRentPhotoMap.toString()");
+
+    GetRentPhoto getRentPhoto = await ApiService.GetRentPhotos(getRentPhotoMap);
+    log(getRentPhoto.message, name: "getRentPhoto.message");
 
     for (int i = 0; i < carShowImages.length; i++) {
-      int? photoFrom = carShowImages[i].photoFrom;
-      int? rentType = carShowImages[i].rentType;
-
-      // İlgili photo_type'a karşılık gelen index'i bul
-      int imageIndex = carShowImages.indexWhere((image) => image.photoFrom == photoType);
-
-      // Eğer index bulunursa, path'i güncelle
-      if (imageIndex != -1) {
-        carShowImages[imageIndex].path = carAddPhotos[i].carShowImages;
+      // carShowImages listesindeki her öğe için gerekli eşleşmeyi arayın
+      for (int j = 0; j < getRentPhoto.rentPhotoCar.length; j++) {
+        // Eğer photoType'lar eşleşiyorsa, atamaları yapın
+        if (carShowImages[i].photoType == getRentPhoto.rentPhotoCar[j].photoType) {
+          carShowImages[i].photoFrom = getRentPhoto.rentPhotoCar[j].photoFrom;
+          carShowImages[i].rentType = getRentPhoto.rentPhotoCar[j].rentType;
+          carShowImages[i].path = getRentPhoto.rentPhotoCar[j].photoPath;
+          break;
+        }
       }
     }
-  }*/
+  }
+
+  //Comment Car
+  int isRentEnd = 0;
+  final commentCarPageKey = GlobalKey<FormState>();
+
+  TextEditingController comment = TextEditingController();
+
+  RxDouble rating = (1.0).obs;
+
+  Future<GeneralResponse> GiveCarComment() async {
+    Map<String, dynamic> carCommentMap = {
+      "CarID": selectedNotification!.carId,
+      "CommentedBy": selectedNotification!.renterId,
+      "RentID": selectedNotification?.ID,
+      "Comment": comment.text,
+      "Point": rating.toInt(),
+      "Status": 0,
+    };
+
+    GeneralResponse generalResponse = await ApiService.GiveCarComment(carCommentMap);
+    log(generalResponse.message, name: "GiveCarComment");
+    return generalResponse;
+  }
 }

@@ -193,6 +193,14 @@ class LoginAndRegisterButton extends StatelessWidget {
           },
           child: const Text("Kayıt Ol"),
         ),
+        const SizedBox(height: 12),
+        TextButton(
+          onPressed: () => Get.to(const Dashboard()),
+          child: const Text(
+            "Kayıt olmadan devam et",
+            style: TextStyle(fontSize: 12, decoration: TextDecoration.underline, color: Colors.black),
+          ),
+        ),
       ],
     );
   }
@@ -227,25 +235,40 @@ class EmailAndPassword extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 15),
-        Padding(
-          padding: const EdgeInsets.only(left: 20.0, right: 20.0),
-          child: TextFormField(
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Lütfen şifrenizi giriniz';
-              } else {
-                return null;
-              }
-            },
-            obscureText: true,
-            controller: authController.loginPasswordController,
-            decoration: InputDecoration(
-                hintText: "Şifre",
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none),
-                fillColor: Colors.grey.withOpacity(0.1),
-                filled: true,
-                prefixIcon: const Icon(Icons.password)),
-          ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 0),
+              child: TextFormField(
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Lütfen şifrenizi giriniz';
+                  } else {
+                    return null;
+                  }
+                },
+                obscureText: true,
+                controller: authController.loginPasswordController,
+                decoration: InputDecoration(
+                    hintText: "Şifre",
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none),
+                    fillColor: Colors.grey.withOpacity(0.1),
+                    filled: true,
+                    prefixIcon: const Icon(Icons.password)),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(right: 10.0),
+              child: TextButton(
+                onPressed: () => Get.to(const Dashboard()),
+                child: const Text(
+                  "Şifremi unuttum",
+                  style: TextStyle(fontSize: 14, decoration: TextDecoration.underline, color: Colors.black),
+                ),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 15),
       ],

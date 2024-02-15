@@ -50,8 +50,18 @@ class MyCarsPage extends StatelessWidget {
                                     log("Bildirim detayı getirilirken hata oluştur $e", name: "Bildirim detay hatası");
                                   }
                                 },
-                                title: Text(
-                                  "${controller.carList.value[index].brandName ?? ""} - ${controller.carList.value[index].modelName ?? ""} - ${controller.carList.value[index].plate ?? ""}",
+                                title: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      controller.carList.value[index].plate ?? "",
+                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                    ),
+                                    Text(
+                                      "${controller.carList.value[index].brandName ?? ""} - ${controller.carList.value[index].modelName ?? ""} ",
+                                      style: TextStyle(fontSize: 12),
+                                    ),
+                                  ],
                                 ),
                                 subtitle: Row(
                                   children: [
@@ -79,7 +89,7 @@ class MyCarsPage extends StatelessWidget {
                                     ),
                                   ),
                                 ),
-                                trailing: Icon(Icons.arrow_forward_ios_sharp),
+                                trailing: Icon(Icons.keyboard_arrow_right_rounded),
                               ),
                             ],
                           );

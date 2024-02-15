@@ -812,7 +812,7 @@ class RegisterPage extends StatelessWidget {
                                       CustomDialog.showMessage(
                                           context: context,
                                           title: "Kayıt Başarılı",
-                                          message: "Kaydınız başarılı, admin onayından sonra giriş yapabilirsiniz.",
+                                          //message: "Kaydınız başarılı, admin onayından sonra giriş yapabilirsiniz.",
                                           onPositiveButtonPressed: () {
                                             Get.offAll(const LoginPage());
                                           });

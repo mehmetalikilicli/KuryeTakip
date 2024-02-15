@@ -117,7 +117,7 @@ class TestAddController extends GetxController {
   RxList<AddCarLocation> locations = <AddCarLocation>[].obs;
 
   MapPickerController mapPickerController = MapPickerController();
-  CameraPosition cameraPosition = const CameraPosition(target: LatLng(38.4192, 27.1287), zoom: 14.0);
+  CameraPosition cameraPosition = const CameraPosition(target: LatLng(38.4192, 27.1287), zoom: 10.0);
   final googleMapController = Completer<GoogleMapController>();
   RxString gmAddressText = "".obs, rxCity = "".obs, rxDistrict = "".obs, address = "".obs;
   String district = "", city = "";
@@ -210,13 +210,15 @@ class TestAddController extends GetxController {
 
   //PAGE-5
   RxList<AddCarUploadImage> carImages = <AddCarUploadImage>[
-    AddCarUploadImage(header: "Ön", description: "Aracın önden fotoğrafını yükleyiniz.", ext: "", load: false.obs, photo64: ""),
-    AddCarUploadImage(header: "Arka", description: "Aracın arkadan fotoğrafını yükleyiniz.", ext: "", load: false.obs, photo64: ""),
-    AddCarUploadImage(header: "Sağ", description: "Aracın sağ yandan fotoğrafını yükleyiniz.", ext: "", load: false.obs, photo64: ""),
-    AddCarUploadImage(header: "Sol", description: "Aracın sol yandan fotoğrafını yükleyiniz.", ext: "", load: false.obs, photo64: ""),
-    AddCarUploadImage(header: "Ön İç", description: "Aracın araç iç ön kısmının fotoğrafını yükleyiniz.", ext: "", load: false.obs, photo64: ""),
-    AddCarUploadImage(header: "Arka İç", description: "Aracın araç iç arka kısmının fotoğrafını yükleyiniz.", ext: "", load: false.obs, photo64: ""),
-    AddCarUploadImage(header: "Bagaj", description: "Aracın araç bagaj içi fotoğrafını yükleyiniz.", ext: "", load: false.obs, photo64: ""),
+    AddCarUploadImage(header: "Aracın önden fotoğrafı", description: "Aracın önden fotoğrafını yükleyiniz.", ext: "", load: false.obs, photo64: ""),
+    AddCarUploadImage(header: "Aracın arkadan fotoğrafı", description: "Aracın arkadan fotoğrafını yükleyiniz.", ext: "", load: false.obs, photo64: ""),
+    AddCarUploadImage(header: "Aracın sağdan fotoğrafı", description: "Aracın sağ yandan fotoğrafını yükleyiniz.", ext: "", load: false.obs, photo64: ""),
+    AddCarUploadImage(header: "Aracın soldan fotoğrafı", description: "Aracın sol yandan fotoğrafını yükleyiniz.", ext: "", load: false.obs, photo64: ""),
+    AddCarUploadImage(
+        header: "Araç içi ön kısım fotoğrafı", description: "Aracın araç iç ön kısmının fotoğrafını yükleyiniz.", ext: "", load: false.obs, photo64: ""),
+    AddCarUploadImage(
+        header: "Arka içi arka kısım fotoğrafı", description: "Aracın araç iç arka kısmının fotoğrafını yükleyiniz.", ext: "", load: false.obs, photo64: ""),
+    AddCarUploadImage(header: "Araç bağaj fotoğrafı", description: "Aracın araç bagaj içi fotoğrafını yükleyiniz.", ext: "", load: false.obs, photo64: ""),
   ].obs;
 
   Future<void> pickImageAtIndex(ImageSource source, int index) async {
@@ -324,7 +326,7 @@ class TestAddController extends GetxController {
       "user_email": userEmail,
       "user_phone": userPhone,
       "is_long_term": isLongTerm.value ? 1 : 0,
-      "is_approved": 1,
+      "is_approved": 0,
       "is_available_date_start": availableCarDateStart.toIso8601String(),
       "is_available_date_end": availableCarDateEnd.toIso8601String(),
     };
