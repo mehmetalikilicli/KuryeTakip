@@ -5,9 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:kurye_takip/app_constants/app_colors.dart';
+import 'package:kurye_takip/helpers/get_local_user.dart';
 import 'package:kurye_takip/model/register.dart';
 import 'package:kurye_takip/pages/add_car/test_add.dart';
 import 'package:kurye_takip/pages/auth/login.dart';
+import 'package:kurye_takip/pages/profile/about_us.dart';
+import 'package:kurye_takip/pages/profile/edit_profile.dart';
+import 'package:kurye_takip/pages/profile/questions_answers.dart';
 import 'package:kurye_takip/pages/zzz/car_rentals/car_rentals.dart';
 import 'package:kurye_takip/pages/my_cars/my_cars.dart';
 import 'package:kurye_takip/pages/owner_notifications/owner_notifications.dart';
@@ -30,24 +34,39 @@ class _ProfilePageState extends State<ProfilePage> {
       extendBodyBehindAppBar: false,
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text("Profil"),
-        backgroundColor: Colors.white,
+        title: const Text("Profil"),
         surfaceTintColor: Colors.white,
+        backgroundColor: Colors.white,
+        centerTitle: true,
+        elevation: 1,
+        shadowColor: Colors.black,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
             children: [
-              const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [CircleAvatar(maxRadius: 70, backgroundImage: AssetImage("assets/logo/logo_dark.png"))],
+              SizedBox(height: 8),
+              Stack(
+                children: [
+                  CircleAvatar(
+                    maxRadius: 70,
+                    backgroundImage: AssetImage("assets/logo/logo_dark.png"),
+                  ),
+                  /*IconButton(
+                    onPressed: () {},
+                    icon: Icon(
+                      Icons.change_circle_outlined,
+                      color: Colors.white,
+                      size: 48,
+                    ),
+                  )*/
+                ],
               ),
               const SizedBox(height: 15),
               Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [Text(controller.profileName.text, style: TextStyle(fontWeight: FontWeight.w900, fontSize: 26))]),
               Row(mainAxisAlignment: MainAxisAlignment.center, children: [Text(controller.profileEmail.text)]),
-              const SizedBox(height: 15),
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
@@ -64,6 +83,22 @@ class _ProfilePageState extends State<ProfilePage> {
                             contentPadding: EdgeInsets.symmetric(vertical: 0),
                             leading: Icon(Icons.notifications_active_outlined, color: Colors.black54),
                             title: Text('Taleplerim', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                            trailing: Icon(Icons.keyboard_arrow_right_rounded, color: Colors.black54)),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Visibility(
+                      visible: controller.isVehicleOwner == 0 && controller.isUserLogedIn == 1,
+                      child: MaterialButton(
+                        onPressed: () {
+                          //Get.to(RentNotificationPage());
+                        },
+                        color: Colors.grey.shade100,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        child: const ListTile(
+                            contentPadding: EdgeInsets.symmetric(vertical: 0),
+                            leading: Icon(Icons.car_rental, color: Colors.black54),
+                            title: Text('Kiralama İşlemlerim', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
                             trailing: Icon(Icons.keyboard_arrow_right_rounded, color: Colors.black54)),
                       ),
                     ),
@@ -87,13 +122,13 @@ class _ProfilePageState extends State<ProfilePage> {
                         ],
                       ),
                     ),
-                    Visibility(
+                    /*Visibility(
                       visible: controller.isVehicleOwner == 1 && controller.isUserLogedIn == 1,
                       child: Column(
                         children: [
                           const SizedBox(height: 10),
                           MaterialButton(
-                            onPressed: () => Get.to(TestAddCarView()),
+                            onPressed: () => Get.to(() => TestAddCarView()),
                             color: Colors.grey.shade100,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                             child: const ListTile(
@@ -105,7 +140,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                         ],
                       ),
-                    ),
+                    ),*/
                     Visibility(
                       visible: controller.isVehicleOwner == 1 && controller.isUserLogedIn == 1,
                       child: Column(
@@ -126,25 +161,13 @@ class _ProfilePageState extends State<ProfilePage> {
                         ],
                       ),
                     ),
-
-                    /*const SizedBox(height: 10),
-                    MaterialButton(
-                      onPressed: () {
-                        Get.to(CarRentalsPage());
-                      },
-                      color: Colors.grey.shade100,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      child: const ListTile(
-                          contentPadding: EdgeInsets.symmetric(horizontal: 0),
-                          leading: Icon(CupertinoIcons.rectangle_stack_fill, color: Colors.black54),
-                          title: Text('Kiralama işlemlerim', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                          trailing: Icon(Icons.arrow_forward_ios_outlined, color: Colors.black54)),
-                    ),*/
                     const SizedBox(height: 10),
                     Visibility(
                       visible: controller.isUserLogedIn == 1,
                       child: MaterialButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Get.to(EditProfilePage());
+                        },
                         color: Colors.grey.shade100,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         child: const ListTile(
@@ -154,7 +177,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             trailing: Icon(Icons.keyboard_arrow_right_rounded)),
                       ),
                     ),
-                    const SizedBox(height: 10),
+                    /*const SizedBox(height: 10),
                     MaterialButton(
                       onPressed: () {},
                       color: Colors.grey.shade100,
@@ -164,12 +187,12 @@ class _ProfilePageState extends State<ProfilePage> {
                           leading: Icon(CupertinoIcons.settings_solid, color: Colors.black54),
                           title: Text('Ayarlar', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
                           trailing: Icon(Icons.keyboard_arrow_right_rounded)),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
+                    ),*/
+                    const SizedBox(height: 10),
                     MaterialButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Get.to(QuestionsAnswersPage());
+                      },
                       color: Colors.grey.shade100,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       child: const ListTile(
@@ -181,7 +204,9 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                     const SizedBox(height: 10),
                     MaterialButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Get.to(AboutUsPage());
+                      },
                       color: Colors.grey.shade100,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       child: const ListTile(

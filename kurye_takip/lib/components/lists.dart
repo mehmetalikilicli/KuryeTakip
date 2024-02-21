@@ -1,6 +1,6 @@
 class Lists {
   static List<String> generateCarYearList() {
-    int currentYear = DateTime.now().year + 1;
+    int currentYear = DateTime.now().year;
     List<String> carYearList = [];
 
     for (int i = currentYear; i >= currentYear - 30; i--) {
@@ -17,4 +17,6 @@ class Lists {
 
   static List<String> drawerCarFuelTypeList = ['Tümü', 'Benzin', 'Benzin/LPG', 'Dizel', 'Elektrik', 'Hibrit(Elektrik/Benzin)', 'Hidrojen'];
   static List<String> drawerCarTransmissionTypeList = ['Tümü', 'Otomatik', 'Manuel', 'Yarı Otomatik'];
+
+  static List<String> genderList = ["Erkek", "Kadın", "Belirtmek İstemiyorum"];
 }

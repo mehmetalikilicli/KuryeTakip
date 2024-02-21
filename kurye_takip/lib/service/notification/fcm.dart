@@ -1,9 +1,11 @@
+// ignore_for_file: unused_import, unused_local_variable
+
 import 'dart:convert';
 import 'dart:developer';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:get/get.dart';
-import 'package:kurye_takip/helpers/get_local_user_id.dart';
+import 'package:kurye_takip/helpers/get_local_user.dart';
 import 'package:kurye_takip/helpers/helpers.dart';
 import 'package:kurye_takip/service/api_service.dart';
 import 'package:kurye_takip/service/notification/local.dart';
@@ -23,11 +25,11 @@ class FirebaseNotificationService {
     messaging.getToken().then(
       (value) async {
         FirebaseMessaging.instance.subscribeToTopic('global');
-        log("Token: $value", name: "FCM Token");
+        //log("Token: $value", name: "FCM Token");
         bool login = await Helpers.isLoggedIn();
         if (login) {
           Map<String, dynamic> tokenMap = {
-            "UserID": getLocalUserID(),
+            "UserID": GetLocalUserInfo.getLocalUserID(),
             "Token": value,
           };
           await ApiService.SaveNotificationToken(tokenMap);
@@ -101,6 +103,6 @@ class FirebaseNotificationService {
 void loginSaveToken() {
   FirebaseMessaging.instance.getToken().then((value) {
     FirebaseMessaging.instance.subscribeToTopic('global');
-    log("Token: $value", name: "FCM Token");
+    //log("Token: $value", name: "FCM Token");
   });
 }

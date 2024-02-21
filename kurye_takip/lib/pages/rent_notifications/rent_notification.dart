@@ -11,7 +11,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:kurye_takip/app_constants/app_colors.dart';
 import 'package:kurye_takip/helpers/custom_dialog.dart';
-import 'package:kurye_takip/helpers/get_local_user_id.dart';
+import 'package:kurye_takip/helpers/get_local_user.dart';
 import 'package:kurye_takip/model/general_response.dart';
 import 'package:kurye_takip/pages/add_car/test_add.dart';
 import 'package:kurye_takip/pages/cars_detail/car_detail.dart';
@@ -34,6 +34,8 @@ class RentNotificationPage extends StatelessWidget {
         surfaceTintColor: Colors.white,
         backgroundColor: Colors.white,
         centerTitle: true,
+        elevation: 1,
+        shadowColor: Colors.black,
       ),
       body: RenterRequestList(),
     );
@@ -46,101 +48,105 @@ class RenterRequestList extends GetView<RentNotificationsController> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: controller.fetchRentNotifications(getLocalUserID()),
+      future: controller.fetchRentNotifications(
+        GetLocalUserInfo.getLocalUserID(),
+      ),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const Center(child: Text("Hata!"));
         } else if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CupertinoActivityIndicator(color: Colors.black));
         } else {
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: controller.notificationApproveList.length == 0
-                ? Center(child: Text("Herhangi bir talebiniz bulunmamaktadır."))
-                : ListView(
-                    children: [
-                      ListView.separated(
-                        padding: const EdgeInsets.only(top: 8),
-                        shrinkWrap: true,
-                        primary: false,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: controller.notificationApproveList.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          return GestureDetector(
-                            onTap: () async {
-                              try {
-                                await controller.getNotificationDetail(index);
-                              } catch (e) {
-                                log("Bildirim detayı getirilirken hata oluştur $e", name: "Bildirim detay hatası");
-                              }
-                            },
-                            child: Column(
-                              children: [
-                                ListTile(
-                                  contentPadding: EdgeInsets.fromLTRB(6, 0, 6, 0),
-                                  onTap: () async {
-                                    try {
-                                      controller.getNotificationDetail(index);
-                                    } catch (e) {
-                                      log("Bildirim detayı getirilirken hata oluştur $e", name: "Bildirim detay hatası");
-                                    }
-                                  },
-                                  title: Text(
-                                    "${controller.rentRequestNotification.notifications[index].brandName ?? ""} - ${controller.rentRequestNotification.notifications[index].modelName ?? ""}",
-                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                                  ),
-                                  subtitle: controller.rentRequestNotification.notifications[index].rentStatus == 0
-                                      ? Row(
-                                          children: [
-                                            Container(
-                                                padding: EdgeInsets.fromLTRB(8, 2, 8, 2),
-                                                decoration: BoxDecoration(color: Colors.grey, borderRadius: BorderRadius.circular(6.0)),
-                                                child: Text("Bekliyor", style: TextStyle(color: Colors.white, fontSize: 14))),
-                                          ],
-                                        )
-                                      : controller.rentRequestNotification.notifications[index].rentStatus == 1
-                                          ? Row(
-                                              children: [
-                                                Container(
-                                                  padding: EdgeInsets.fromLTRB(8, 2, 8, 2),
-                                                  decoration: BoxDecoration(color: Colors.green, borderRadius: BorderRadius.circular(6.0)),
-                                                  child: Text("Onaylandı", style: TextStyle(color: Colors.white, fontSize: 14)),
-                                                ),
-                                              ],
-                                            )
-                                          : Row(
-                                              children: [
-                                                Container(
-                                                  padding: EdgeInsets.fromLTRB(8, 2, 8, 2),
-                                                  decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(6.0)),
-                                                  child: Text("Reddedildi", style: TextStyle(color: Colors.white, fontSize: 14)),
-                                                ),
-                                              ],
-                                            ),
-                                  trailing: Column(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      Icon(Icons.keyboard_arrow_right_rounded),
-                                      Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+          return controller.RNlist.length == 0
+              ? Center(child: Text("Herhangi bir talebiniz bulunmamaktadır."))
+              : ListView(
+                  children: [
+                    ListView.separated(
+                      padding: const EdgeInsets.only(top: 8, left: 4, right: 4),
+                      shrinkWrap: true,
+                      primary: false,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: controller.RNlist.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return GestureDetector(
+                          onTap: () async {
+                            try {
+                              await controller.getNotificationDetail(index);
+                            } catch (e) {
+                              log("Bildirim detayı getirilirken hata oluştu $e", name: "Bildirim detay hatası");
+                            }
+                          },
+                          child: Column(
+                            children: [
+                              ListTile(
+                                contentPadding: EdgeInsets.fromLTRB(6, 0, 6, 0),
+                                onTap: () async {
+                                  try {
+                                    controller.getNotificationDetail(index);
+                                  } catch (e) {
+                                    log("Bildirim detayı getirilirken hata oluştur $e", name: "Bildirim detay hatası");
+                                  }
+                                },
+                                title: Text(
+                                  "${controller.rentRequestNotification.notifications[index].brandName ?? ""} - ${controller.rentRequestNotification.notifications[index].modelName ?? ""}",
+                                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                                ),
+                                subtitle: controller.rentRequestNotification.notifications[index].rentStatus == 0
+                                    ? Row(
                                         children: [
-                                          Text("Talep oluşturma zamanı:", style: TextStyle(fontSize: 8)),
-                                          Text("${DateFormat('dd.MM.yyyy HH:mm').format(controller.rentRequestNotification.notifications[index].createdDate)}"),
+                                          Container(
+                                              padding: EdgeInsets.fromLTRB(8, 2, 8, 2),
+                                              decoration: BoxDecoration(color: Colors.grey, borderRadius: BorderRadius.circular(6.0)),
+                                              child: Text("Bekliyor", style: TextStyle(color: Colors.white, fontSize: 14))),
                                         ],
                                       )
-                                    ],
-                                  ),
+                                    : controller.rentRequestNotification.notifications[index].rentStatus == 1
+                                        ? Row(
+                                            children: [
+                                              Container(
+                                                padding: EdgeInsets.fromLTRB(8, 2, 8, 2),
+                                                decoration: BoxDecoration(color: Colors.green, borderRadius: BorderRadius.circular(6.0)),
+                                                child: Text("Onaylandı", style: TextStyle(color: Colors.white, fontSize: 14)),
+                                              ),
+                                            ],
+                                          )
+                                        : Row(
+                                            children: [
+                                              Container(
+                                                padding: EdgeInsets.fromLTRB(8, 2, 8, 2),
+                                                decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(6.0)),
+                                                child: Text("Reddedildi", style: TextStyle(color: Colors.white, fontSize: 14)),
+                                              ),
+                                            ],
+                                          ),
+                                trailing: Column(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Icon(Icons.keyboard_arrow_right_rounded),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text("No: ${controller.rentRequestNotification.notifications[index].ID.toString()}"),
+                                            Text(DateFormat('dd.MM.yyyy HH:mm').format(controller.rentRequestNotification.notifications[index].createdDate)),
+                                          ],
+                                        ),
+                                      ],
+                                    )
+                                  ],
                                 ),
-                              ],
-                            ),
-                          );
-                        },
-                        separatorBuilder: (context, index) => const Divider(height: 8),
-                      ),
-                    ],
-                  ),
-          );
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      separatorBuilder: (context, index) => const Divider(height: 0),
+                    ),
+                  ],
+                );
         }
       },
     );
@@ -252,28 +258,45 @@ class RenterRequestDetail extends StatelessWidget {
                               Divider(height: 8, color: Colors.black),
                               Row(
                                 children: [
-                                  Icon(CupertinoIcons.timer),
-                                  const SizedBox(width: 8),
-                                  Text("${DateFormat('dd.MM.yyyy HH:mm').format(controller.selectedNotification!.createdDate)} ",
-                                      style: TextStyle(fontSize: 16))
+                                  Icon(CupertinoIcons.time),
+                                  SizedBox(width: 8),
+                                  Row(
+                                    children: [
+                                      Text("İstek zamanı:"),
+                                      const SizedBox(width: 2),
+                                      Text("${DateFormat('dd.MM.yyyy - HH:mm').format(controller.selectedNotification!.createdDate)} ",
+                                          style: TextStyle(fontSize: 14))
+                                    ],
+                                  ),
                                 ],
                               ),
                               const SizedBox(height: 8),
                               Row(
                                 children: [
                                   Icon(CupertinoIcons.calendar_today),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                      "${DateFormat('dd.MM.yyyy').format(controller.selectedNotification!.rentStartDate)} - ${DateFormat('dd.MM.yyyy').format(controller.selectedNotification!.rentEndDate)}",
-                                      style: TextStyle(fontSize: 16))
+                                  SizedBox(width: 8),
+                                  Expanded(
+                                    child: Row(
+                                      children: [
+                                        Text("İstek tarih aralığı: "),
+                                        const SizedBox(width: 2),
+                                        Text(
+                                            "${DateFormat('dd.MM.yyyy').format(controller.selectedNotification!.rentStartDate)} - ${DateFormat('dd.MM.yyyy').format(controller.selectedNotification!.rentEndDate)}",
+                                            style: TextStyle(fontSize: 12))
+                                      ],
+                                    ),
+                                  ),
                                 ],
                               ),
                               const SizedBox(height: 8),
                               Row(
                                 children: [
-                                  Icon(CupertinoIcons.calendar_today),
-                                  const SizedBox(width: 8),
-                                  Text("${controller.selectedNotification!.price} ₺", style: TextStyle(fontSize: 16))
+                                  Icon(CupertinoIcons.tags),
+                                  SizedBox(width: 8),
+                                  Text("Fiyat: "),
+                                  Row(
+                                    children: [const SizedBox(width: 8), Text("${controller.selectedNotification!.price} ₺", style: TextStyle(fontSize: 16))],
+                                  ),
                                 ],
                               ),
                               const SizedBox(height: 8),
@@ -282,46 +305,53 @@ class RenterRequestDetail extends StatelessWidget {
                           Column(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                              controller.selectedNotification!.rentStatus == 0
-                                  ? Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        Container(
-                                            padding: EdgeInsets.all(8.0),
-                                            decoration: BoxDecoration(color: Colors.grey, borderRadius: BorderRadius.circular(10.0)),
-                                            child: Text("Araç sahibinin onayı bekleniyor", style: TextStyle(color: Colors.white))),
-                                      ],
-                                    )
-                                  : controller.selectedNotification!.rentStatus == 1
-                                      ? Row(
-                                          mainAxisAlignment: MainAxisAlignment.end,
-                                          children: [
-                                            GestureDetector(
-                                              onTap: () {
-                                                Get.to(PaymentPage(carElement: controller.carElement, rentNotification: controller.selectedNotification!));
-                                              },
-                                              child: Container(
-                                                padding: EdgeInsets.all(8.0),
-                                                decoration: BoxDecoration(color: Colors.green, borderRadius: BorderRadius.circular(10.0)),
-                                                child: Text(controller.selectedNotification!.paymentStatus == 0 ? "Ödemeye Geç" : "Ödediniz",
-                                                    style: TextStyle(color: Colors.white)),
-                                              ),
-                                            ),
-                                          ],
-                                        )
-                                      : Row(
-                                          mainAxisAlignment: MainAxisAlignment.end,
-                                          children: [
-                                            Container(
+                              Obx(
+                                () => controller.RNlist.isNotEmpty && controller.RNlist[controller.selectedIndex].rentStatus == 0
+                                    ? Row(
+                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        children: [
+                                          Container(
                                               padding: EdgeInsets.all(8.0),
-                                              decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(10.0)),
-                                              child: Text("Reddedildi", style: TextStyle(color: Colors.white)),
-                                            ),
-                                          ],
-                                        ),
+                                              decoration: BoxDecoration(color: Colors.grey, borderRadius: BorderRadius.circular(10.0)),
+                                              child: Text("Araç sahibinin onayı bekleniyor", style: TextStyle(color: Colors.white))),
+                                        ],
+                                      )
+                                    : Obx(
+                                        () => controller.RNlist.isNotEmpty && controller.RNlist[controller.selectedIndex].rentStatus == 1
+                                            ? Row(
+                                                mainAxisAlignment: MainAxisAlignment.end,
+                                                children: [
+                                                  GestureDetector(
+                                                    onTap: () {
+                                                      Get.to(
+                                                          PaymentPage(carElement: controller.carElement, rentNotification: controller.selectedNotification!));
+                                                    },
+                                                    child: Container(
+                                                      padding: EdgeInsets.all(8.0),
+                                                      decoration: BoxDecoration(color: Colors.green, borderRadius: BorderRadius.circular(10.0)),
+                                                      child: Text(controller.RNlist[controller.selectedIndex].paymentStatus == 0 ? "Ödemeye Geç" : "Ödediniz",
+                                                          style: TextStyle(color: Colors.white)),
+                                                    ),
+                                                  ),
+                                                ],
+                                              )
+                                            : Row(
+                                                mainAxisAlignment: MainAxisAlignment.end,
+                                                children: [
+                                                  Container(
+                                                    padding: EdgeInsets.all(8.0),
+                                                    decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(10.0)),
+                                                    child: Text("Reddedildi", style: TextStyle(color: Colors.white)),
+                                                  ),
+                                                ],
+                                              ),
+                                      ),
+                              ),
                               SizedBox(height: 8),
                               Visibility(
-                                visible: controller.selectedNotification!.rentStatus == 1 && controller.selectedNotification!.paymentStatus == 1,
+                                visible: controller.RNlist.isNotEmpty &&
+                                    controller.RNlist[controller.selectedIndex].rentStatus == 1 &&
+                                    controller.RNlist[controller.selectedIndex].paymentStatus == 1,
                                 child: Obx(
                                   () => Column(
                                     children: [
@@ -363,7 +393,9 @@ class RenterRequestDetail extends StatelessWidget {
                               ),
                               SizedBox(height: 8),
                               Visibility(
-                                visible: controller.selectedNotification!.rentStatus == 1 && controller.selectedNotification!.paymentStatus == 1,
+                                visible: controller.RNlist.isNotEmpty &&
+                                    controller.RNlist[controller.selectedIndex].rentStatus == 1 &&
+                                    controller.RNlist[controller.selectedIndex].paymentStatus == 1,
                                 child: Obx(
                                   () => Column(
                                     children: [
@@ -581,7 +613,9 @@ class RenterAddRentPhoto extends StatelessWidget {
                                   Expanded(child: Text(controller.carAddImages[index].header, style: const TextStyle(fontWeight: FontWeight.w600))),
                                   const SizedBox(width: 8),
                                   GestureDetector(
-                                    onTap: () {},
+                                    onTap: () {
+                                      controller.removeImageAtIndex(index);
+                                    },
                                     child: const Icon(CupertinoIcons.xmark_circle, color: CupertinoColors.systemRed),
                                   ),
                                 ],

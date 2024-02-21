@@ -26,21 +26,21 @@ class OwnerNotificationsController extends GetxController {
 
   RentNotification? selectedNotification;
 
-  RxList<int> notificationApproveList = <int>[].obs;
+  RxList<ONList> ONlist = <ONList>[].obs;
 
   String renterName = "";
   String renterSurname = "";
   String renterEmail = "";
   String renterPhone = "";
 
-  int detailIndex = -1;
+  int selectedIndex = -1;
 
   RxInt isApproveRent = 0.obs;
 
   CarElement carElement = CarElement();
 
   Future<void> getNotificationDetail(int index) async {
-    detailIndex = index;
+    selectedIndex = index;
     CarDetail carDetail = await ApiService.getCar(rentRequestNotification.notifications[index].carId);
     carElement = carDetail.car!;
 
@@ -51,13 +51,22 @@ class OwnerNotificationsController extends GetxController {
     isRenterLoadAfterPhoto.value = selectedNotification!.isRenterLoadAfterPhoto!;
   }
 
-  Future<void> fetchOwnerNotifications(int renter_id) async {
-    notificationApproveList.clear();
-    try {
-      rentRequestNotification = await ApiService.fetchOwnerNotifications(renter_id);
+  void removeImageAtIndex(int index) {
+    carImages.value[index].load.value = false;
+    carImages.value[index].ext = "";
+    carImages.value[index].photo64 = "";
+  }
 
+  Future<void> fetchOwnerNotifications(int owner_id) async {
+    ONlist.clear();
+    try {
+      rentRequestNotification = await ApiService.fetchOwnerNotifications(owner_id);
       for (int i = 0; i < rentRequestNotification.notifications.length; i++) {
-        notificationApproveList.value.add(rentRequestNotification.notifications[i].rentStatus);
+        ONList newItem = ONList(
+          paymentStatus: rentRequestNotification.notifications[i].paymentStatus!.obs,
+          rentStatus: rentRequestNotification.notifications[i].rentStatus.obs,
+        );
+        ONlist.add(newItem);
       }
     } catch (e) {
       print('Error: $e');
@@ -313,5 +322,15 @@ class RentImage {
     this.photoFrom,
     this.rentType,
     this.photoType,
+  });
+}
+
+class ONList {
+  RxInt rentStatus;
+  RxInt paymentStatus;
+
+  ONList({
+    required this.rentStatus,
+    required this.paymentStatus,
   });
 }

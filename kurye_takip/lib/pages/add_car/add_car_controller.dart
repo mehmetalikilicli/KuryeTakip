@@ -89,7 +89,7 @@ class AddCarController extends GetxController {
   List<String> kmList = ['0 - 29.999', '30.000 - 59.999', '60.000 - 89.999', '90.000 ve üzeri'];
 
   MapPickerController mapPickerController = MapPickerController();
-  CameraPosition cameraPosition = const CameraPosition(target: LatLng(38.4237, 27.1428), zoom: 14.4746);
+  CameraPosition cameraPosition = const CameraPosition(target: LatLng(38.4237, 27.1428), zoom: 8.4746);
   final googleMapController = Completer<GoogleMapController>();
   RxString gmAddressText = "".obs, rxCity = "".obs, rxDistrict = "".obs;
   RxString address = "".obs;

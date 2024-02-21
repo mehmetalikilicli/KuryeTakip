@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:kurye_takip/model/general_response.dart';
 import 'package:kurye_takip/model/login.dart';
 import 'package:kurye_takip/model/register.dart';
 
@@ -64,6 +65,7 @@ class AuthService {
       throw Exception('Failed to register');
     }
   }
+
 /*
   Future<RegisterResponse> register2(String jsonBody) async {
     final response = await http.post(Uri.parse('$baseUrl/Authentication/Register'), body: {});
@@ -75,4 +77,36 @@ class AuthService {
       throw Exception('Failed to register');
     }
   }*/
+
+  static Future<GeneralResponse> forgotPassword(Map body) async {
+    final String requestBody = json.encode(body);
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/Authentication/ForgotPassword'),
+      headers: {'Content-Type': 'application/json'},
+      body: requestBody,
+    );
+
+    if (response.statusCode == 200) {
+      return GeneralResponse.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to create');
+    }
+  }
+
+  static Future<GeneralResponse> editProfile(Map body) async {
+    final String requestBody = json.encode(body);
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/Users/EditProfile'),
+      headers: {'Content-Type': 'application/json'},
+      body: requestBody,
+    );
+
+    if (response.statusCode == 200) {
+      return GeneralResponse.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to create');
+    }
+  }
 }

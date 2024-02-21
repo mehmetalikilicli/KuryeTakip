@@ -26,7 +26,7 @@ class DashboardController extends GetxController {
   DateTime filterDateStart = DateTime.now();
   DateTime filterDateEnd = DateTime.now();
 
-  String? carYear, carFuel, carTransmission;
+  String? carFuel, carTransmission;
 
   TextEditingController minRentDay = TextEditingController();
 
@@ -38,7 +38,7 @@ class DashboardController extends GetxController {
 
   RxBool isDateCloseIconShow = false.obs;
 
-  CameraPosition cameraPosition = const CameraPosition(target: LatLng(38.4237, 27.1428), zoom: 10);
+  CameraPosition cameraPosition = const CameraPosition(target: LatLng(38.4237, 27.1428), zoom: 8);
   Set<Marker> carsMarkers = Set<Marker>();
   final googleMapController = Completer<GoogleMapController>();
 
@@ -59,10 +59,10 @@ class DashboardController extends GetxController {
   RxBool loadingBrands = false.obs;
 
   @override
-  void onInit() {
+  void onInit() async {
     super.onInit();
-    fetchBanner();
-    fetchData();
+    await fetchBanner();
+    await fetchData();
   }
 
   void changeBrand(value) {
@@ -87,8 +87,10 @@ class DashboardController extends GetxController {
   Future<void> fetchData() async {
     try {
       cars = await ApiService.fetchCars();
+      log(cars.cars.length.toString());
       //await Future.delayed(const Duration(seconds: 2));
       clearFilters();
+      await fetchBrands();
     } catch (e) {
       print('Error: $e');
     }
@@ -102,76 +104,41 @@ class DashboardController extends GetxController {
     }
   }
 
-  /*Future<void> applyFilters() async {
-    DateTime selectedStartDate = filterDateStart;
-    DateTime selectedEndDate = filterDateEnd.add(const Duration(days: 1));
-
+  Future<void> applyFilters() async {
     List<CarElement> filtered = cars.cars.where((car) {
       DateTime? carStartDate = car.is_available_date_start;
       DateTime? carEndDate = car.is_available_date_end;
 
-      // Filtrelerin kontrolü
-      bool fuelTypeFilter = carFuel == null || car.fuelType == carFuel;
-      //bool transmissionTypeFilter = carTransmission == null || car.transmissionType == carTransmission;
-      //bool minRentDayFilter = minRentDay.text.isEmpty || (car.minRentDay != null && car.minRentDay! >= int.parse(minRentDay.text));
-      //bool minPriceFilter = minPrice.text.isEmpty || (car.dailyPrice != null && car.dailyPrice! >= int.parse(minPrice.text));
-      //bool maxPriceFilter = maxPrice.text.isEmpty || (car.dailyPrice != null && car.dailyPrice! <= int.parse(maxPrice.text));
-      //bool brandFilter = carBrand == null || car.brandName == carBrand;
-      //bool modelFilter = carModel == null || car.modelName == carModel;
-
-      // Sadece seçili carType'a göre filtreleme
-      bool carTypeFilter = car.carType == selectedType.value;
-
-      // Tüm filtrelerin kontrolü
-      return carTypeFilter && fuelTypeFilter; //&& transmissionTypeFilter && minPriceFilter && maxPriceFilter && brandFilter && modelFilter;
-    }).toList();
-
-    // Filtrelenmiş araçları atama
-    filteredCars.assignAll(filtered);
-  }*/
-
-  Future<void> applyFilters2() async {
-    DateTime selectedStartDate = filterDateStart;
-    DateTime selectedEndDate = filterDateEnd.add(const Duration(days: 1));
-
-    List<CarElement> filtered = cars.cars.where((car) {
-      DateTime? carStartDate = car.is_available_date_start;
-      DateTime? carEndDate = car.is_available_date_end;
-
-      int minRentDay = car.minRentDay!;
+      int minRentDay = car.minRentDay ?? 0;
 
       bool carTypeFilter = car.carType == selectedType.value;
-      bool fuelTypeFilter = carFuel == null || car.fuelType == carFuel || carTransmission == 'Tümü';
-      bool transmissionTypeFilter = carTransmission == null || car.transmissionType == carTransmission;
+      bool fuelTypeFilter = carFuel == null || car.fuelType == carFuel || carFuel == 'Tümü';
+      bool transmissionTypeFilter = carTransmission == null || car.transmissionType == carTransmission || carTransmission == 'Tümü';
       bool minPriceFilter = minPrice.text.isEmpty || (car.dailyPrice != null && car.dailyPrice! >= int.parse(minPrice.text));
       bool maxPriceFilter = maxPrice.text.isEmpty || (car.dailyPrice != null && car.dailyPrice! <= int.parse(maxPrice.text));
 
-      bool brandFilter = carBrand == null || car.brandName == carBrand;
-      bool modelFilter = carModel == null || car.modelName == carModel;
+      bool brandFilter = carBrand == null || car.brandId.toString() == carBrand;
+      //log(brandFilter.toString());
+      bool modelFilter = carModel == null || car.modelId.toString() == carModel;
 
-      int dayDifference = carStartDate!.difference(carEndDate!).inDays.abs();
+      // Tarih aralığı kontrolü
+      bool dateRangeFilter = carStartDate!.isBefore(filterDateStart.add(const Duration(days: 1))) && carEndDate!.isAfter(filterDateEnd);
 
-      //log(dayDifference.toString());
-      //log(minRentDay.toString());
-      //log(carStartDate.toString(), name: "carStartDate ");
-      //log(carEndDate.toString(), name: "carEndDate   ");
-      //log("----------------------");
+      // minRentDay ile tarih arasındaki fark
+      //bool minRentDayFilter = dayDifference >= minRentDay;
 
       return carTypeFilter &&
-          carStartDate.isBefore(selectedEndDate) &&
-          carEndDate.isAfter(selectedStartDate) &&
+          dateRangeFilter &&
           fuelTypeFilter &&
           transmissionTypeFilter &&
           minPriceFilter &&
           maxPriceFilter &&
           brandFilter &&
-          modelFilter &&
-          dayDifference >= minRentDay;
+          modelFilter; // &&
+      //minRentDayFilter;
     }).toList();
 
-    // Filtrelenmiş araçları atama
     filteredCars.assignAll(filtered);
-    //log(filteredCars.length.toString(), name: "filteredCars length");
   }
 
   void dateChanged(DateTimeRange result) {
@@ -179,21 +146,22 @@ class DashboardController extends GetxController {
     filterDateEnd = result.end;
     filterDateText.text = "${DateFormat('dd.MM.yyyy').format(result.start)} - ${DateFormat('dd.MM.yyyy').format(result.end)}";
     isDateCloseIconShow.value = true;
-    applyFilters2();
+    applyFilters();
   }
 
-  Future<void> toggleCarType(int id) async {
+  Future<void> changeCarType(int carType) async {
     carBrandsList.clear();
     carModelList.clear();
 
     carBrand = null;
     carModel = null;
 
-    selectedType.value = id;
+    selectedType.value = carType;
 
+    await fetchData();
     await fetchBrands();
 
-    applyFilters2();
+    applyFilters();
   }
 
   Future<void> fetchBrands() async {
@@ -207,7 +175,6 @@ class DashboardController extends GetxController {
   }
 
   void clearFilters() {
-    selectedType.value = 1;
     carFuel = null;
     carTransmission = null;
     carBrandsList.clear();
@@ -224,31 +191,7 @@ class DashboardController extends GetxController {
     filterDateStart = DateTime.now();
     filterDateEnd = DateTime.now();
 
-    applyFilters2();
-  }
-
-  Future<void> applyFiltersByWithoutDates() async {
-    List<CarElement> filtered = cars.cars.where((car) {
-      int minRentDay = car.minRentDay!;
-
-      bool carTypeFilter = car.carType == selectedType.value;
-      bool fuelTypeFilter = carFuel == null || car.fuelType == carFuel || carTransmission == 'Tümü';
-      bool transmissionTypeFilter = carTransmission == null || car.transmissionType == carTransmission;
-      bool minPriceFilter = minPrice.text.isEmpty || (car.dailyPrice != null && car.dailyPrice! >= int.parse(minPrice.text));
-      bool maxPriceFilter = maxPrice.text.isEmpty || (car.dailyPrice != null && car.dailyPrice! <= int.parse(maxPrice.text));
-
-      bool brandFilter = carBrand == null || car.brandName == carBrand;
-      bool modelFilter = carModel == null || car.modelName == carModel;
-
-      //log(minRentDay.toString());
-      //log("----------------------");
-
-      return carTypeFilter && fuelTypeFilter && transmissionTypeFilter && minPriceFilter && maxPriceFilter && brandFilter && modelFilter;
-    }).toList();
-
-    // Filtrelenmiş araçları atama
-    filteredCars.assignAll(filtered);
-    //log(filteredCars.length.toString(), name: "filteredCars length");
+    applyFilters();
   }
 
   void clearDate() {
@@ -256,7 +199,7 @@ class DashboardController extends GetxController {
     filterDateText.text = "";
     filterDateStart = DateTime.now();
     filterDateEnd = DateTime.now();
-    applyFiltersByWithoutDates();
+    applyFilters();
   }
 
   Set<Marker> FillTheMarkers(List<CarElement> cars) {
@@ -282,4 +225,7 @@ class DashboardController extends GetxController {
 
     return carsMarkers;
   }
+
+  String getBrandName(brandName) => carBrandsList.firstWhere((element) => element.brandName == brandName).brandId.toString();
+  String getModelName(modelName) => carModelList.firstWhere((element) => element.name == modelName).id.toString();
 }

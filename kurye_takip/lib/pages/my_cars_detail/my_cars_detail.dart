@@ -1,10 +1,11 @@
-// ignore_for_file: must_be_immutable, prefer_const_constructors, invalid_use_of_protected_member
+// ignore_for_file: must_be_immutable, prefer_const_constructors, invalid_use_of_protected_member, use_build_context_synchronously
 
 import 'dart:convert';
 
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -13,6 +14,8 @@ import 'package:intl/intl.dart';
 import 'package:kurye_takip/app_constants/app_colors.dart';
 import 'package:kurye_takip/components/lists.dart';
 import 'package:kurye_takip/helpers/custom_dialog.dart';
+import 'package:kurye_takip/helpers/helper_functions.dart';
+import 'package:kurye_takip/helpers/helpers.dart';
 import 'package:kurye_takip/model/cars_list.dart';
 import 'package:kurye_takip/model/general_response.dart';
 import 'package:kurye_takip/pages/add_car/test_add.dart';
@@ -34,8 +37,11 @@ class _MyCarsDetailPageState extends State<MyCarsDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    controller.carElement = widget.carElement;
-    controller.FillInfo();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.carElement = widget.carElement;
+
+      controller.FillInfo();
+    });
 
     return Scaffold(
       appBar: AppBar(
@@ -100,28 +106,39 @@ class _MyCarsDetailPageState extends State<MyCarsDetailPage> {
               Get.to(NoteEditPage());
             },
           ),
-          Obx(
-            () => Padding(
-              padding: EdgeInsets.fromLTRB(0, 16, 16, 0),
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: controller.isActive.value == 0 ? Colors.green.shade800 : Colors.red.shade800,
-                    visualDensity: VisualDensity.compact,
-                    side: BorderSide(
-                      color: controller.isActive.value == 0 ? Colors.green.shade800 : Colors.red.shade800,
+          Obx(() => controller.isApproved.value == 1
+              ? Padding(
+                  padding: EdgeInsets.fromLTRB(0, 16, 16, 0),
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: controller.isActive.value == 0 ? Colors.green.shade800 : Colors.red.shade800,
+                        visualDensity: VisualDensity.compact,
+                        side: BorderSide(
+                          color: controller.isActive.value == 0 ? Colors.green.shade800 : Colors.red.shade800,
+                        ),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      onPressed: () {
+                        CustomDialog.showMessage(
+                          context: context,
+                          title: "Uyarı",
+                          message: controller.isActive.value == 0
+                              ? "Aracı yayına almak istediğinize emin misiniz?"
+                              : "Aracı yayından kaldırmak istediğinize emin misiniz?",
+                          negativeButtonText: "İptal",
+                          positiveButtonText: "Evet",
+                          onPositiveButtonPressed: () async {
+                            await controller.changeActivity();
+                          },
+                        );
+                      },
+                      child: controller.isActive.value == 0 ? Text("Aracı Yayına Al") : Text("Aracı Yayından Kaldır"),
                     ),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
-                  onPressed: () {
-                    controller.changeActivity();
-                  },
-                  child: controller.isActive.value == 0 ? Text("Aracı Yayına Al") : Text("Aracı Yayından Kaldır"),
-                ),
-              ),
-            ),
-          ),
+                )
+              : SizedBox(height: 0, width: 0)),
           Padding(
             padding: EdgeInsets.fromLTRB(0, 8, 16, 0),
             child: Align(
@@ -142,6 +159,11 @@ class _MyCarsDetailPageState extends State<MyCarsDetailPage> {
                     message: "Aracı silmek istediğinize emin misiniz?",
                     negativeButtonText: "İptal",
                     positiveButtonText: "Sil",
+                    onPositiveButtonPressed: () async {
+                      await controller.DeleteCar();
+                      Helpers.showSnackbar("Başarılı!", "Aracınız silindi.");
+                      Get.back();
+                    },
                   );
                 },
                 child: Text("Aracı Sil"),
@@ -317,79 +339,79 @@ class CarDateAndTimeEditPage extends GetView<MyCarsDetailController> {
                   children: controller.isGeneralTime.isTrue
                       ? [
                           const Divider(height: 12),
-                          AddCarTimeRow(
+                          CarEditTimeRowWidget(
                             date: 'Haftaiçi',
                             input1: controller.availableWeekdayStart,
                             input2: controller.availableWeekdayEnd,
-                            time1: controller.availableWeekdayStartTime,
-                            time2: controller.availableWeekdayEndTime,
+                            startIndex: 7,
+                            endIndex: 7,
                           ),
                           const Divider(height: 12),
-                          AddCarTimeRow(
+                          CarEditTimeRowWidget(
                             date: 'Haftasonu',
                             input1: controller.availableWeekendStart,
                             input2: controller.availableWeekendEnd,
-                            time1: controller.availableWeekEndStartTime,
-                            time2: controller.availableWeekEndEndTime,
+                            startIndex: 8,
+                            endIndex: 8,
                           ),
                           const Divider(height: 12),
                         ]
                       : [
                           const Divider(height: 12),
-                          AddCarTimeRow(
+                          CarEditTimeRowWidget(
                             date: 'Pazartesi',
                             input1: controller.availableMondayStart,
                             input2: controller.availableMondayEnd,
-                            time1: controller.availableMondayStartTime,
-                            time2: controller.availableMondayEndTime,
+                            startIndex: 0,
+                            endIndex: 0,
                           ),
                           const Divider(height: 12),
-                          AddCarTimeRow(
+                          CarEditTimeRowWidget(
                             date: 'Salı',
                             input1: controller.availableTuesdayStart,
                             input2: controller.availableTuesdayEnd,
-                            time1: controller.availableTuesdayStartTime,
-                            time2: controller.availableTuesdayEndTime,
+                            startIndex: 1,
+                            endIndex: 1,
                           ),
                           const Divider(height: 12),
-                          AddCarTimeRow(
+                          CarEditTimeRowWidget(
                             date: 'Çarşamba',
                             input1: controller.availableWednesdayStart,
                             input2: controller.availableWednesdayEnd,
-                            time1: controller.availableWednesdayStartTime,
-                            time2: controller.availableWednesdayEndTime,
+                            startIndex: 2,
+                            endIndex: 2,
                           ),
                           const Divider(height: 12),
-                          AddCarTimeRow(
+                          CarEditTimeRowWidget(
                             date: 'Perşembe',
                             input1: controller.availableThursdayStart,
                             input2: controller.availableThursdayEnd,
-                            time1: controller.availableThursdayStartTime,
-                            time2: controller.availableThursdayEndTime,
+                            startIndex: 3,
+                            endIndex: 3,
                           ),
                           const Divider(height: 12),
-                          AddCarTimeRow(
+                          CarEditTimeRowWidget(
                             date: 'Cuma',
                             input1: controller.availableFridayStart,
                             input2: controller.availableFridayEnd,
-                            time1: controller.availableFridayStartTime,
-                            time2: controller.availableFridayEndTime,
+                            startIndex: 4,
+                            endIndex: 4,
                           ),
                           const Divider(height: 12),
-                          AddCarTimeRow(
+                          CarEditTimeRowWidget(
                             date: 'Cumartesi',
                             input1: controller.availableSaturdayStart,
                             input2: controller.availableSaturdayEnd,
-                            time1: controller.availableSaturdayStartTime,
-                            time2: controller.availableSaturdayEndTime,
+                            startIndex: 5,
+                            endIndex: 5,
                           ),
                           const Divider(height: 12),
-                          AddCarTimeRow(
+                          CarEditTimeRowWidget(
                             date: 'Pazar',
                             input1: controller.availableSundayStart,
                             input2: controller.availableSundayEnd,
-                            time1: controller.availableSundayStartTime,
-                            time2: controller.availableSundayEndTime,
+                            startIndex: 6,
+                            endIndex: 6,
                           ),
                           const Divider(height: 12),
                         ],
@@ -398,15 +420,41 @@ class CarDateAndTimeEditPage extends GetView<MyCarsDetailController> {
               const SizedBox(height: 8),
               Align(
                 alignment: Alignment.centerRight,
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                  onPressed: () {
-                    controller.editCarDeliveryTimes(controller.carElement.carId!);
-                    controller.editCarAvailableDate(controller.carElement.carId!);
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  onPressed: () async {
+                    controller.generateCarDeliveryTimesJson();
+                    /*
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (BuildContext context) {
+                        return Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      },
+                    );
+                    GeneralResponse generalResponseTime = await controller.editCarDeliveryTimes(controller.carElement.carId!);
+                    GeneralResponse generalResponseDate = await controller.editCarAvailableDate(controller.carElement.carId!);
+
+                    bool isTimeSaved = generalResponseTime.success;
+                    bool isDateSaved = generalResponseDate.success;
+
+                    Navigator.pop(context);
+
+                    if (isTimeSaved && isDateSaved) {
+                      Helpers.showSnackbar("Başarılı", "Tarih ve saatler güncellendi");
+                    } else {
+                      Helpers.showSnackbar("Başarısız", "Tarih ve saatler güncellenemedi");
+                    }
+                    Navigator.pop(context);
+                    */
                   },
                   child: const Text("Kaydet"),
                 ),
-              )
+              ),
             ],
           ),
         ),
@@ -420,204 +468,234 @@ class CarInfoEditPage extends GetView<MyCarsDetailController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(),
-      body: FutureBuilder(
-        future: controller.getCarEditInformations(),
-        builder: (context, snapshot) {
-          /*if (snapshot.hasError) {
-            return const FutureErrorWidget();
-          } else if (snapshot.connectionState == ConnectionState.waiting) {
-            return const FutureLoadingWidget();
-          } else {*/
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Form(
-              key: controller.carInfoEditKey,
-              child: Column(
-                children: [
-                  DropdownButtonFormField2(
-                    decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Araç türünü seçiniz", Icons.list, Colors.black),
-                    isExpanded: true,
-                    icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
-                    iconSize: 20,
-                    buttonPadding: const EdgeInsets.only(),
-                    dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
-                    dropdownPadding: EdgeInsets.zero,
-                    items: Lists.carTypeList.map((item) => DropdownMenuItem<String>(value: item, child: Text(item))).toList(),
-                    selectedItemHighlightColor: AppColors.primaryColor,
-                    onChanged: (value) => controller.changeCarType(value),
-                    validator: (value) => value == null ? "Lütfen araç türünü seçiniz" : null,
-                    value: controller.carTypeText,
-                    dropdownOverButton: true,
-                    dropdownMaxHeight: Get.height * .25,
-                    scrollbarAlwaysShow: true,
+    return GestureDetector(
+      onTap: () => HelpFunctions.closeKeyboard(),
+      child: Scaffold(
+        appBar: AppBar(),
+        body: FutureBuilder(
+          future: controller.getCarEditInformations(),
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return const FutureErrorWidget();
+            } else if (snapshot.connectionState == ConnectionState.waiting) {
+              return const FutureLoadingWidget();
+            } else {
+              return SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Form(
+                  key: controller.carInfoEditKey,
+                  child: Column(
+                    children: [
+                      DropdownButtonFormField2(
+                        decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Araç türünü seçiniz", Icons.list, Colors.black),
+                        isExpanded: true,
+                        icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
+                        iconSize: 20,
+                        buttonPadding: const EdgeInsets.only(),
+                        dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+                        dropdownPadding: EdgeInsets.zero,
+                        items: Lists.carTypeList.map((item) => DropdownMenuItem<String>(value: item, child: Text(item))).toList(),
+                        selectedItemHighlightColor: AppColors.primaryColor,
+                        onChanged: (value) => controller.changeCarType(value),
+                        validator: (value) => value == null ? "Lütfen araç türünü seçiniz" : null,
+                        value: controller.carTypeText,
+                        dropdownOverButton: true,
+                        dropdownMaxHeight: Get.height * .25,
+                        scrollbarAlwaysShow: true,
+                      ),
+                      const SizedBox(height: 8),
+                      Obx(
+                        () => controller.loadingBrands.isTrue
+                            ? DropdownButtonFormField2(
+                                decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Marka seçiniz", Icons.list, Colors.black),
+                                isExpanded: true,
+                                icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
+                                iconSize: 20,
+                                buttonPadding: const EdgeInsets.only(),
+                                dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+                                dropdownPadding: EdgeInsets.zero,
+                                items: const [],
+                              )
+                            : DropdownButtonFormField2(
+                                decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Marka seçiniz", Icons.list, Colors.black),
+                                isExpanded: true,
+                                icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
+                                iconSize: 20,
+                                buttonPadding: const EdgeInsets.only(),
+                                dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+                                dropdownPadding: EdgeInsets.zero,
+                                items: controller.carBrandsList.value
+                                    .map((item) => DropdownMenuItem<String>(value: item.brandId.toString(), child: Text(item.brandName)))
+                                    .toList(),
+                                selectedItemHighlightColor: AppColors.primaryColor,
+                                onChanged: (value) => controller.changeBrand(value),
+                                validator: (value) => value == null ? "Lütfen araç markası seçiniz" : null,
+                                value: controller.carBrand,
+                                dropdownOverButton: true,
+                                dropdownMaxHeight: Get.height * .25,
+                                scrollbarAlwaysShow: true,
+                              ),
+                      ),
+                      const SizedBox(height: 8),
+                      Obx(
+                        () => controller.loadingModels.isTrue
+                            ? DropdownButtonFormField2(
+                                decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Model seçiniz", Icons.list, Colors.black),
+                                isExpanded: true,
+                                icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
+                                iconSize: 20,
+                                buttonPadding: const EdgeInsets.only(),
+                                dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+                                dropdownPadding: EdgeInsets.zero,
+                                items: const [],
+                              )
+                            : DropdownButtonFormField2(
+                                decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Model seçiniz", Icons.list, Colors.black),
+                                isExpanded: true,
+                                icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
+                                iconSize: 20,
+                                buttonPadding: const EdgeInsets.only(),
+                                dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+                                dropdownPadding: EdgeInsets.zero,
+                                items: controller.carModelList.value
+                                    .map((item) => DropdownMenuItem<String>(value: item.id.toString(), child: Text(item.name)))
+                                    .toList(),
+                                selectedItemHighlightColor: AppColors.primaryColor,
+                                onChanged: (value) {
+                                  controller.carModel = value;
+                                  //final selectedModel = controller.carModelList.value.firstWhere((item) => item.id.toString() == value);
+                                  //controller.recomendation_price = selectedModel.recomendation_price;
+                                },
+                                validator: (value) => value == null ? "Lütfen araç modeli seçiniz" : null,
+                                value: controller.carModel,
+                                dropdownOverButton: true,
+                                dropdownMaxHeight: Get.height * .25,
+                                scrollbarAlwaysShow: true,
+                              ),
+                      ),
+                      const SizedBox(height: 8),
+                      DropdownButtonFormField2(
+                        decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Model yılı seçiniz", Icons.list, Colors.black),
+                        isExpanded: true,
+                        icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
+                        iconSize: 20,
+                        buttonPadding: const EdgeInsets.only(),
+                        dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+                        dropdownPadding: EdgeInsets.zero,
+                        items: Lists.generateCarYearList().map((item) => DropdownMenuItem<String>(value: item, child: Text(item))).toList(),
+                        selectedItemHighlightColor: AppColors.primaryColor,
+                        onChanged: (value) => controller.carYear = value,
+                        validator: (value) => value == null ? "Lütfen araç model yılını seçiniz" : null,
+                        value: controller.carElement.year.toString(),
+                        dropdownOverButton: true,
+                        dropdownMaxHeight: Get.height * .25,
+                        scrollbarAlwaysShow: true,
+                      ),
+                      const SizedBox(height: 8),
+                      DropdownButtonFormField2(
+                        decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Yakıt türü seçiniz", Icons.list, Colors.black),
+                        isExpanded: true,
+                        icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
+                        iconSize: 20,
+                        buttonPadding: const EdgeInsets.only(),
+                        dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+                        dropdownPadding: EdgeInsets.zero,
+                        items: Lists.carFuelTypeList.map((item) => DropdownMenuItem<String>(value: item, child: Text(item))).toList(),
+                        selectedItemHighlightColor: AppColors.primaryColor,
+                        onChanged: (value) => controller.carFuel = value,
+                        validator: (value) => value == null ? "Lütfen yakıt türünü seçiniz" : null,
+                        value: controller.carFuel,
+                        dropdownOverButton: true,
+                        dropdownMaxHeight: Get.height * .25,
+                        scrollbarAlwaysShow: true,
+                      ),
+                      const SizedBox(height: 8),
+                      DropdownButtonFormField2(
+                        decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Vites türü seçiniz", Icons.list, Colors.black),
+                        isExpanded: true,
+                        icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
+                        iconSize: 20,
+                        buttonPadding: const EdgeInsets.only(),
+                        dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+                        dropdownPadding: EdgeInsets.zero,
+                        items: Lists.carTransmissionTypeList.map((item) => DropdownMenuItem<String>(value: item, child: Text(item))).toList(),
+                        selectedItemHighlightColor: AppColors.primaryColor,
+                        onChanged: (value) => controller.carTransmission = value,
+                        validator: (value) => value == null ? "Lütfen vites türünü seçiniz" : null,
+                        value: controller.carTransmission,
+                        dropdownOverButton: true,
+                        dropdownMaxHeight: Get.height * .25,
+                        scrollbarAlwaysShow: true,
+                      ),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        controller: controller.carPlate,
+                        keyboardType: TextInputType.name,
+                        textCapitalization: TextCapitalization.characters,
+                        decoration:
+                            InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Araç Plakası", CupertinoIcons.car_detailed, AppColors.primaryColor),
+                        validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
+                        inputFormatters: [
+                          LengthLimitingTextInputFormatter(10),
+                          FilteringTextInputFormatter.deny(RegExp(r'\s')),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      DropdownButtonFormField2(
+                        decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Km Bilgisi", CupertinoIcons.gauge, AppColors.primaryColor),
+                        isExpanded: true,
+                        icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
+                        iconSize: 20,
+                        buttonPadding: const EdgeInsets.only(),
+                        dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+                        dropdownPadding: EdgeInsets.zero,
+                        items: Lists.kmList.map((item) => DropdownMenuItem<String>(value: item, child: Text(item))).toList(),
+                        selectedItemHighlightColor: AppColors.primaryColor,
+                        onChanged: (value) => controller.selectedKm = value,
+                        validator: (value) => value == null ? "Lütfen km bilgisi seçiniz." : null,
+                        value: controller.selectedKm,
+                        dropdownOverButton: true,
+                        dropdownMaxHeight: Get.height * .25,
+                        scrollbarAlwaysShow: true,
+                      ),
+                      SizedBox(height: 8),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: OutlinedButton(
+                          style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                          onPressed: () async {
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (BuildContext context) {
+                                return Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              },
+                            );
+                            GeneralResponse generalResponse = await controller.checkCarInfoAndSave();
+                            bool isCarInfoSaved = generalResponse.success;
+
+                            Navigator.pop(context);
+
+                            if (isCarInfoSaved) {
+                              Helpers.showSnackbar("Başarılı", "Araç bilgileri güncellendi");
+                            } else {
+                              Helpers.showSnackbar("Başarısız", "Araç bilgileri güncellenemedi");
+                            }
+                            Navigator.pop(context);
+                          },
+                          child: const Text("Kaydet"),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 8),
-                  Obx(
-                    () => controller.loadingBrands.isTrue
-                        ? DropdownButtonFormField2(
-                            decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Marka seçiniz", Icons.list, Colors.black),
-                            isExpanded: true,
-                            icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
-                            iconSize: 20,
-                            buttonPadding: const EdgeInsets.only(),
-                            dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
-                            dropdownPadding: EdgeInsets.zero,
-                            items: const [],
-                          )
-                        : DropdownButtonFormField2(
-                            decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Marka seçiniz", Icons.list, Colors.black),
-                            isExpanded: true,
-                            icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
-                            iconSize: 20,
-                            buttonPadding: const EdgeInsets.only(),
-                            dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
-                            dropdownPadding: EdgeInsets.zero,
-                            items: controller.carBrandsList.value
-                                .map((item) => DropdownMenuItem<String>(value: item.brandId.toString(), child: Text(item.brandName)))
-                                .toList(),
-                            selectedItemHighlightColor: AppColors.primaryColor,
-                            onChanged: (value) => controller.changeBrand(value),
-                            validator: (value) => value == null ? "Lütfen araç markası seçiniz" : null,
-                            value: controller.carBrand,
-                            dropdownOverButton: true,
-                            dropdownMaxHeight: Get.height * .25,
-                            scrollbarAlwaysShow: true,
-                          ),
-                  ),
-                  const SizedBox(height: 8),
-                  Obx(
-                    () => controller.loadingModels.isTrue
-                        ? DropdownButtonFormField2(
-                            decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Model seçiniz", Icons.list, Colors.black),
-                            isExpanded: true,
-                            icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
-                            iconSize: 20,
-                            buttonPadding: const EdgeInsets.only(),
-                            dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
-                            dropdownPadding: EdgeInsets.zero,
-                            items: const [],
-                          )
-                        : DropdownButtonFormField2(
-                            decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Model seçiniz", Icons.list, Colors.black),
-                            isExpanded: true,
-                            icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
-                            iconSize: 20,
-                            buttonPadding: const EdgeInsets.only(),
-                            dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
-                            dropdownPadding: EdgeInsets.zero,
-                            items: controller.carModelList.value
-                                .map((item) => DropdownMenuItem<String>(value: item.id.toString(), child: Text(item.name)))
-                                .toList(),
-                            selectedItemHighlightColor: AppColors.primaryColor,
-                            onChanged: (value) {
-                              controller.carModel = value;
-                              //final selectedModel = controller.carModelList.value.firstWhere((item) => item.id.toString() == value);
-                              //controller.recomendation_price = selectedModel.recomendation_price;
-                            },
-                            validator: (value) => value == null ? "Lütfen araç modeli seçiniz" : null,
-                            value: controller.carModel,
-                            dropdownOverButton: true,
-                            dropdownMaxHeight: Get.height * .25,
-                            scrollbarAlwaysShow: true,
-                          ),
-                  ),
-                  const SizedBox(height: 8),
-                  DropdownButtonFormField2(
-                    decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Model yılı seçiniz", Icons.list, Colors.black),
-                    isExpanded: true,
-                    icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
-                    iconSize: 20,
-                    buttonPadding: const EdgeInsets.only(),
-                    dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
-                    dropdownPadding: EdgeInsets.zero,
-                    items: Lists.generateCarYearList().map((item) => DropdownMenuItem<String>(value: item, child: Text(item))).toList(),
-                    selectedItemHighlightColor: AppColors.primaryColor,
-                    onChanged: (value) => controller.carYear = value,
-                    validator: (value) => value == null ? "Lütfen araç model yılını seçiniz" : null,
-                    value: controller.carElement.year.toString(),
-                    dropdownOverButton: true,
-                    dropdownMaxHeight: Get.height * .25,
-                    scrollbarAlwaysShow: true,
-                  ),
-                  const SizedBox(height: 8),
-                  DropdownButtonFormField2(
-                    decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Yakıt türü seçiniz", Icons.list, Colors.black),
-                    isExpanded: true,
-                    icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
-                    iconSize: 20,
-                    buttonPadding: const EdgeInsets.only(),
-                    dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
-                    dropdownPadding: EdgeInsets.zero,
-                    items: Lists.carFuelTypeList.map((item) => DropdownMenuItem<String>(value: item, child: Text(item))).toList(),
-                    selectedItemHighlightColor: AppColors.primaryColor,
-                    onChanged: (value) => controller.carFuel = value,
-                    validator: (value) => value == null ? "Lütfen yakıt türünü seçiniz" : null,
-                    value: controller.carFuel,
-                    dropdownOverButton: true,
-                    dropdownMaxHeight: Get.height * .25,
-                    scrollbarAlwaysShow: true,
-                  ),
-                  const SizedBox(height: 8),
-                  DropdownButtonFormField2(
-                    decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Vites türü seçiniz", Icons.list, Colors.black),
-                    isExpanded: true,
-                    icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
-                    iconSize: 20,
-                    buttonPadding: const EdgeInsets.only(),
-                    dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
-                    dropdownPadding: EdgeInsets.zero,
-                    items: Lists.carTransmissionTypeList.map((item) => DropdownMenuItem<String>(value: item, child: Text(item))).toList(),
-                    selectedItemHighlightColor: AppColors.primaryColor,
-                    onChanged: (value) => controller.carTransmission = value,
-                    validator: (value) => value == null ? "Lütfen vites türünü seçiniz" : null,
-                    value: controller.carTransmission,
-                    dropdownOverButton: true,
-                    dropdownMaxHeight: Get.height * .25,
-                    scrollbarAlwaysShow: true,
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: controller.carPlate,
-                    keyboardType: TextInputType.name,
-                    textCapitalization: TextCapitalization.characters,
-                    decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Araç Plakası", CupertinoIcons.car_detailed, AppColors.primaryColor),
-                    validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
-                  ),
-                  const SizedBox(height: 8),
-                  DropdownButtonFormField2(
-                    decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Km Bilgisi", CupertinoIcons.gauge, AppColors.primaryColor),
-                    isExpanded: true,
-                    icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
-                    iconSize: 20,
-                    buttonPadding: const EdgeInsets.only(),
-                    dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
-                    dropdownPadding: EdgeInsets.zero,
-                    items: Lists.kmList.map((item) => DropdownMenuItem<String>(value: item, child: Text(item))).toList(),
-                    selectedItemHighlightColor: AppColors.primaryColor,
-                    onChanged: (value) => controller.selectedKm = value,
-                    validator: (value) => value == null ? "Lütfen km bilgisi seçiniz." : null,
-                    value: controller.selectedKm,
-                    dropdownOverButton: true,
-                    dropdownMaxHeight: Get.height * .25,
-                    scrollbarAlwaysShow: true,
-                  ),
-                  SizedBox(height: 8),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: OutlinedButton(
-                      style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                      onPressed: () => controller.checkCarInfoAndSave(),
-                      child: const Text("Kaydet"),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-          //}
-        },
+                ),
+              );
+              //}
+            }
+          },
+        ),
       ),
     );
   }
@@ -706,8 +784,8 @@ class CarLocationEditSelectLocation extends GetView<MyCarsDetailController> {
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
       contentPadding: const EdgeInsets.all(0),
       content: SizedBox(
-        height: Get.height * 0.5,
-        width: Get.width * .75,
+        height: Get.height * 0.9,
+        width: Get.width * .9,
         child: Stack(
           alignment: Alignment.topCenter,
           children: [
@@ -756,6 +834,21 @@ class CarLocationEditSelectLocation extends GetView<MyCarsDetailController> {
                 child: Obx(() => Text(controller.gmAddressText.value)),
               ),
             ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 24, 8, 0),
+              child: Align(
+                alignment: Alignment.topRight,
+                child: IconButton(
+                  onPressed: () {
+                    Get.back();
+                  },
+                  icon: const Icon(
+                    CupertinoIcons.xmark_square_fill,
+                    size: 32,
+                  ),
+                ),
+              ),
+            ),
             Positioned(
               bottom: 24,
               left: 24,
@@ -773,9 +866,19 @@ class CarLocationEditSelectLocation extends GetView<MyCarsDetailController> {
                       city: controller.rxCity.value,
                       district: controller.rxDistrict.value,
                     );
-                    controller.saveLocation(carAvailableLocation);
-                    controller.locations.add(carAvailableLocation);
-                    Get.back();
+
+                    if (carAvailableLocation.city != "İzmir") {
+                      CustomDialog.showMessage(
+                        context: context,
+                        title: "Hata",
+                        message: "Şu an sadece İzmir konumuna izin verilmektedir.",
+                      );
+                    } else {
+                      controller.saveLocation(carAvailableLocation);
+                      controller.locations.add(carAvailableLocation);
+                      Get.back();
+                      Helpers.showSnackbar("Başarılı", "Adres eklendi.");
+                    }
                   },
                   style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFFA3080C)),
@@ -811,79 +914,82 @@ class CarPhotosEditPage extends GetView<MyCarsDetailController> {
             const Align(alignment: Alignment.centerLeft, child: Text("Araç Fotoğrafları", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600))),
             const Divider(height: 12),
             Obx(
-              () => ListView.separated(
-                padding: EdgeInsets.zero,
-                shrinkWrap: true,
-                primary: false,
-                itemCount: controller.carImages.value.length,
-                separatorBuilder: (context, index) => const Divider(height: 12),
-                itemBuilder: (context, index) {
-                  return Obx(
-                    () => Row(
-                      children: controller.carImages.value[index].load.isFalse
-                          ? [
-                              Expanded(child: Text(controller.carImages.value[index].description)),
-                              const SizedBox(width: 8),
-                              OutlinedButton(
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: CupertinoColors.activeGreen,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                  side: const BorderSide(width: 0.5, color: CupertinoColors.activeGreen),
-                                  visualDensity: VisualDensity.compact,
+              () {
+                return ListView.separated(
+                  padding: EdgeInsets.zero,
+                  shrinkWrap: true,
+                  primary: false,
+                  itemCount: controller.carImages.value.length,
+                  separatorBuilder: (context, index) => const Divider(height: 12),
+                  itemBuilder: (context, index) {
+                    return Obx(
+                      () => Row(
+                        children: [
+                          controller.carImages[index].isChanged.value
+                              ? Image.memory(
+                                  base64Decode(controller.carImages.value[index].photo64),
+                                  width: Get.width * 0.25,
+                                  fit: BoxFit.fitWidth,
+                                )
+                              : Image.network(
+                                  controller.carImages[index].path,
+                                  width: Get.width * 0.25,
+                                  fit: BoxFit.fitWidth,
                                 ),
-                                onPressed: () async {
-                                  String result = await Get.bottomSheet(const SelectImageFromBottomSheet()) ?? "";
-                                  if (result == "Camera") {
-                                    controller.pickImageAtIndex(ImageSource.camera, index);
-                                  } else if (result == "Gallery") {
-                                    controller.pickImageAtIndex(ImageSource.gallery, index);
-                                  } else {}
-                                },
-                                child: const Text("Fotoğraf Yükle"),
-                              ),
-                            ]
-                          : [
-                              controller.carImages[index].isChanged
-                                  ? Image.memory(
-                                      base64Decode(controller.carImages.value[index].photo64),
-                                      width: Get.width * 0.25,
-                                      fit: BoxFit.fitWidth,
-                                    )
-                                  : Image.network(
-                                      controller.carImages[index].path,
-                                      width: Get.width * 0.25,
-                                      fit: BoxFit.fitWidth,
-                                    ),
-
-                              /*Image.network(
-                                controller.carImages[index].path,
-                                width: Get.width * 0.25,
-                                fit: BoxFit.fitWidth,
-                              ),
-                              Image.memory(
-                                base64Decode(controller.carImages.value[index].photo64),
-                                width: Get.width * 0.25,
-                                fit: BoxFit.fitWidth,
-                              ),*/
-                              const SizedBox(width: 8),
-                              Expanded(child: Text(controller.carImages.value[index].header, style: const TextStyle(fontWeight: FontWeight.w600))),
-                              const SizedBox(width: 8),
-                              GestureDetector(
-                                onTap: () => controller.removeImageAtIndex(index),
-                                child: const Icon(CupertinoIcons.xmark_circle, color: CupertinoColors.systemRed),
-                              ),
-                            ],
-                    ),
-                  );
-                },
-              ),
+                          const SizedBox(width: 8),
+                          Expanded(child: Text(controller.carImages.value[index].header, style: const TextStyle(fontWeight: FontWeight.w600))),
+                          const SizedBox(width: 8),
+                          OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: CupertinoColors.activeGreen,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              side: const BorderSide(width: 0.5, color: CupertinoColors.activeGreen),
+                              visualDensity: VisualDensity.compact,
+                            ),
+                            onPressed: () async {
+                              String result = await Get.bottomSheet(const SelectImageFromBottomSheet()) ?? "";
+                              if (result == "Camera") {
+                                controller.pickImageAtIndex(ImageSource.camera, index);
+                              } else if (result == "Gallery") {
+                                controller.pickImageAtIndex(ImageSource.gallery, index);
+                              } else {}
+                            },
+                            child: const Text("Değiştir"),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
             ),
             const Divider(height: 12),
             Align(
               alignment: Alignment.centerRight,
               child: OutlinedButton(
                 style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                onPressed: () => controller.checkPhotosandSave(),
+                onPressed: () async {
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (BuildContext context) {
+                      return Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    },
+                  );
+                  GeneralResponse generalResponse = await controller.editCarPhotos();
+
+                  bool isPhotos = generalResponse.success;
+                  Navigator.pop(context);
+
+                  if (isPhotos) {
+                    Helpers.showSnackbar("Başarılı", "Araç fotoğrafları güncellendi");
+                  } else {
+                    Helpers.showSnackbar("Başarısız", "Araç fotoğrafları güncellenemedi");
+                  }
+                  Navigator.pop(context);
+                },
                 child: const Text("Kaydet"),
               ),
             )
@@ -899,128 +1005,151 @@ class PricesAndDiscounts extends GetView<MyCarsDetailController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Text("${controller.carElement.plate}"),
-        ),
-        body: SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(16, 0, 16, 0),
-          child: Form(
-            key: controller.pricesAndDiscountsKey,
-            child: Column(
-              children: [
-                const Align(alignment: Alignment.centerLeft, child: Text("İndirim Oranları", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600))),
-                const Divider(height: 12),
-                Column(
-                  children: [
-                    const Align(alignment: Alignment.centerLeft, child: Text("Haftalık İndirim Oranı")),
-                    DropdownButtonFormField2(
-                      decoration:
-                          InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Haftalık kira indirim oranını seçiniz.", Icons.list, Colors.black),
-                      isExpanded: true,
-                      icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
-                      iconSize: 20,
-                      buttonPadding: const EdgeInsets.only(),
-                      dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
-                      dropdownPadding: EdgeInsets.zero,
-                      items: controller.weeklyDiscountRateList.map((item) => DropdownMenuItem<String>(value: item, child: Text(item))).toList(),
-                      selectedItemHighlightColor: AppColors.primaryColor,
-                      onChanged: (value) => controller.weeklyDiscount = value,
-                      value: "%${controller.carElement.weeklyRent.toString()}",
-                      dropdownOverButton: true,
-                      dropdownMaxHeight: Get.height * .25,
-                      scrollbarAlwaysShow: true,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Column(
-                  children: [
-                    const Align(alignment: Alignment.centerLeft, child: Text("Aylık İndirim Oranı")),
-                    DropdownButtonFormField2(
-                      decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Aylık kira indirim oranını seçiniz.", Icons.list, Colors.black),
-                      isExpanded: true,
-                      icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
-                      iconSize: 20,
-                      buttonPadding: const EdgeInsets.only(),
-                      dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
-                      dropdownPadding: EdgeInsets.zero,
-                      items: controller.monthlyDiscountRateList.map((item) => DropdownMenuItem<String>(value: item, child: Text(item))).toList(),
-                      selectedItemHighlightColor: AppColors.primaryColor,
-                      onChanged: (value) => controller.monthlyDiscount = value,
-                      value: "%${controller.carElement.monthlyRent.toString()}",
-                      dropdownOverButton: true,
-                      dropdownMaxHeight: Get.height * .25,
-                      scrollbarAlwaysShow: true,
-                    ),
-                  ],
-                ),
-                SizedBox(height: 8),
-                Column(
-                  children: [
-                    const Align(alignment: Alignment.centerLeft, child: Text("Minimum kira günü")),
-                    TextFormField(
-                      controller: controller.minRentDay,
-                      keyboardType: TextInputType.number,
-                      decoration:
-                          InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Minimum Kira günü", CupertinoIcons.car_detailed, AppColors.primaryColor),
-                      validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Column(
-                  children: [
-                    const Align(alignment: Alignment.centerLeft, child: Text("Günlük kira bedeli")),
-                    TextFormField(
-                      controller: controller.dailyRentPrice,
-                      keyboardType: TextInputType.number,
-                      decoration: InputWidgets().dropdownDecoration(
-                          Colors.grey, Colors.red, "Tavsiye edilen fiyat: ${controller.recomendation_price} TL", Icons.car_rental, AppColors.primaryColor),
-                      validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: OutlinedButton(
-                    style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                    onPressed: () => controller.monthlyRentPriceCalculator(),
-                    child: const Text("Aylık kira getirisini hesapla"),
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                        child: Text(
-                      "Aracınızı uzun dönem kiralamak ister misiniz?",
-                      style: TextStyle(fontSize: 12),
-                    )),
-                    Obx(() => Switch(
-                          value: controller.isLongTerm.value,
-                          onChanged: (value) {
-                            controller.isLongTerm.toggle();
-                          },
-                        )),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: OutlinedButton(
-                    style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                    onPressed: () {
-                      controller.editPriceandDiscount();
-                    },
-                    child: const Text("Kaydet"),
-                  ),
-                ),
-              ],
-            ),
+    return GestureDetector(
+      onTap: () => HelpFunctions.closeKeyboard(),
+      child: Scaffold(
+          appBar: AppBar(
+            title: Text("${controller.carElement.plate}"),
           ),
-        ));
+          body: SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(16, 0, 16, 0),
+            child: Form(
+              key: controller.pricesAndDiscountsKey,
+              child: Column(
+                children: [
+                  const Align(alignment: Alignment.centerLeft, child: Text("İndirim Oranları", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600))),
+                  const Divider(height: 12),
+                  Column(
+                    children: [
+                      const Align(alignment: Alignment.centerLeft, child: Text("Haftalık İndirim Oranı")),
+                      DropdownButtonFormField2(
+                        decoration:
+                            InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Haftalık kira indirim oranını seçiniz.", Icons.list, Colors.black),
+                        isExpanded: true,
+                        icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
+                        iconSize: 20,
+                        buttonPadding: const EdgeInsets.only(),
+                        dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+                        dropdownPadding: EdgeInsets.zero,
+                        items: controller.weeklyDiscountRateList.map((item) => DropdownMenuItem<String>(value: item, child: Text(item))).toList(),
+                        selectedItemHighlightColor: AppColors.primaryColor,
+                        onChanged: (value) => controller.weeklyDiscount = value,
+                        value: controller.weeklyDiscount,
+                        dropdownOverButton: true,
+                        dropdownMaxHeight: Get.height * .25,
+                        scrollbarAlwaysShow: true,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Column(
+                    children: [
+                      const Align(alignment: Alignment.centerLeft, child: Text("Aylık İndirim Oranı")),
+                      DropdownButtonFormField2(
+                        decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Aylık kira indirim oranını seçiniz.", Icons.list, Colors.black),
+                        isExpanded: true,
+                        icon: const Icon(CupertinoIcons.chevron_down, color: AppColors.dartGreyColor),
+                        iconSize: 20,
+                        buttonPadding: const EdgeInsets.only(),
+                        dropdownDecoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+                        dropdownPadding: EdgeInsets.zero,
+                        items: controller.monthlyDiscountRateList.map((item) => DropdownMenuItem<String>(value: item, child: Text(item))).toList(),
+                        selectedItemHighlightColor: AppColors.primaryColor,
+                        onChanged: (value) => controller.monthlyDiscount = value,
+                        value: controller.monthlyDiscount,
+                        dropdownOverButton: true,
+                        dropdownMaxHeight: Get.height * .25,
+                        scrollbarAlwaysShow: true,
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 8),
+                  Column(
+                    children: [
+                      const Align(alignment: Alignment.centerLeft, child: Text("Minimum kira günü")),
+                      TextFormField(
+                        controller: controller.minRentDay,
+                        keyboardType: TextInputType.number,
+                        decoration: InputWidgets()
+                            .dropdownDecoration(Colors.grey, Colors.red, "Minimum Kira günü", CupertinoIcons.car_detailed, AppColors.primaryColor),
+                        validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Column(
+                    children: [
+                      const Align(alignment: Alignment.centerLeft, child: Text("Günlük kira bedeli")),
+                      TextFormField(
+                        controller: controller.dailyRentPrice,
+                        keyboardType: TextInputType.number,
+                        decoration: InputWidgets().dropdownDecoration(
+                            Colors.grey, Colors.red, "Tavsiye edilen fiyat: ${controller.recomendation_price} TL", Icons.car_rental, AppColors.primaryColor),
+                        validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                      onPressed: () => controller.monthlyRentPriceCalculator(),
+                      child: const Text("Aylık kira getirisini hesapla"),
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                          child: Text(
+                        "Aracınızı uzun dönem kiralamak ister misiniz?",
+                        style: TextStyle(fontSize: 12),
+                      )),
+                      Obx(() => Switch(
+                            value: controller.isLongTerm.value,
+                            onChanged: (value) {
+                              controller.isLongTerm.toggle();
+                            },
+                          )),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                      onPressed: () async {
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (BuildContext context) {
+                            return Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          },
+                        );
+                        GeneralResponse generalResponse = await controller.editPriceandDiscount();
+
+                        bool isPriceandDiscountSaved = generalResponse.success;
+
+                        Navigator.pop(context);
+
+                        if (isPriceandDiscountSaved) {
+                          Helpers.showSnackbar("Başarılı", "Ücret ve indirim bilgileri güncellendi");
+                        } else {
+                          Helpers.showSnackbar("Başarısız", "Ücret ve indirim bilgileri güncellenemedi");
+                        }
+                        Navigator.pop(context);
+                      },
+                      child: const Text("Kaydet"),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )),
+    );
   }
 }
 
@@ -1032,32 +1161,60 @@ class NoteEditPage extends GetView<MyCarsDetailController> {
     return Scaffold(
       appBar: AppBar(),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: controller.notEditKey,
-          child: Column(
-            children: [
-              const Align(
-                  alignment: Alignment.centerLeft, child: Text("Kullanıcıya Notunuz(Opsiyonel)", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600))),
-              const Divider(height: 12),
-              TextField(
-                  controller: controller.note,
-                  keyboardType: TextInputType.multiline,
-                  maxLines: 6,
-                  decoration: InputWidgets().noteDecoration(Colors.grey, Colors.red, "Kullanıcıya iletmek istediğiniz notu giriniz.")),
-              const SizedBox(height: 8),
-              Align(
-                alignment: Alignment.centerRight,
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                  onPressed: () async {
-                    controller.editNote();
-                  },
-                  child: const Text("Kaydet"),
+        padding: EdgeInsets.all(16),
+        child: Column(
+          children: [
+            GestureDetector(
+              onTap: () => HelpFunctions.closeKeyboard(),
+              child: Form(
+                key: controller.notEditKey,
+                child: Column(
+                  children: [
+                    const Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text("Kullanıcıya Notunuz(Opsiyonel)", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600))),
+                    const Divider(height: 12),
+                    TextField(
+                        controller: controller.note,
+                        keyboardType: TextInputType.multiline,
+                        maxLines: 6,
+                        decoration: InputWidgets().noteDecoration(Colors.grey, Colors.red, "Kullanıcıya iletmek istediğiniz notu giriniz.")),
+                    const SizedBox(height: 8),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                        onPressed: () async {
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (BuildContext context) {
+                              return Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            },
+                          );
+                          GeneralResponse generalResponse = await controller.editNote();
+
+                          bool isnoteSaved = generalResponse.success;
+
+                          Navigator.pop(context);
+
+                          if (isnoteSaved) {
+                            Helpers.showSnackbar("Başarılı", "Not güncellendi");
+                          } else {
+                            Helpers.showSnackbar("Başarısız", "Not güncellenemedi");
+                          }
+                          Navigator.pop(context);
+                        },
+                        child: const Text("Kaydet"),
+                      ),
+                    )
+                  ],
                 ),
-              )
-            ],
-          ),
+              ),
+            ),
+          ],
         ),
       ),
     );

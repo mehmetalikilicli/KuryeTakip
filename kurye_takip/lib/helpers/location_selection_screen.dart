@@ -56,10 +56,7 @@ class _LocationSelectionScreenState extends State<LocationSelectionScreen> {
   final MapController mapController = Get.put(MapController());
   GoogleMapController? _controller;
 
-  static final CameraPosition _initalCameraPosition = CameraPosition(
-    target: LatLng(_originLatitude, _originLongitude),
-    zoom: 15,
-  );
+  static final CameraPosition _initalCameraPosition = CameraPosition(target: LatLng(_originLatitude, _originLongitude), zoom: 8);
 
   @override
   Widget build(BuildContext context) {

@@ -27,26 +27,23 @@ class RentNotificationsController extends GetxController {
   RentRequestNotification rentRequestNotification = RentRequestNotification(success: false, message: "", notifications: []);
 
   RentNotification? selectedNotification;
-  RxList<int> notificationApproveList = <int>[].obs;
-
-  RxInt rentStatus = (-1).obs;
-  RxInt paymnetStatus = (-1).obs;
+  RxList<RNList> RNlist = <RNList>[].obs;
 
   String ownerName = "";
   String ownerSurname = "";
   String ownerEmail = "";
   String ownerPhone = "";
-  int detailIndex = -1;
+  int selectedIndex = -1;
 
   CarElement carElement = CarElement();
 
   List<String> carPhotosList = [];
-  CameraPosition cameraPosition = const CameraPosition(target: LatLng(38.4237, 27.1428), zoom: 14.4746);
+  CameraPosition cameraPosition = const CameraPosition(target: LatLng(38.4237, 27.1428), zoom: 8.4746);
   Set<Marker> carAvailableLocationMarkers = Set<Marker>();
   final googleMapController = Completer<GoogleMapController>();
 
   Future<void> getNotificationDetail(int index) async {
-    detailIndex = index;
+    selectedIndex = index;
     CarDetail carDetail = await ApiService.getCar(rentRequestNotification.notifications[index].carId);
     carElement = carDetail.car!;
 
@@ -56,18 +53,21 @@ class RentNotificationsController extends GetxController {
     isRenterLoadBeforePhoto.value = selectedNotification!.isRenterLoadBeforePhoto!;
     isRenterLoadAfterPhoto.value = selectedNotification!.isRenterLoadAfterPhoto!;
 
-    rentStatus.value = selectedNotification!.rentStatus;
-    paymnetStatus.value = selectedNotification!.paymentStatus!;
     Get.to(RenterRequestDetail());
   }
 
   Future<void> fetchRentNotifications(int renter_id) async {
-    notificationApproveList.clear();
+    RNlist.clear();
     try {
       rentRequestNotification = await ApiService.fetchRentNotifications(renter_id);
       for (int i = 0; i < rentRequestNotification.notifications.length; i++) {
-        notificationApproveList.value.add(rentRequestNotification.notifications[i].rentStatus);
+        RNList newItem = RNList(
+          paymentStatus: rentRequestNotification.notifications[i].paymentStatus!,
+          rentStatus: rentRequestNotification.notifications[i].rentStatus,
+        );
+        RNlist.add(newItem);
       }
+      //log("list length ${RNlist.length}");
     } catch (e) {
       print('Error: $e');
     }
@@ -126,6 +126,12 @@ class RentNotificationsController extends GetxController {
     });
 
     Get.to(RenterAddRentPhoto());
+  }
+
+  void removeImageAtIndex(int index) {
+    carAddImages.value[index].load.value = false;
+    carAddImages.value[index].ext = "";
+    carAddImages.value[index].photo64 = "";
   }
 
   RxList<RentImage> carAddImages = <RentImage>[
@@ -297,4 +303,14 @@ class RentNotificationsController extends GetxController {
     log(generalResponse.message, name: "GiveCarComment");
     return generalResponse;
   }
+}
+
+class RNList {
+  int rentStatus;
+  int paymentStatus;
+
+  RNList({
+    required this.rentStatus,
+    required this.paymentStatus,
+  });
 }

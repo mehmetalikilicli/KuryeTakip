@@ -13,6 +13,7 @@ class InputWidgets {
       errorBorder: _inputBorder(borderColor, 0.5, 8),
       focusedErrorBorder: _inputBorder(borderColor, 1, 8),
       hintText: hint,
+      hintStyle: const TextStyle(fontSize: 14),
       prefixIcon: Icon(iconData, color: iconColor),
     );
   }

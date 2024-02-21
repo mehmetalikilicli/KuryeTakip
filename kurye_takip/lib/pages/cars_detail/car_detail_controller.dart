@@ -7,7 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:kurye_takip/helpers/get_local_user_id.dart';
+import 'package:kurye_takip/helpers/get_local_user.dart';
 import 'package:kurye_takip/helpers/helpers.dart';
 import 'package:kurye_takip/model/cars_list.dart';
 import 'package:kurye_takip/model/general_response.dart';
@@ -17,7 +17,7 @@ class CarDetailController extends GetxController {
   CarElement carElement = CarElement();
   Future<void> SendNotification() async {}
   List<String> carPhotosList = [];
-  CameraPosition cameraPosition = const CameraPosition(target: LatLng(38.4237, 27.1428), zoom: 14.4746);
+  CameraPosition cameraPosition = const CameraPosition(target: LatLng(38.4237, 27.1428), zoom: 8.4746);
   Set<Marker> carAvailableLocationMarkers = Set<Marker>();
   final googleMapController = Completer<GoogleMapController>();
   final carDetailPageKey = GlobalKey<FormState>();
@@ -58,7 +58,7 @@ class CarDetailController extends GetxController {
     if (carDetailPageKey.currentState!.validate()) {
       Map<String, dynamic> requestMap = {
         "car_id": carElement.carId,
-        "renter_id": getLocalUserID(),
+        "renter_id": GetLocalUserInfo.getLocalUserID(),
         "owner_id": carElement.userId,
         "rent_status": 0,
         "created_date": DateTime.now().toIso8601String(),

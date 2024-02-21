@@ -11,7 +11,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:kurye_takip/app_constants/app_colors.dart';
 import 'package:kurye_takip/helpers/custom_dialog.dart';
-import 'package:kurye_takip/helpers/get_local_user_id.dart';
+import 'package:kurye_takip/helpers/get_local_user.dart';
 import 'package:kurye_takip/main.dart';
 import 'package:kurye_takip/model/car_detail.dart';
 import 'package:kurye_takip/model/cars_list.dart';
@@ -34,12 +34,13 @@ class OwnerNotificationsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: const Text(
-            "Araç Kiralama İstekleri",
-          ),
-          surfaceTintColor: Colors.white,
-          backgroundColor: Colors.white,
-          centerTitle: true),
+        title: const Text("Araç Kiralama İstekleri"),
+        surfaceTintColor: Colors.white,
+        backgroundColor: Colors.white,
+        centerTitle: true,
+        elevation: 1,
+        shadowColor: Colors.black,
+      ),
       body: OwnerRequestList(),
     );
   }
@@ -54,101 +55,102 @@ class OwnerRequestList extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: FutureBuilder(
-        future: controller.fetchOwnerNotifications(getLocalUserID()),
+        future: controller.fetchOwnerNotifications(
+          GetLocalUserInfo.getLocalUserID(),
+        ),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return const Center(child: Text("Hata!"));
           } else if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CupertinoActivityIndicator(color: Colors.black));
           } else {
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: controller.notificationApproveList.length == 0
+            return Obx(
+              () => controller.ONlist.length == 0
                   ? const Center(child: Text("Herhangi bir isteğiniz bulunmamaktadır."))
-                  : ListView(
-                      children: [
-                        ListView.separated(
-                          padding: const EdgeInsets.only(top: 8),
-                          shrinkWrap: true,
-                          primary: false,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: controller.notificationApproveList.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            return Obx(
-                              () => GestureDetector(
-                                onTap: () {},
-                                child: Column(
-                                  children: [
-                                    ListTile(
-                                      onTap: () async {
-                                        try {
-                                          await controller.getNotificationDetail(index);
-                                          Get.to(OwnerRequestDetail());
-                                        } catch (e) {
-                                          log("Bildirim detayı getirilirken hata oluştur $e", name: "Bildirim detay hatası");
-                                        }
-                                      },
-                                      title: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            controller.rentRequestNotification.notifications[index].plate,
-                                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                                          ),
-                                          Text(
-                                            "${controller.rentRequestNotification.notifications[index].brandName ?? ""} - ${controller.rentRequestNotification.notifications[index].modelName ?? ""} ",
-                                            style: TextStyle(fontSize: 12),
-                                          ),
-                                        ],
+                  : ListView.separated(
+                      padding: const EdgeInsets.only(top: 8, left: 4, right: 4),
+                      shrinkWrap: true,
+                      primary: false,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: controller.ONlist.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Obx(
+                          () => GestureDetector(
+                            onTap: () {},
+                            child: Column(
+                              children: [
+                                ListTile(
+                                  contentPadding: EdgeInsets.symmetric(horizontal: 12),
+                                  onTap: () async {
+                                    try {
+                                      await controller.getNotificationDetail(index);
+                                      Get.to(OwnerRequestDetail());
+                                    } catch (e) {
+                                      log("Bildirim detayı getirilirken hata oluştu $e", name: "Bildirim detay hatası");
+                                    }
+                                  },
+                                  title: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        controller.rentRequestNotification.notifications[index].plate,
+                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                                       ),
-                                      subtitle: controller.notificationApproveList[index] == 0
+                                      Text(
+                                        "${controller.rentRequestNotification.notifications[index].brandName ?? ""} - ${controller.rentRequestNotification.notifications[index].modelName ?? ""} ",
+                                        style: TextStyle(fontSize: 12),
+                                      ),
+                                    ],
+                                  ),
+                                  subtitle: controller.ONlist[index].rentStatus.value == 0
+                                      ? Row(
+                                          children: [
+                                            Container(
+                                              padding: EdgeInsets.fromLTRB(8, 2, 8, 2),
+                                              decoration: BoxDecoration(color: Colors.grey, borderRadius: BorderRadius.circular(6.0)),
+                                              child: const Text("Bekliyor", style: TextStyle(color: Colors.white, fontSize: 14)),
+                                            ),
+                                          ],
+                                        )
+                                      : controller.ONlist[index].rentStatus.value == 1
                                           ? Row(
                                               children: [
                                                 Container(
                                                   padding: EdgeInsets.fromLTRB(8, 2, 8, 2),
-                                                  decoration: BoxDecoration(color: Colors.grey, borderRadius: BorderRadius.circular(6.0)),
-                                                  child: const Text("Bekliyor", style: TextStyle(color: Colors.white, fontSize: 14)),
+                                                  decoration: BoxDecoration(color: Colors.green, borderRadius: BorderRadius.circular(6.0)),
+                                                  child: const Text("Onayladınız", style: TextStyle(color: Colors.white, fontSize: 14)),
                                                 ),
                                               ],
                                             )
-                                          : controller.notificationApproveList[index] == 1
-                                              ? Row(
-                                                  children: [
-                                                    Container(
-                                                      padding: EdgeInsets.fromLTRB(8, 2, 8, 2),
-                                                      decoration: BoxDecoration(color: Colors.green, borderRadius: BorderRadius.circular(6.0)),
-                                                      child: const Text("Onayladınız", style: TextStyle(color: Colors.white, fontSize: 14)),
-                                                    ),
-                                                  ],
-                                                )
-                                              : Row(
-                                                  children: [
-                                                    Container(
-                                                      padding: EdgeInsets.fromLTRB(8, 2, 8, 2),
-                                                      decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(6.0)),
-                                                      child: const Text("Reddettiniz", style: TextStyle(color: Colors.white, fontSize: 14)),
-                                                    ),
-                                                  ],
+                                          : Row(
+                                              children: [
+                                                Container(
+                                                  padding: EdgeInsets.fromLTRB(8, 2, 8, 2),
+                                                  decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(6.0)),
+                                                  child: const Text("Reddettiniz", style: TextStyle(color: Colors.white, fontSize: 14)),
                                                 ),
-                                      trailing: Column(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        crossAxisAlignment: CrossAxisAlignment.end,
+                                              ],
+                                            ),
+                                  trailing: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      const Icon(Icons.keyboard_arrow_right_rounded),
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          const Icon(Icons.keyboard_arrow_right_rounded),
-                                          Text(
-                                            DateFormat('dd.MM.yyyy HH:mm').format(controller.rentRequestNotification.notifications[index].createdDate),
-                                          ),
+                                          Text("No: ${controller.rentRequestNotification.notifications[index].ID.toString()}"),
+                                          Text(DateFormat('dd.MM.yyyy HH:mm').format(controller.rentRequestNotification.notifications[index].createdDate)),
                                         ],
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            );
-                          },
-                          separatorBuilder: (context, index) => const Divider(height: 8),
-                        ),
-                      ],
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                      separatorBuilder: (context, index) => const Divider(height: 0),
                     ),
             );
           }
@@ -211,7 +213,7 @@ class OwnerRequestDetail extends StatelessWidget {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text("RENTEKER"),
+          title: Text(controller.selectedNotification!.plate),
           bottom: const TabBar(
             tabs: [
               Tab(text: "Kiralama Bilgileri"),
@@ -228,137 +230,137 @@ class OwnerRequestDetail extends StatelessWidget {
                   color: Colors.grey.shade100,
                   child: Padding(
                     padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("Kiralamak İsteyen Bilgileri", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                            Divider(height: 8, color: Colors.black),
-                            Row(
-                              children: [
-                                Icon(CupertinoIcons.person_add),
-                                const SizedBox(width: 8),
-                                Text("${controller.selectedNotification!.renterName} ${controller.selectedNotification!.renterSurname}",
-                                    style: TextStyle(fontSize: 16))
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                Icon(CupertinoIcons.mail),
-                                const SizedBox(width: 8),
-                                Text("${controller.selectedNotification!.renterEmail} ", style: TextStyle(fontSize: 16)),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                Icon(CupertinoIcons.phone_arrow_right),
-                                const SizedBox(width: 8),
-                                Text("${controller.selectedNotification!.renterPhone} ", style: TextStyle(fontSize: 16)),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                Icon(CupertinoIcons.star),
-                                const SizedBox(width: 8),
-                                GestureDetector(
-                                  onTap: () {
-                                    RenterCommentBottomSheet.showComments(context: context, rentNotification: controller.selectedNotification!);
-                                  },
-                                  child: RatingBarIndicator(
-                                    rating: controller.calculateAverageRating(),
-                                    itemCount: 5,
-                                    itemSize: 18.0,
-                                    itemBuilder: (context, _) => const Icon(
-                                      Icons.star,
-                                      color: Colors.orange,
-                                    ),
+                    child: Obx(
+                      () => Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Kiralamak İsteyen Bilgileri", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                          Divider(height: 8, color: Colors.black),
+                          Row(
+                            children: [
+                              Icon(CupertinoIcons.person_add),
+                              const SizedBox(width: 8),
+                              Text("${controller.selectedNotification!.renterName} ${controller.selectedNotification!.renterSurname}",
+                                  style: TextStyle(fontSize: 16))
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Icon(CupertinoIcons.mail),
+                              const SizedBox(width: 8),
+                              Text("${controller.selectedNotification!.renterEmail} ", style: TextStyle(fontSize: 16)),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Icon(CupertinoIcons.phone_arrow_right),
+                              const SizedBox(width: 8),
+                              Text("${controller.selectedNotification!.renterPhone} ", style: TextStyle(fontSize: 16)),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Icon(CupertinoIcons.star),
+                              const SizedBox(width: 8),
+                              GestureDetector(
+                                onTap: () {
+                                  RenterCommentBottomSheet.showComments(context: context, rentNotification: controller.selectedNotification!);
+                                },
+                                child: RatingBarIndicator(
+                                  rating: controller.calculateAverageRating(),
+                                  itemCount: 5,
+                                  itemSize: 18.0,
+                                  itemBuilder: (context, _) => const Icon(
+                                    Icons.star,
+                                    color: Colors.orange,
                                   ),
                                 ),
-                                Text("(${controller.selectedNotification?.renterComment?.length ?? 0})"),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Text("Kiralama Detayları", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                            Divider(height: 8, color: Colors.black),
-                            Row(
-                              children: [
-                                Icon(CupertinoIcons.time),
-                                const SizedBox(width: 8),
-                                Row(
+                              ),
+                              Text("(${controller.selectedNotification?.renterComment?.length ?? 0})"),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text("Kiralama Detayları", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                          Divider(height: 8, color: Colors.black),
+                          Row(
+                            children: [
+                              Icon(CupertinoIcons.time),
+                              const SizedBox(width: 8),
+                              Row(
+                                children: [
+                                  Text("İstek zamanı:"),
+                                  SizedBox(width: 2),
+                                  Text("${DateFormat('dd.MM.yyyy - HH:mm').format(controller.selectedNotification!.createdDate)} ",
+                                      style: TextStyle(fontSize: 14))
+                                ],
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Icon(CupertinoIcons.calendar_today),
+                              const SizedBox(width: 8),
+                              Row(
+                                children: [
+                                  Text("İstek tarih aralığı: "),
+                                  Text(
+                                      "${DateFormat('dd.MM.yyyy').format(controller.selectedNotification!.rentStartDate)} - ${DateFormat('dd.MM.yyyy').format(controller.selectedNotification!.rentEndDate)}",
+                                      style: TextStyle(fontSize: 14)),
+                                ],
+                              )
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Icon(CupertinoIcons.tags),
+                              const SizedBox(width: 8),
+                              Text("Fiyat: "),
+                              Text("${controller.selectedNotification!.price} ₺", style: TextStyle(fontSize: 16))
+                            ],
+                          ),
+                          /*controller.selectedNotification!.renterNote != ""
+                              ? Column(
                                   children: [
-                                    Text("İstek zamanı:"),
-                                    SizedBox(width: 2),
-                                    Text("${DateFormat('dd.MM.yyyy - HH:mm').format(controller.selectedNotification!.createdDate)} ",
-                                        style: TextStyle(fontSize: 14))
-                                  ],
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                Icon(CupertinoIcons.calendar_today),
-                                const SizedBox(width: 8),
-                                Row(
-                                  children: [
-                                    Text("İstek tarih aralığı: "),
-                                    Text(
-                                        "${DateFormat('dd.MM.yyyy').format(controller.selectedNotification!.rentStartDate)} - ${DateFormat('dd.MM.yyyy').format(controller.selectedNotification!.rentEndDate)}",
-                                        style: TextStyle(fontSize: 14)),
-                                  ],
-                                )
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                Icon(Icons.money),
-                                const SizedBox(width: 8),
-                                Text("Fiyat: "),
-                                Text("${controller.selectedNotification!.price} ₺", style: TextStyle(fontSize: 16))
-                              ],
-                            ),
-                            controller.selectedNotification!.renterNote != ""
-                                ? Column(
-                                    children: [
-                                      const SizedBox(height: 8),
-                                      Row(
-                                        children: const [
-                                          Icon(Icons.note_outlined),
-                                          SizedBox(width: 8),
-                                          Text(
-                                            "Kullanıcı notu:",
-                                            style: TextStyle(fontSize: 16),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Row(
-                                        children: [
-                                          const SizedBox(width: 8),
-                                          Expanded(
-                                            child: SizedBox(
-                                              height: Get.height * 0.1,
-                                              child: SingleChildScrollView(
-                                                padding: EdgeInsets.only(left: 4),
-                                                child: Text(
-                                                  "\"${controller.selectedNotification!.renterNote}\"",
-                                                  style: TextStyle(fontSize: 13, fontStyle: FontStyle.italic),
-                                                ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      children: const [
+                                        Icon(Icons.note_outlined),
+                                        SizedBox(width: 8),
+                                        Text(
+                                          "Kullanıcı notu:",
+                                          style: TextStyle(fontSize: 16),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: SizedBox(
+                                            height: Get.height * 0.1,
+                                            child: SingleChildScrollView(
+                                              padding: EdgeInsets.only(left: 4),
+                                              child: Text(
+                                                "\"${controller.selectedNotification!.renterNote}\"",
+                                                style: TextStyle(fontSize: 13, fontStyle: FontStyle.italic),
                                               ),
                                             ),
                                           ),
-                                        ],
-                                      ),
-                                    ],
-                                  )
-                                : Container(),
-                            const SizedBox(height: 8),
-                            controller.notificationApproveList[controller.detailIndex] == 0
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                )
+                              : Container(),*/
+                          const SizedBox(height: 8),
+                          Obx(
+                            () => controller.ONlist.isNotEmpty && controller.ONlist[controller.selectedIndex].rentStatus.value == 0
                                 ? Row(
                                     mainAxisAlignment: MainAxisAlignment.end,
                                     children: [
@@ -366,7 +368,7 @@ class OwnerRequestDetail extends StatelessWidget {
                                         onTap: () async {
                                           await showNotificationMessage(
                                               context: context,
-                                              index: controller.detailIndex,
+                                              index: controller.selectedIndex,
                                               message: "Aracınızı bu kullanıcıya kiraya vermek istiyor musunuz?");
                                         },
                                         child: Container(
@@ -376,7 +378,7 @@ class OwnerRequestDetail extends StatelessWidget {
                                       ),
                                     ],
                                   )
-                                : controller.notificationApproveList[controller.detailIndex] == 1
+                                : controller.ONlist.isNotEmpty && controller.ONlist[controller.selectedIndex].rentStatus.value == 1
                                     ? Align(
                                         alignment: Alignment.centerRight,
                                         child: Column(
@@ -396,14 +398,14 @@ class OwnerRequestDetail extends StatelessWidget {
                                             Container(
                                               padding: EdgeInsets.all(8.0),
                                               decoration: BoxDecoration(
-                                                  color: controller.selectedNotification!.paymentStatus == 1 ? Colors.green : Colors.grey,
+                                                  color: controller.ONlist[controller.selectedIndex].paymentStatus.value == 1 ? Colors.green : Colors.grey,
                                                   borderRadius: BorderRadius.circular(10.0)),
-                                              child: Text(controller.selectedNotification!.paymentStatus == 1 ? "Ödendi" : "Ödenmedi",
+                                              child: Text(controller.ONlist[controller.selectedIndex].paymentStatus.value == 1 ? "Ödendi" : "Ödenmedi",
                                                   style: TextStyle(color: Colors.white)),
                                             ),
                                             SizedBox(height: 8),
                                             Visibility(
-                                              visible: controller.selectedNotification!.paymentStatus == 1,
+                                              visible: controller.ONlist[controller.selectedIndex].paymentStatus.value == 1,
                                               child: Obx(
                                                 () => Column(
                                                   children: [
@@ -452,14 +454,17 @@ class OwnerRequestDetail extends StatelessWidget {
                                           ),
                                         ],
                                       ),
-                            SizedBox(height: 8),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Visibility(
-                                  visible: controller.selectedNotification!.paymentStatus == 1 &&
-                                      controller.selectedNotification!.rentEndDate.isAfter(DateTime.now()),
-                                  child: Column(
+                          ),
+                          SizedBox(height: 8),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Visibility(
+                                visible: controller.ONlist.isNotEmpty &&
+                                    controller.ONlist[controller.selectedIndex].paymentStatus.value == 1 &&
+                                    controller.selectedNotification!.rentEndDate.isAfter(DateTime.now()),
+                                child: Obx(
+                                  () => Column(
                                     children: [
                                       controller.isOwnerLoadAfterPhoto.value == 1
                                           ? GestureDetector(
@@ -487,104 +492,104 @@ class OwnerRequestDetail extends StatelessWidget {
                                     ],
                                   ),
                                 ),
-                              ],
-                            ),
-                            SizedBox(height: 8),
-                            Visibility(
-                              visible: controller.isRentEnd == 0,
-                              child: GestureDetector(
-                                onTap: () async {
-                                  showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return AlertDialog(
-                                        contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-                                        title: const Text(
-                                          "Aracınızı kiralayan kişiyi değerlendirin",
-                                          style: TextStyle(fontSize: 16),
-                                        ),
-                                        content: Form(
-                                          key: controller.commentRenterPageKey,
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              const Align(
-                                                  alignment: Alignment.centerLeft,
-                                                  child: Text("Puan", style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600))),
-                                              RatingBar.builder(
-                                                initialRating: 1,
-                                                minRating: 1,
-                                                direction: Axis.horizontal,
-                                                allowHalfRating: false,
-                                                itemCount: 5,
-                                                itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
-                                                itemBuilder: (context, _) => Icon(
-                                                  Icons.star,
-                                                  color: Colors.amber,
-                                                ),
-                                                onRatingUpdate: (double rating) {
-                                                  controller.rating.value = rating;
-                                                },
-                                              ),
-                                              const SizedBox(height: 8),
-                                              const Align(
-                                                  alignment: Alignment.centerLeft,
-                                                  child: Text("Yorum", style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600))),
-                                              const Divider(height: 4),
-                                              TextField(
-                                                  controller: controller.comment,
-                                                  keyboardType: TextInputType.multiline,
-                                                  maxLines: 6,
-                                                  decoration:
-                                                      InputWidgets().noteDecoration(Colors.grey, Colors.red, "").copyWith(labelStyle: TextStyle(fontSize: 14))),
-                                              const SizedBox(height: 8),
-                                            ],
-                                          ),
-                                        ),
-                                        actions: <Widget>[
-                                          TextButton(
-                                            onPressed: () {
-                                              Get.back();
-                                            },
-                                            child: const Text("İptal"),
-                                          ),
-                                          TextButton(
-                                            onPressed: () async {
-                                              GeneralResponse generalResponse = await controller.GiveRenterComment();
-
-                                              if (generalResponse.success) {
-                                                CustomDialog.showMessage(context: context, title: "Değerlendirme", message: "Değerlendirmeniz kaydedildi.");
-                                                Get.back();
-                                              } else {
-                                                CustomDialog.showMessage(context: context, title: "Değerlendirme", message: "Değerlendirmeniz kaydedilemedi.");
-                                                Get.back();
-                                              }
-                                            },
-                                            child: const Text("Değerlendir"),
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  );
-                                },
-                                child: Visibility(
-                                  visible: controller.isOwnerLoadAfterPhoto.value == 1 && controller.isOwnerLoadBeforePhoto.value == 1,
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                      Container(
-                                        padding: EdgeInsets.all(8.0),
-                                        decoration: BoxDecoration(color: AppColors.primaryColor, borderRadius: BorderRadius.circular(10.0)),
-                                        child: Text("Kullanıcıyı Değerlendir", style: TextStyle(color: Colors.black)),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 8),
+                          Visibility(
+                            visible: controller.isRentEnd == 0,
+                            child: GestureDetector(
+                              onTap: () async {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                                      title: const Text(
+                                        "Aracınızı kiralayan kişiyi değerlendirin",
+                                        style: TextStyle(fontSize: 16),
                                       ),
-                                    ],
-                                  ),
+                                      content: Form(
+                                        key: controller.commentRenterPageKey,
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const Align(
+                                                alignment: Alignment.centerLeft,
+                                                child: Text("Puan", style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600))),
+                                            RatingBar.builder(
+                                              initialRating: 1,
+                                              minRating: 1,
+                                              direction: Axis.horizontal,
+                                              allowHalfRating: false,
+                                              itemCount: 5,
+                                              itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
+                                              itemBuilder: (context, _) => Icon(
+                                                Icons.star,
+                                                color: Colors.amber,
+                                              ),
+                                              onRatingUpdate: (double rating) {
+                                                controller.rating.value = rating;
+                                              },
+                                            ),
+                                            const SizedBox(height: 8),
+                                            const Align(
+                                                alignment: Alignment.centerLeft,
+                                                child: Text("Yorum", style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600))),
+                                            const Divider(height: 4),
+                                            TextField(
+                                                controller: controller.comment,
+                                                keyboardType: TextInputType.multiline,
+                                                maxLines: 6,
+                                                decoration:
+                                                    InputWidgets().noteDecoration(Colors.grey, Colors.red, "").copyWith(labelStyle: TextStyle(fontSize: 14))),
+                                            const SizedBox(height: 8),
+                                          ],
+                                        ),
+                                      ),
+                                      actions: <Widget>[
+                                        TextButton(
+                                          onPressed: () {
+                                            Get.back();
+                                          },
+                                          child: const Text("İptal"),
+                                        ),
+                                        TextButton(
+                                          onPressed: () async {
+                                            GeneralResponse generalResponse = await controller.GiveRenterComment();
+
+                                            if (generalResponse.success) {
+                                              CustomDialog.showMessage(context: context, title: "Değerlendirme", message: "Değerlendirmeniz kaydedildi.");
+                                              Get.back();
+                                            } else {
+                                              CustomDialog.showMessage(context: context, title: "Değerlendirme", message: "Değerlendirmeniz kaydedilemedi.");
+                                              Get.back();
+                                            }
+                                          },
+                                          child: const Text("Değerlendir"),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              },
+                              child: Visibility(
+                                visible: controller.isOwnerLoadAfterPhoto.value == 1 && controller.isOwnerLoadBeforePhoto.value == 1,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Container(
+                                      padding: EdgeInsets.all(8.0),
+                                      decoration: BoxDecoration(color: AppColors.primaryColor, borderRadius: BorderRadius.circular(10.0)),
+                                      child: Text("Kullanıcıyı Değerlendir", style: TextStyle(color: Colors.black)),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
-                          ],
-                        ),
-                      ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -629,18 +634,28 @@ class OwnerRequestDetail extends StatelessWidget {
               child: Text(negativeButtonText ?? 'Vazgeç'),
             ),
             TextButton(
-              onPressed: () {
-                ApiService.ApproveOrRejectNotification(controller.rentRequestNotification.notifications[index].ID, 2);
-                controller.notificationApproveList[index] = 2;
-                Get.back();
+              onPressed: () async {
+                GeneralResponse generalResponse = await ApiService.ApproveOrRejectNotification(controller.rentRequestNotification.notifications[index].ID, 2);
+                if (generalResponse.success) {
+                  controller.ONlist[index].rentStatus = 2.obs;
+                  controller.fetchOwnerNotifications(
+                    GetLocalUserInfo.getLocalUserID(),
+                  );
+                  Get.back();
+                }
               },
               child: Text(negativeButtonText ?? 'Reddet'),
             ),
             TextButton(
-              onPressed: () {
-                ApiService.ApproveOrRejectNotification(controller.rentRequestNotification.notifications[index].ID, 1);
-                controller.notificationApproveList[index] = 1;
-                Get.back();
+              onPressed: () async {
+                GeneralResponse generalResponse = await ApiService.ApproveOrRejectNotification(controller.rentRequestNotification.notifications[index].ID, 1);
+                if (generalResponse.success) {
+                  controller.ONlist[index].rentStatus = 1.obs;
+                  controller.fetchOwnerNotifications(
+                    GetLocalUserInfo.getLocalUserID(),
+                  );
+                  Get.back();
+                }
               },
               child: Text(positiveButtonText ?? 'Onayla'),
             ),
@@ -668,7 +683,7 @@ class OwnerAddRentPhoto extends StatelessWidget {
             const Divider(height: 12),
             Obx(
               () => ListView.separated(
-                padding: EdgeInsets.zero,
+                padding: EdgeInsets.only(top: 8),
                 shrinkWrap: true,
                 primary: false,
                 itemCount: controller.carImages.length,
@@ -710,7 +725,9 @@ class OwnerAddRentPhoto extends StatelessWidget {
                                   Expanded(child: Text(controller.carImages[index].header, style: const TextStyle(fontWeight: FontWeight.w600))),
                                   const SizedBox(width: 8),
                                   GestureDetector(
-                                    onTap: () {},
+                                    onTap: () {
+                                      controller.removeImageAtIndex(index);
+                                    },
                                     child: const Icon(CupertinoIcons.xmark_circle, color: CupertinoColors.systemRed),
                                   ),
                                 ],

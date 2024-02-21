@@ -1,11 +1,13 @@
-// ignore_for_file: invalid_use_of_protected_member, must_be_immutable, unused_import, avoid_print, prefer_const_constructors
+// ignore_for_file: invalid_use_of_protected_member, must_be_immutable, unused_import, avoid_print, prefer_const_constructors, use_build_context_synchronously, override_on_non_overriding_member
 
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:ffi';
 
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -24,6 +26,7 @@ import 'package:kurye_takip/pages/widgets/inputs.dart';
 import 'package:map_picker/map_picker.dart';
 
 import '../../app_constants/app_colors.dart';
+import '../my_cars_detail/my_cars_detail_controller.dart';
 
 class TestAddCarView extends StatelessWidget {
   TestAddCarView({super.key});
@@ -35,9 +38,16 @@ class TestAddCarView extends StatelessWidget {
     return GestureDetector(
       onTap: () => HelpFunctions.closeKeyboard(),
       child: Scaffold(
-        appBar: AppBar(title: const Text("ARAÇ EKLEME")),
+        appBar: AppBar(
+          title: const Text(
+            "ARAÇ EKLEME",
+          ),
+          backgroundColor: Colors.white,
+          shadowColor: Colors.black,
+          elevation: 1,
+        ),
         body: PageView(
-          physics: NeverScrollableScrollPhysics(),
+          //physics: NeverScrollableScrollPhysics(),
           controller: controller.pageController,
           children: const [
             //TestAddPageTwo(),
@@ -54,6 +64,7 @@ class TestAddCarView extends StatelessWidget {
   }
 }
 
+//Araç Bilgileri - 1
 class TestAddPageOne extends GetView<TestAddController> {
   const TestAddPageOne({super.key});
 
@@ -66,7 +77,7 @@ class TestAddPageOne extends GetView<TestAddController> {
         child: Column(
           children: [
             const Align(alignment: Alignment.centerLeft, child: Text("Araç Bilgileri - 1", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600))),
-            const Divider(height: 12),
+            SizedBox(height: 12),
             DropdownButtonFormField2(
               decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Araç türünü seçiniz", Icons.list, Colors.black),
               isExpanded: true,
@@ -207,7 +218,7 @@ class TestAddPageOne extends GetView<TestAddController> {
               dropdownMaxHeight: Get.height * .25,
               scrollbarAlwaysShow: true,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -294,6 +305,7 @@ class TestAddPageTwo extends GetView<TestAddController> {
   }
 }
 
+//Araç Bilgileri - 2
 class TestAddPageThree extends GetView<TestAddController> {
   const TestAddPageThree({super.key});
 
@@ -312,6 +324,10 @@ class TestAddPageThree extends GetView<TestAddController> {
               keyboardType: TextInputType.name,
               textCapitalization: TextCapitalization.characters,
               decoration: InputWidgets().dropdownDecoration(Colors.grey, Colors.red, "Araç Plakası", CupertinoIcons.car_detailed, AppColors.primaryColor),
+              inputFormatters: [
+                LengthLimitingTextInputFormatter(10),
+                FilteringTextInputFormatter.deny(RegExp(r'\s')),
+              ],
               validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
             ),
             const SizedBox(height: 8),
@@ -332,20 +348,26 @@ class TestAddPageThree extends GetView<TestAddController> {
               dropdownMaxHeight: Get.height * .25,
               scrollbarAlwaysShow: true,
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 8),
             MaterialButton(
+              padding: EdgeInsets.fromLTRB(8, 0, 0, 0),
               color: AppColors.softPrimaryColor,
               minWidth: Get.width,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-              onPressed: () => Get.bottomSheet(
-                const AddCarLocationsBottomSheet(),
-                isScrollControlled: true,
-              ),
+              onPressed: () => Get.bottomSheet(const AddCarLocationsBottomSheet(), isScrollControlled: true),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Expanded(child: Text("Teslimat Adresleri")),
-                  const SizedBox(width: 8),
-                  Obx(() => Text("(${controller.locations.value.length})")),
+                  Obx(() => Expanded(child: Text("Teslimat Adresleri (${controller.locations.value.length})"))),
+                  Row(
+                    children: [
+                      Text("Adres Ekle"),
+                      IconButton(
+                        onPressed: () => Get.bottomSheet(const AddCarLocationsBottomSheet(), isScrollControlled: true),
+                        icon: Icon(Icons.add_circle_outline_outlined),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -386,6 +408,7 @@ class TestAddPageThree extends GetView<TestAddController> {
   }
 }
 
+//Araç Uygunluk Tarih ve Saatleri
 class TestAddPageFour extends GetView<TestAddController> {
   const TestAddPageFour({super.key});
 
@@ -553,6 +576,7 @@ class TestAddPageFour extends GetView<TestAddController> {
   }
 }
 
+//Fotoğraflar
 class TestAddPageFive extends GetView<TestAddController> {
   const TestAddPageFive({super.key});
 
@@ -606,7 +630,9 @@ class TestAddPageFive extends GetView<TestAddController> {
                             Expanded(child: Text(controller.carImages.value[index].header, style: const TextStyle(fontWeight: FontWeight.w600))),
                             const SizedBox(width: 8),
                             GestureDetector(
-                              onTap: () => controller.removeImageAtIndex(index),
+                              onTap: () {
+                                controller.removeImageAtIndex(index);
+                              },
                               child: const Icon(CupertinoIcons.xmark_circle, color: CupertinoColors.systemRed),
                             ),
                           ],
@@ -637,6 +663,7 @@ class TestAddPageFive extends GetView<TestAddController> {
   }
 }
 
+//Fiyat ve indirimler
 class TestAddPageSix extends GetView<TestAddController> {
   const TestAddPageSix({super.key});
 
@@ -750,12 +777,14 @@ class TestAddPageSix extends GetView<TestAddController> {
                   "Aracınızı uzun dönem kiralamak ister misiniz?",
                   style: TextStyle(fontSize: 12),
                 )),
-                Obx(() => Switch(
-                      value: controller.isLongTerm.value,
-                      onChanged: (value) {
-                        controller.isLongTerm.toggle();
-                      },
-                    )),
+                Obx(
+                  () => Switch(
+                    value: controller.isLongTerm.value,
+                    onChanged: (value) {
+                      controller.isLongTerm.toggle();
+                    },
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 8),
@@ -781,63 +810,77 @@ class TestAddPageSix extends GetView<TestAddController> {
   }
 }
 
+//Kullanıcıya not
 class TestAddPageSeven extends GetView<TestAddController> {
   const TestAddPageSeven({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Form(
-        key: controller.testAddPageSevenKey,
-        child: Column(
-          children: [
-            const Align(
-                alignment: Alignment.centerLeft, child: Text("Kullanıcıya Notunuz(Opsiyonel)", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600))),
-            const Divider(height: 12),
-            TextField(
-                controller: controller.note,
-                keyboardType: TextInputType.multiline,
-                maxLines: 6,
-                decoration: InputWidgets().noteDecoration(Colors.grey, Colors.red, "Kullanıcıya iletmek istediğiniz notu giriniz.")),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                OutlinedButton(
-                  style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                  onPressed: () => controller.pageController.previousPage(duration: const Duration(milliseconds: 300), curve: Curves.ease),
-                  child: const Text("Geri"),
-                ),
-                OutlinedButton(
-                  style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                  onPressed: () async {
-                    if (await controller.saveCar()) {
-                      // ignore: use_build_context_synchronously
-                      CustomDialog.showMessage(
+    return GestureDetector(
+      onTap: () => HelpFunctions.closeKeyboard(),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Form(
+          key: controller.testAddPageSevenKey,
+          child: Column(
+            children: [
+              const Align(
+                  alignment: Alignment.centerLeft, child: Text("Kullanıcıya Notunuz(Opsiyonel)", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600))),
+              const Divider(height: 12),
+              TextField(
+                  controller: controller.note,
+                  keyboardType: TextInputType.multiline,
+                  maxLines: 6,
+                  decoration: InputWidgets().noteDecoration(Colors.grey, Colors.red, "Kullanıcıya iletmek istediğiniz notu giriniz.")),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  OutlinedButton(
+                    style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                    onPressed: () => controller.pageController.previousPage(duration: const Duration(milliseconds: 300), curve: Curves.ease),
+                    child: const Text("Geri"),
+                  ),
+                  OutlinedButton(
+                    style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                    onPressed: () async {
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (BuildContext context) {
+                          return Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        },
+                      );
+                      bool isCarSaved = await controller.saveCar();
+                      Navigator.pop(context);
+                      if (isCarSaved) {
+                        CustomDialog.showMessage(
                           context: context,
                           title: "Araç Kayıt Başarılı",
                           message: "Araç kaydınız başarılı, admin onayından sonra \"Araçlarım\" kısmından bakabilirsiniz.",
                           onPositiveButtonPressed: () {
                             Get.offAll(Dashboard());
-                          });
-                    } else {
-                      // ignore: use_build_context_synchronously
-                      CustomDialog.showMessage(
-                        context: context,
-                        title: "Araç Kaydı Başarısız",
-                        message: "Araç kaydınız başarısız.",
-                        onPositiveButtonPressed: () {
-                          Get.off(ProfilePage());
-                        },
-                      );
-                    }
-                  },
-                  child: const Text("Kaydet"),
-                ),
-              ],
-            )
-          ],
+                          },
+                        );
+                      } else {
+                        CustomDialog.showMessage(
+                          context: context,
+                          title: "Araç Kaydı Başarısız",
+                          message: "Araç kaydınız başarısız.",
+                          onPositiveButtonPressed: () {
+                            Get.off(ProfilePage());
+                          },
+                        );
+                      }
+                    },
+                    child: const Text("Kaydet"),
+                  ),
+                ],
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -913,8 +956,8 @@ class TestAddSelectLocationCarOwner extends GetView<TestAddController> {
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
       contentPadding: const EdgeInsets.all(0),
       content: SizedBox(
-        height: Get.height * 0.5,
-        width: Get.width * .75,
+        height: Get.height * 0.9,
+        width: Get.width * 0.9,
         child: Stack(
           alignment: Alignment.topCenter,
           children: [
@@ -982,7 +1025,7 @@ class TestAddSelectLocationCarOwner extends GetView<TestAddController> {
                     if (carLocation.city != "İzmir") {
                       CustomDialog.showMessage(
                         context: context,
-                        title: "Konum Yanlış",
+                        title: "Hata",
                         message: "Şu an sadece İzmir konumuna izin verilmektedir.",
                       );
                     } else {
@@ -1002,7 +1045,22 @@ class TestAddSelectLocationCarOwner extends GetView<TestAddController> {
                   ),
                 ),
               ),
-            )
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 24, 8, 0),
+              child: Align(
+                alignment: Alignment.topRight,
+                child: IconButton(
+                  onPressed: () {
+                    Get.back();
+                  },
+                  icon: const Icon(
+                    CupertinoIcons.xmark_square_fill,
+                    size: 32,
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -1016,21 +1074,23 @@ class AddCarTimeInput extends GetView<TestAddController> {
   TextEditingController textController;
   TimeOfDay time;
 
+  TestAddController controller = Get.put(TestAddController());
   @override
   Widget build(BuildContext context) {
     return TextFormField(
-      readOnly: true,
+      readOnly: true, //controller.isGeneralTime.value,
       controller: textController,
       decoration: InputWidgets().timeDecoration(Colors.grey, Colors.red, "00:00"),
       textAlign: TextAlign.center,
       validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
-      onTap: () async {
-        final TimeOfDay? pickedTime = await showTimePicker(context: context, initialTime: time);
-        if (pickedTime != null) {
-          time = pickedTime;
-          textController.text = "${pickedTime.hour}: ${pickedTime.minute}";
-        }
-      },
+      onTap: controller.isGeneralTime.value
+          ? null
+          : () async {
+              final pickedTime = await showTimePicker(context: context, initialTime: time);
+              if (pickedTime != null) {
+                textController.text = "${pickedTime.hour}:${pickedTime.minute}";
+              }
+            },
     );
   }
 }
@@ -1131,7 +1191,7 @@ class AddCarLocationsBottomSheet extends GetView<TestAddController> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               const Padding(
-                padding: EdgeInsets.fromLTRB(12.0, 12, 12, 0),
+                padding: EdgeInsets.fromLTRB(12, 12, 12, 0),
                 child: Text("Teslimat Adresleri", style: TextStyle(color: Colors.black, fontSize: 18)),
               ),
               const Divider(height: 12),
@@ -1190,6 +1250,116 @@ class AddCarLocationsBottomSheet extends GetView<TestAddController> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class CarEditTimeRow extends GetView<MyCarsDetailController> {
+  CarEditTimeRow({super.key, required this.date, required this.input1, required this.input2, required this.time1, required this.time2});
+
+  String date;
+  TextEditingController input1, input2;
+  TimeOfDay time1, time2;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(child: Padding(padding: const EdgeInsets.only(top: 8.0), child: Text(date))),
+        const SizedBox(width: 8),
+        Row(
+          children: [
+            SizedBox(width: Get.width * .25, child: CarEditTimeInput(textController: input1, time: time1)),
+            const SizedBox(width: 8),
+            SizedBox(width: Get.width * .25, child: CarEditTimeInput(textController: input2, time: time2)),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class CarEditTimeRowWidget extends GetView<MyCarsDetailController> {
+  CarEditTimeRowWidget({super.key, required this.date, required this.input1, required this.input2, required this.startIndex, required this.endIndex});
+
+  String date;
+  TextEditingController input1, input2;
+  int startIndex, endIndex;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(child: Padding(padding: const EdgeInsets.only(top: 8.0), child: Text(date))),
+        const SizedBox(width: 8),
+        Row(
+          children: [
+            SizedBox(width: Get.width * .25, child: CarEditTimeInputWidget(textController: input1, index: startIndex, start: true)),
+            const SizedBox(width: 8),
+            SizedBox(width: Get.width * .25, child: CarEditTimeInputWidget(textController: input2, index: endIndex, start: false)),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class CarEditTimeInputWidget extends GetView<MyCarsDetailController> {
+  CarEditTimeInputWidget({super.key, required this.textController, required this.index, required this.start});
+
+  TextEditingController textController;
+  int index;
+  bool start;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      readOnly: true,
+      controller: textController,
+      decoration: InputWidgets().timeDecoration(Colors.grey, Colors.red, "00:00"),
+      textAlign: TextAlign.center,
+      validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
+      onTap: () async {
+        final pickedTime = await showTimePicker(context: context, initialTime: start ? controller.startTimes[index] : controller.endTimes[index]);
+        if (pickedTime != null) {
+          textController.text = getTimeString(pickedTime);
+          start ? controller.startTimes[index] = pickedTime : controller.endTimes[index] = pickedTime;
+          log(getTimeString(pickedTime));
+          log(getTimeString(controller.startTimes[index]));
+          log(getTimeString(controller.endTimes[index]));
+        }
+      },
+    );
+  }
+}
+
+class CarEditTimeInput extends GetView<MyCarsDetailController> {
+  CarEditTimeInput({super.key, required this.textController, required this.time});
+
+  TextEditingController textController;
+  TimeOfDay time;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      readOnly: true,
+      controller: textController,
+      decoration: InputWidgets().timeDecoration(Colors.grey, Colors.red, "00:00"),
+      textAlign: TextAlign.center,
+      validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
+      onTap: () async {
+        final pickedTime = await showTimePicker(context: context, initialTime: time);
+        if (pickedTime != null) {
+          textController.text = getTimeString(pickedTime);
+          time = pickedTime;
+          log(getTimeString(pickedTime));
+          log(getTimeString(time));
+        }
+      },
     );
   }
 }

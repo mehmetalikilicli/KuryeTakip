@@ -5,7 +5,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:kurye_takip/helpers/get_local_user_id.dart';
+import 'package:kurye_takip/helpers/get_local_user.dart';
 import 'package:kurye_takip/model/general_response.dart';
 import 'package:kurye_takip/model/login.dart';
 import 'package:kurye_takip/model/register.dart';
@@ -68,7 +68,7 @@ class ProfileController extends GetxController {
   Future<void> Logout() async {
     try {
       Map<String, dynamic> tokenMap = {
-        "UserID": getLocalUserID(),
+        "UserID": GetLocalUserInfo.getLocalUserID(),
         "Token": "",
       };
       GeneralResponse generalResponse = await ApiService.SaveNotificationToken(tokenMap);

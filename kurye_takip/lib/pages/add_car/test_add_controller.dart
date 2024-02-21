@@ -28,12 +28,21 @@ import '../../model/model.dart';
 import '../../service/api_service.dart';
 
 class TestAddController extends GetxController {
-  @override
-  void initState() {
-    //clearAll
-  }
   //General
   PageController pageController = PageController();
+
+  void clearCarInfoDropdowns() {
+    loadingModels.value = false;
+    loadingBrands.value = false;
+    carBrandsList.clear();
+    carModelList.clear();
+    carBrand = "";
+    carModel = "";
+    carYear = "";
+    carFuel = "";
+    carTransmission = "";
+    carTypeText = "";
+  }
 
   // PAGE-1
   final testAddPageOneFormKey = GlobalKey<FormState>();
@@ -117,7 +126,7 @@ class TestAddController extends GetxController {
   RxList<AddCarLocation> locations = <AddCarLocation>[].obs;
 
   MapPickerController mapPickerController = MapPickerController();
-  CameraPosition cameraPosition = const CameraPosition(target: LatLng(38.4192, 27.1287), zoom: 10.0);
+  CameraPosition cameraPosition = const CameraPosition(target: LatLng(38.4192, 27.1287), zoom: 8.0);
   final googleMapController = Completer<GoogleMapController>();
   RxString gmAddressText = "".obs, rxCity = "".obs, rxDistrict = "".obs, address = "".obs;
   String district = "", city = "";
@@ -131,7 +140,7 @@ class TestAddController extends GetxController {
     }
     if (permission == LocationPermission.whileInUse || permission == LocationPermission.always) {
       Position position = await Geolocator.getCurrentPosition();
-      cameraPosition = CameraPosition(target: LatLng(position.latitude, position.longitude), zoom: 14.4746);
+      cameraPosition = CameraPosition(target: LatLng(position.latitude, position.longitude), zoom: 8.4746);
     }
     Get.dialog(const TestAddSelectLocationCarOwner());
   }
@@ -141,7 +150,7 @@ class TestAddController extends GetxController {
       if (locations.value.isNotEmpty) {
         pageController.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.ease);
       } else {
-        Helpers.showSnackbar("Uyarı!", "Lütfen teslimat konumunu ekleyiniz.");
+        Helpers.showSnackbar("Uyarı!", "Lütfen teslimat konumu ekleyiniz.");
       }
     } else {
       Helpers.showSnackbar("Uyarı!", "Lütfen gerekli alanları doldurunuz.");
@@ -180,10 +189,10 @@ class TestAddController extends GetxController {
   TimeOfDay availableSundayStartTime = TimeOfDay.now();
   TimeOfDay availableSundayEndTime = TimeOfDay.now();
 
-  TextEditingController availableWeekdayStart = TextEditingController();
-  TextEditingController availableWeekdayEnd = TextEditingController();
-  TextEditingController availableWeekendStart = TextEditingController();
-  TextEditingController availableWeekendEnd = TextEditingController();
+  TextEditingController availableWeekdayStart = TextEditingController(text: "09:00");
+  TextEditingController availableWeekdayEnd = TextEditingController(text: "18:00");
+  TextEditingController availableWeekendStart = TextEditingController(text: "09:00");
+  TextEditingController availableWeekendEnd = TextEditingController(text: "18:00");
 
   TextEditingController availableMondayStart = TextEditingController();
   TextEditingController availableMondayEnd = TextEditingController();

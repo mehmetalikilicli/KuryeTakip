@@ -1,4 +1,4 @@
-// ignore_for_file: must_be_immutable, unnecessary_null_comparison, non_constant_identifier_names, unused_local_variable, prefer_typing_uninitialized_variables, avoid_function_literals_in_foreach_calls, unnecessary_brace_in_string_interps, no_leading_underscores_for_local_identifiers, avoid_unnecessary_containers, use_build_context_synchronously, duplicate_ignore
+// ignore_for_file: must_be_immutable, unnecessary_null_comparison, non_constant_identifier_names, unused_local_variable, prefer_typing_uninitialized_variables, avoid_function_literals_in_foreach_calls, unnecessary_brace_in_string_interps, no_leading_underscores_for_local_identifiers, avoid_unnecessary_containers, use_build_context_synchronously, duplicate_ignore, unused_import
 
 import 'dart:developer';
 
@@ -12,6 +12,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:kurye_takip/app_constants/app_colors.dart';
 import 'package:kurye_takip/helpers/custom_dialog.dart';
+import 'package:kurye_takip/helpers/get_local_user.dart';
 import 'package:kurye_takip/helpers/helper_functions.dart';
 import 'package:kurye_takip/model/cars_list.dart';
 import 'package:kurye_takip/model/general_response.dart';
@@ -71,7 +72,7 @@ class _CarDetailViewState extends State<CarDetailView> {
       onTap: () => HelpFunctions.closeKeyboard(),
       child: Scaffold(
         floatingActionButton: Visibility(
-          visible: widget.isfloatingActionButtonActive,
+          visible: widget.isfloatingActionButtonActive && GetLocalUserInfo.getLocalUserIsVehicleOwner() == 0,
           child: FloatingActionButton.extended(
             onPressed: () async {
               controller.rentCarDate.text = "";
@@ -102,7 +103,7 @@ class _CarDetailViewState extends State<CarDetailView> {
                                 final result = await showDateRangePicker(
                                   context: context,
                                   firstDate: DateTime.now(),
-                                  lastDate: DateTime.now().add(const Duration(days: 365)),
+                                  lastDate: controller.carElement.is_available_date_end!,
                                 );
                                 if (result != null) {
                                   controller.rentCarDateStart = result.start;
@@ -181,9 +182,7 @@ class _CarDetailViewState extends State<CarDetailView> {
             },
             label: const Text("Kiralama Talebi Gönder", style: TextStyle(fontSize: 12)),
             backgroundColor: AppColors.primaryColor,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           ),
         ),
         appBar: widget.isAppBarActive
@@ -335,7 +334,7 @@ class CarDetailFeatured extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               const Text(
-                "Detaylar",
+                "Özellikler",
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
               ),
               const SizedBox(height: 6),
@@ -526,7 +525,7 @@ class CarBrandAndBrandModelText extends GetView<CarDetailController> {
                 "${widget.carElement.brandName}",
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 24,
+                  fontSize: 18,
                   color: AppColors.primaryColor,
                 ),
               ),
@@ -535,7 +534,7 @@ class CarBrandAndBrandModelText extends GetView<CarDetailController> {
                 "-",
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 24,
+                  fontSize: 18,
                   color: AppColors.primaryColor,
                 ),
               ),
@@ -544,7 +543,7 @@ class CarBrandAndBrandModelText extends GetView<CarDetailController> {
                 widget.carElement.modelName ?? "",
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 24,
+                  fontSize: 18,
                   color: AppColors.primaryColor,
                 ),
               ),

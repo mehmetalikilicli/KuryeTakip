@@ -3,10 +3,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:kurye_takip/app_constants/app_colors.dart';
+import 'package:kurye_takip/helpers/helper_functions.dart';
 import 'package:kurye_takip/pages/auth/authentication.dart';
 import 'package:kurye_takip/helpers/custom_dialog.dart';
 import 'package:kurye_takip/helpers/helpers.dart';
 import 'package:kurye_takip/model/login.dart';
+import 'package:kurye_takip/pages/auth/forgot_password.dart';
 import 'package:kurye_takip/pages/auth/register.dart';
 import 'package:kurye_takip/pages/dashboard/dashboard.dart';
 
@@ -29,23 +31,22 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Form(
-            key: authController.loginFormKey,
-            child: Column(
-              children: [
-                const ImageAndText(),
-                EmailAndPassword(
-                  authController: authController,
-                ),
-                LoginAndRegisterButton(
-                  authController: authController,
-                ),
-                //LoginWithGoogleAndApple(),
-              ],
+    return GestureDetector(
+      onTap: () => HelpFunctions.closeKeyboard(),
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        body: SafeArea(
+          child: SingleChildScrollView(
+            child: Form(
+              key: authController.loginFormKey,
+              child: Column(
+                children: [
+                  const ImageAndText(),
+                  const EmailAndPassword(),
+                  LoginAndRegisterButton(authController: authController),
+                  //LoginWithGoogleAndApple(),
+                ],
+              ),
             ),
           ),
         ),
@@ -131,7 +132,7 @@ class LoginWithGoogleAndApple extends StatelessWidget {
   }
 }
 
-class LoginAndRegisterButton extends StatelessWidget {
+class LoginAndRegisterButton extends GetView<LoginController> {
   const LoginAndRegisterButton({
     super.key,
     required this.authController,
@@ -206,10 +207,8 @@ class LoginAndRegisterButton extends StatelessWidget {
   }
 }
 
-class EmailAndPassword extends StatelessWidget {
-  const EmailAndPassword({super.key, required this.authController});
-
-  final LoginController authController;
+class EmailAndPassword extends GetView<LoginController> {
+  const EmailAndPassword({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -219,49 +218,47 @@ class EmailAndPassword extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(left: 20.0, right: 20.0),
           child: TextFormField(
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Lütfen epostanızı giriniz.';
-              }
-              return null;
-            },
-            controller: authController.loginEmailController,
+            validator: (value) => value!.isEmpty
+                ? "Boş bırakılamaz"
+                : !value.toString().isEmail
+                    ? "Geçerli bir mail adresi giriniz."
+                    : null,
+            controller: controller.loginEmailController,
             decoration: InputDecoration(
                 hintText: "Eposta",
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none),
                 fillColor: Colors.grey.withOpacity(0.1),
                 filled: true,
-                prefixIcon: const Icon(Icons.email)),
+                prefixIcon: const Icon(Icons.email_outlined)),
           ),
         ),
         const SizedBox(height: 15),
         Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 0),
-              child: TextFormField(
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Lütfen şifrenizi giriniz';
-                  } else {
-                    return null;
-                  }
-                },
-                obscureText: true,
-                controller: authController.loginPasswordController,
-                decoration: InputDecoration(
-                    hintText: "Şifre",
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none),
-                    fillColor: Colors.grey.withOpacity(0.1),
-                    filled: true,
-                    prefixIcon: const Icon(Icons.password)),
-              ),
-            ),
+            Obx(() => Padding(
+                  padding: const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 0),
+                  child: TextFormField(
+                    validator: (value) => value!.isEmpty ? "Boş bırakılamaz" : null,
+                    obscureText: controller.passwordHide.isTrue,
+                    controller: controller.loginPasswordController,
+                    decoration: InputDecoration(
+                      hintText: "Şifre",
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none),
+                      fillColor: Colors.grey.withOpacity(0.1),
+                      filled: true,
+                      prefixIcon: const Icon(Icons.password),
+                      suffixIcon: GestureDetector(
+                        onTap: () => controller.passwordHide.toggle(),
+                        child: Icon(controller.passwordHide.isTrue ? Icons.visibility : Icons.visibility_off),
+                      ),
+                    ),
+                  ),
+                )),
             Padding(
               padding: const EdgeInsets.only(right: 10.0),
               child: TextButton(
-                onPressed: () => Get.to(const Dashboard()),
+                onPressed: () => Get.to(ForgotPasswordPage()),
                 child: const Text(
                   "Şifremi unuttum",
                   style: TextStyle(fontSize: 14, decoration: TextDecoration.underline, color: Colors.black),

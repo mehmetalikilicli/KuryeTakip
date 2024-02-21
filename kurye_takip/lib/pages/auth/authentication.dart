@@ -1,4 +1,4 @@
-// ignore_for_file: non_constant_identifier_names, deprecated_member_use, avoid_print
+// ignore_for_file: non_constant_identifier_names, deprecated_member_use, avoid_print, invalid_use_of_protected_member
 
 import 'dart:async';
 import 'dart:convert';
@@ -54,14 +54,12 @@ class RegisterController extends GetxController {
   RegisterModel registerModel = RegisterModel();
   RegisterModel registerModel2 = RegisterModel();
 
-  RxBool isCommercial = true.obs;
+  RxBool isCommercial = false.obs;
 
   DateTime rentDLdate = DateTime.now();
   DateTime rentBirthDate = DateTime.now();
 
   RxString rentGender = "".obs;
-
-  String image1 = "", image2 = "", image1ext = "", image2ext = "";
 
   RxBool rentPasswordHide = true.obs, rentPassword2Hide = true.obs;
 
@@ -74,7 +72,14 @@ class RegisterController extends GetxController {
   RxString address = "".obs;
   String district = "", city = "";
 
-  CameraPosition cameraPosition = const CameraPosition(target: LatLng(38.4237, 27.1428), zoom: 14.4746);
+  CameraPosition cameraPosition = const CameraPosition(target: LatLng(38.4237, 27.1428), zoom: 8.4746);
+
+  RxList<DrivingLicenseImage> drivingLicencesImages = <DrivingLicenseImage>[
+    DrivingLicenseImage(
+        description: "Ehliyetinizin ön yüz fotoğrafını yükleyiniz.", ext: "", header: "Ehliyetinizin ön yüz fotoğrafı", load: false.obs, photo64: ""),
+    DrivingLicenseImage(
+        description: "Ehliyetinizin arka yüz fotoğrafını yükleyiniz.", ext: "", header: "Ehliyetinizin arka yüz fotoğrafı", load: false.obs, photo64: "")
+  ].obs;
 
   Future<RegisterResponse> Register(RegisterModel registerModel) async {
     try {
@@ -86,11 +91,17 @@ class RegisterController extends GetxController {
     }
   }
 
+  void removeImageAtIndex(int index) {
+    drivingLicencesImages.value[index].load.value = false;
+    drivingLicencesImages.value[index].ext = "";
+    drivingLicencesImages.value[index].photo64 = "";
+  }
+
   Future<void> pickImageAtFrontOrBack(ImageSource source, int frontOrBack) async {
     final XFile? image = await ImagePicker().pickImage(source: source, imageQuality: 25);
     if (image!.isNull == false) {
       //0 front
-      frontOrBack == 0 ? image1ext = image.path.split(".").last : image2ext = image.path.split(".").last;
+      frontOrBack == 0 ? drivingLicencesImages[0].ext = image.path.split(".").last : drivingLicencesImages[1].ext = image.path.split(".").last;
       CroppedFile? croppedFile = await ImageCropper().cropImage(
         sourcePath: image.path,
         aspectRatioPresets: AppImages().cropRatios,
@@ -102,7 +113,13 @@ class RegisterController extends GetxController {
         if (compressedBytes.length > 2.5 * 1024 * 1024) {
           Helpers.showSnackbar("Uyarı!", "Maksimum fotoğraf boyutunun üzerindedir. Lütfen daha düşük boyutlu fotoğraflar kullanınınz.");
         } else {
-          frontOrBack == 0 ? image1 = base64Encode(compressedBytes) : image2 = base64Encode(compressedBytes);
+          if (frontOrBack == 0) {
+            drivingLicencesImages[0].photo64 = base64Encode(compressedBytes);
+            drivingLicencesImages[0].load.value = true;
+          } else {
+            drivingLicencesImages[1].photo64 = base64Encode(compressedBytes);
+            drivingLicencesImages[1].load.value = true;
+          }
         }
       }
     }
@@ -135,6 +152,8 @@ class LoginController extends GetxController {
   final loginFormKey = GlobalKey<FormState>();
   final registerFormKey = GlobalKey<FormState>();
   final rentRegisterFormKey = GlobalKey<FormState>();
+
+  RxBool passwordHide = true.obs;
 
   //Login TextEditingControllers
   TextEditingController loginEmailController = TextEditingController();
@@ -169,4 +188,20 @@ class LoginController extends GetxController {
     // Save the JSON string to SharedPreferences
     await prefs.setString('user_data', userJson);
   }*/
+}
+
+class DrivingLicenseImage {
+  RxBool load;
+  String header;
+  String description;
+  String photo64;
+  String ext;
+
+  DrivingLicenseImage({
+    required this.description,
+    required this.ext,
+    required this.header,
+    required this.load,
+    required this.photo64,
+  });
 }

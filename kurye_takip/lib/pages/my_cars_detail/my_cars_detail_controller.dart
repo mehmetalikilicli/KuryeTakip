@@ -29,7 +29,7 @@ class MyCarsDetailController extends GetxController {
   CarElement carElement = CarElement();
 
   // ignore: non_constant_identifier_names
-  void FillInfo() {
+  Future<void> FillInfo() async {
     //Owner Info
     nameController.text = carElement.userName ?? "";
     surnameController.text = carElement.userSurname ?? "";
@@ -54,6 +54,7 @@ class MyCarsDetailController extends GetxController {
     fillPhotos(carElement.carAddPhotos!);
 
     isActive.value = carElement.isActive!;
+    isApproved.value = carElement.isApproved!;
   }
 
   void fillPhotos(List<CarAddPhoto> carAddPhotos) {
@@ -70,8 +71,54 @@ class MyCarsDetailController extends GetxController {
     }
   }
 
-  // ignore: non_constant_identifier_names
   void FillTimes() {
+    // Hafta İçi Değerine Pazartesi atanacak
+    startTimes[7] = convertStringToTimeOfDay(carElement.carDeliveryTimes!.first.startTime);
+    endTimes[7] = convertStringToTimeOfDay(carElement.carDeliveryTimes!.first.endTime);
+    availableWeekdayStart.text = getTimeString(startTimes[7]);
+    availableWeekdayEnd.text = getTimeString(endTimes[7]);
+    // Hafta Sonu Değerine Cumartesi atanacak
+    startTimes[8] = convertStringToTimeOfDay(carElement.carDeliveryTimes!.last.startTime);
+    endTimes[8] = convertStringToTimeOfDay(carElement.carDeliveryTimes!.last.endTime);
+    availableWeekendStart.text = getTimeString(startTimes[8]);
+    availableWeekendEnd.text = getTimeString(endTimes[8]);
+    //Pazartesi değeri doldurulacak.
+    startTimes[0] = convertStringToTimeOfDay(carElement.carDeliveryTimes!.first.startTime);
+    endTimes[0] = convertStringToTimeOfDay(carElement.carDeliveryTimes!.first.endTime);
+    availableMondayStart.text = getTimeString(startTimes[0]);
+    availableMondayEnd.text = getTimeString(endTimes[0]);
+    //Salı değeri doldurulacak.
+    startTimes[1] = convertStringToTimeOfDay(carElement.carDeliveryTimes![1].startTime);
+    endTimes[1] = convertStringToTimeOfDay(carElement.carDeliveryTimes![1].endTime);
+    availableTuesdayStart.text = getTimeString(startTimes[1]);
+    availableTuesdayEnd.text = getTimeString(endTimes[1]);
+    //Çarşamba değeri doldurulacak.
+    startTimes[2] = convertStringToTimeOfDay(carElement.carDeliveryTimes![2].startTime);
+    endTimes[2] = convertStringToTimeOfDay(carElement.carDeliveryTimes![2].endTime);
+    availableWednesdayStart.text = getTimeString(startTimes[2]);
+    availableWednesdayEnd.text = getTimeString(endTimes[2]);
+    //Perşembe değeri doldurulacak.
+    startTimes[3] = convertStringToTimeOfDay(carElement.carDeliveryTimes![3].startTime);
+    endTimes[3] = convertStringToTimeOfDay(carElement.carDeliveryTimes![3].endTime);
+    availableThursdayStart.text = getTimeString(startTimes[3]);
+    availableThursdayEnd.text = getTimeString(endTimes[3]);
+    //Cuma değeri doldurulacak.
+    startTimes[4] = convertStringToTimeOfDay(carElement.carDeliveryTimes![4].startTime);
+    endTimes[4] = convertStringToTimeOfDay(carElement.carDeliveryTimes![4].endTime);
+    availableFridayStart.text = getTimeString(startTimes[4]);
+    availableFridayEnd.text = getTimeString(endTimes[4]);
+    //Cumartesi değeri doldurulacak.
+    startTimes[8] = convertStringToTimeOfDay(carElement.carDeliveryTimes!.last.startTime);
+    endTimes[8] = convertStringToTimeOfDay(carElement.carDeliveryTimes!.last.endTime);
+    availableSaturdayStart.text = getTimeString(startTimes[8]);
+    availableSaturdayEnd.text = getTimeString(endTimes[8]);
+    //Pazar değeri doldurulacak.
+    startTimes[8] = convertStringToTimeOfDay(carElement.carDeliveryTimes!.last.startTime);
+    endTimes[8] = convertStringToTimeOfDay(carElement.carDeliveryTimes!.last.endTime);
+    availableSundayStart.text = getTimeString(startTimes[8]);
+    availableSundayEnd.text = getTimeString(endTimes[8]);
+
+    /*
     availableWeekdayStartTime = convertStringToTimeOfDay(carElement.carDeliveryTimes![0].startTime);
     availableWeekdayStart.text = '${availableWeekdayStartTime.hour}:${availableWeekdayStartTime.minute}';
 
@@ -127,6 +174,7 @@ class MyCarsDetailController extends GetxController {
       availableSundayEndTime = convertStringToTimeOfDay(carElement.carDeliveryTimes![0].endTime);
       availableSundayEnd.text = '${availableSundayEndTime.hour}:${availableSundayEndTime.minute}';
     }
+    */
   }
 
   TimeOfDay convertStringToTimeOfDay(String timeString) {
@@ -134,6 +182,35 @@ class MyCarsDetailController extends GetxController {
     int hour = int.parse(parts[0]);
     int minute = int.parse(parts[1]);
     return TimeOfDay(hour: hour, minute: minute);
+  }
+
+  String generateCarDeliveryTimesJson() {
+    String result = "";
+    List<DeliveryTimeCRUD> times = [];
+
+    if (isGeneralTime.isTrue) {
+      DeliveryTimeCRUD pazartesi = DeliveryTimeCRUD(carID: carElement.carId!, deliveryTime: "Pazartesi", start: startTimes[7], end: endTimes[7]);
+      DeliveryTimeCRUD sali = DeliveryTimeCRUD(carID: carElement.carId!, deliveryTime: "Salı", start: startTimes[7], end: endTimes[7]);
+      DeliveryTimeCRUD carsamba = DeliveryTimeCRUD(carID: carElement.carId!, deliveryTime: "Çarşamba", start: startTimes[7], end: endTimes[7]);
+      DeliveryTimeCRUD persembe = DeliveryTimeCRUD(carID: carElement.carId!, deliveryTime: "Perşembe", start: startTimes[7], end: endTimes[7]);
+      DeliveryTimeCRUD cuma = DeliveryTimeCRUD(carID: carElement.carId!, deliveryTime: "Cuma", start: startTimes[7], end: endTimes[7]);
+      DeliveryTimeCRUD cumartesi = DeliveryTimeCRUD(carID: carElement.carId!, deliveryTime: "Cumartesi", start: startTimes[8], end: endTimes[8]);
+      DeliveryTimeCRUD pazar = DeliveryTimeCRUD(carID: carElement.carId!, deliveryTime: "Pazar", start: startTimes[8], end: endTimes[8]);
+      times = [pazartesi, sali, carsamba, persembe, cuma, cumartesi, pazar];
+    } else {
+      DeliveryTimeCRUD pazartesi = DeliveryTimeCRUD(carID: carElement.carId!, deliveryTime: "Pazartesi", start: startTimes[0], end: endTimes[0]);
+      DeliveryTimeCRUD sali = DeliveryTimeCRUD(carID: carElement.carId!, deliveryTime: "Salı", start: startTimes[1], end: endTimes[1]);
+      DeliveryTimeCRUD carsamba = DeliveryTimeCRUD(carID: carElement.carId!, deliveryTime: "Çarşamba", start: startTimes[2], end: endTimes[2]);
+      DeliveryTimeCRUD persembe = DeliveryTimeCRUD(carID: carElement.carId!, deliveryTime: "Perşembe", start: startTimes[3], end: endTimes[3]);
+      DeliveryTimeCRUD cuma = DeliveryTimeCRUD(carID: carElement.carId!, deliveryTime: "Cuma", start: startTimes[4], end: endTimes[4]);
+      DeliveryTimeCRUD cumartesi = DeliveryTimeCRUD(carID: carElement.carId!, deliveryTime: "Cumartesi", start: startTimes[5], end: endTimes[5]);
+      DeliveryTimeCRUD pazar = DeliveryTimeCRUD(carID: carElement.carId!, deliveryTime: "Pazar", start: startTimes[6], end: endTimes[6]);
+      times = [pazartesi, sali, carsamba, persembe, cuma, cumartesi, pazar];
+    }
+
+    result = jsonEncode(times);
+    log(result);
+    return result;
   }
 
   //CAR OWNER INFO
@@ -241,7 +318,8 @@ class MyCarsDetailController extends GetxController {
     loadingModels.value = false;
   }
 
-  Future checkCarInfoAndSave() async {
+  Future<GeneralResponse> checkCarInfoAndSave() async {
+    GeneralResponse generalResponse = GeneralResponse(success: false, message: "");
     if (carInfoEditKey.currentState!.validate()) {
       Map<String, dynamic> saveCarInfoMap = {
         "car_type": carType,
@@ -254,12 +332,12 @@ class MyCarsDetailController extends GetxController {
         "plate": carPlate.text,
         "km": selectedKm,
       };
-
-      GeneralResponse generalResponse = await ApiService.editCarInfo(saveCarInfoMap);
-      log(generalResponse.message);
+      generalResponse = await ApiService.editCarInfo(saveCarInfoMap);
     } else {
       Helpers.showSnackbar("Uyarı!", "Lütfen gerekli alanları doldurunuz.");
     }
+
+    return generalResponse;
   }
 
   //DATE AND TIME EDIT
@@ -274,25 +352,28 @@ class MyCarsDetailController extends GetxController {
 
   TextEditingController availableCarDate = TextEditingController();
 
-  TimeOfDay availableWeekdayStartTime = TimeOfDay.now();
-  TimeOfDay availableWeekdayEndTime = TimeOfDay.now();
-  TimeOfDay availableWeekEndStartTime = TimeOfDay.now();
-  TimeOfDay availableWeekEndEndTime = TimeOfDay.now();
-
-  TimeOfDay availableMondayStartTime = TimeOfDay.now();
-  TimeOfDay availableMondayEndTime = TimeOfDay.now();
-  TimeOfDay availableTuesdayStartTime = TimeOfDay.now();
-  TimeOfDay availableTuesdayEndTime = TimeOfDay.now();
-  TimeOfDay availableWednesdayStartTime = TimeOfDay.now();
-  TimeOfDay availableWednesdayEndTime = TimeOfDay.now();
-  TimeOfDay availableThursdayStartTime = TimeOfDay.now();
-  TimeOfDay availableThursdayEndTime = TimeOfDay.now();
-  TimeOfDay availableFridayStartTime = TimeOfDay.now();
-  TimeOfDay availableFridayEndTime = TimeOfDay.now();
-  TimeOfDay availableSaturdayStartTime = TimeOfDay.now();
-  TimeOfDay availableSaturdayEndTime = TimeOfDay.now();
-  TimeOfDay availableSundayStartTime = TimeOfDay.now();
-  TimeOfDay availableSundayEndTime = TimeOfDay.now();
+  List<TimeOfDay> startTimes = [
+    TimeOfDay.now(),
+    TimeOfDay.now(),
+    TimeOfDay.now(),
+    TimeOfDay.now(),
+    TimeOfDay.now(),
+    TimeOfDay.now(),
+    TimeOfDay.now(),
+    TimeOfDay.now(),
+    TimeOfDay.now()
+  ];
+  List<TimeOfDay> endTimes = [
+    TimeOfDay.now(),
+    TimeOfDay.now(),
+    TimeOfDay.now(),
+    TimeOfDay.now(),
+    TimeOfDay.now(),
+    TimeOfDay.now(),
+    TimeOfDay.now(),
+    TimeOfDay.now(),
+    TimeOfDay.now()
+  ];
 
   TextEditingController availableWeekdayStart = TextEditingController();
   TextEditingController availableWeekdayEnd = TextEditingController();
@@ -321,8 +402,11 @@ class MyCarsDetailController extends GetxController {
     }
   }
 
-  Future<void> editCarDeliveryTimes(int carId) async {
+  Future<GeneralResponse> editCarDeliveryTimes(int carId) async {
     GeneralResponse generalResponse = GeneralResponse(success: false, message: "");
+    return generalResponse;
+    /*
+   
     List<String> weekDay = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma"];
     List<String> weekEndDay = ["Cumartesi", "Pazar"];
 
@@ -365,6 +449,7 @@ class MyCarsDetailController extends GetxController {
         generalResponse = await ApiService.CarDerliveryTime(carAddDeliveryTime);
         //log(generalResponse.message);
       }
+      return generalResponse;
     } else {
       for (String day in dayTimeMap.keys) {
         Map<String, dynamic> carAddDeliveryTime = {
@@ -379,10 +464,12 @@ class MyCarsDetailController extends GetxController {
         generalResponse = await ApiService.CarDerliveryTime(carAddDeliveryTime);
         //log(generalResponse.message);
       }
+      return generalResponse;
     }
+    */
   }
 
-  Future<void> editCarAvailableDate(int carId) async {
+  Future<GeneralResponse> editCarAvailableDate(int carId) async {
     Map<String, dynamic> carAddDeliveryTime = {
       "car_id": carId,
       "is_available_date_start": availableCarDateStart.toIso8601String(),
@@ -391,6 +478,7 @@ class MyCarsDetailController extends GetxController {
 
     GeneralResponse generalResponse = await ApiService.editCarAvailableDate(carAddDeliveryTime);
     log(generalResponse.message, name: "Date edited");
+    return generalResponse;
   }
 
   //Locaitons
@@ -398,7 +486,7 @@ class MyCarsDetailController extends GetxController {
   RxList<CarAvailableLocation> locations = <CarAvailableLocation>[].obs;
 
   MapPickerController mapPickerController = MapPickerController();
-  CameraPosition cameraPosition = const CameraPosition(target: LatLng(38.4192, 27.1287), zoom: 14.0);
+  CameraPosition cameraPosition = const CameraPosition(target: LatLng(38.4192, 27.1287), zoom: 8.0);
   final googleMapController = Completer<GoogleMapController>();
   RxString gmAddressText = "".obs, rxCity = "".obs, rxDistrict = "".obs, address = "".obs;
   String district = "", city = "";
@@ -421,6 +509,7 @@ class MyCarsDetailController extends GetxController {
       };
       generalResponse = await ApiService.CarAddLocations(carSaveLocationMap);
       log(generalResponse.message);
+      getLocations();
 
       return true;
     } catch (e) {
@@ -441,7 +530,7 @@ class MyCarsDetailController extends GetxController {
     }
     if (permission == LocationPermission.whileInUse || permission == LocationPermission.always) {
       Position position = await Geolocator.getCurrentPosition();
-      cameraPosition = CameraPosition(target: LatLng(position.latitude, position.longitude), zoom: 14.4746);
+      cameraPosition = CameraPosition(target: LatLng(position.latitude, position.longitude), zoom: 8.4746);
     }
     Get.dialog(const CarLocationEditSelectLocation());
   }
@@ -455,7 +544,7 @@ class MyCarsDetailController extends GetxController {
         ext: "",
         load: true.obs,
         photo64: "",
-        isChanged: false,
+        isChanged: false.obs,
         path: "",
         photoType: 1),
     EditCarUploadImage(
@@ -464,7 +553,7 @@ class MyCarsDetailController extends GetxController {
         ext: "",
         load: true.obs,
         photo64: "",
-        isChanged: false,
+        isChanged: false.obs,
         path: "",
         photoType: 2),
     EditCarUploadImage(
@@ -473,7 +562,7 @@ class MyCarsDetailController extends GetxController {
         ext: "",
         load: true.obs,
         photo64: "",
-        isChanged: false,
+        isChanged: false.obs,
         path: "",
         photoType: 3),
     EditCarUploadImage(
@@ -482,7 +571,7 @@ class MyCarsDetailController extends GetxController {
         ext: "",
         load: true.obs,
         photo64: "",
-        isChanged: false,
+        isChanged: false.obs,
         path: "",
         photoType: 4),
     EditCarUploadImage(
@@ -491,7 +580,7 @@ class MyCarsDetailController extends GetxController {
         ext: "",
         load: true.obs,
         photo64: "",
-        isChanged: false,
+        isChanged: false.obs,
         path: "",
         photoType: 5),
     EditCarUploadImage(
@@ -500,7 +589,7 @@ class MyCarsDetailController extends GetxController {
         ext: "",
         load: true.obs,
         photo64: "",
-        isChanged: false,
+        isChanged: false.obs,
         path: "",
         photoType: 6),
     EditCarUploadImage(
@@ -509,7 +598,7 @@ class MyCarsDetailController extends GetxController {
         ext: "",
         load: true.obs,
         photo64: "",
-        isChanged: false,
+        isChanged: false.obs,
         path: "",
         photoType: 7),
   ].obs;
@@ -531,6 +620,7 @@ class MyCarsDetailController extends GetxController {
         } else {
           carImages[index].photo64 = base64Encode(compressedBytes);
           carImages[index].load.value = true;
+          carImages[index].isChanged.value = true;
         }
       }
     }
@@ -540,14 +630,14 @@ class MyCarsDetailController extends GetxController {
     carImages.value[index].load.value = false;
     carImages.value[index].ext = "";
     carImages.value[index].photo64 = "";
-    carImages.value[index].isChanged = true;
+    carImages.value[index].isChanged.value = true;
   }
 
-  Future<bool> editCarPhotos() async {
-    GeneralResponse generalResponse = GeneralResponse(success: false, message: "");
+  Future<GeneralResponse> editCarPhotos() async {
+    GeneralResponse generalResponse = GeneralResponse(success: false, message: "Fotoğraflar kaydedilemedi");
     try {
       for (int i = 0; i < carImages.length; i++) {
-        if (carImages[i].isChanged) {
+        if (carImages[i].isChanged.value) {
           Map<String, dynamic> carAddPhotoMap = {
             "car_id": carElement.carId,
             "base64_image": carImages[i].photo64,
@@ -555,28 +645,13 @@ class MyCarsDetailController extends GetxController {
             "photo_type": i + 1,
           };
           generalResponse = await ApiService.EditPhoto(carAddPhotoMap);
-          log(generalResponse.message);
+          return generalResponse;
         }
       }
-      return true;
+      return generalResponse;
     } catch (e) {
       log(e.toString());
-      return false;
-    }
-  }
-
-  bool checkLoadImageComplete() {
-    for (EditCarUploadImage item in carImages.value) {
-      if (item.load.isFalse) return false;
-    }
-    return true;
-  }
-
-  void checkPhotosandSave() {
-    if (checkLoadImageComplete()) {
-      editCarPhotos();
-    } else {
-      Helpers.showSnackbar("Uyarı!", "Lütfen gerekli fotoğrafları yükleyiniz.");
+      return generalResponse;
     }
   }
 
@@ -586,7 +661,8 @@ class MyCarsDetailController extends GetxController {
     minRentDay.text = carElement.minRentDay.toString();
     dailyRentPrice.text = carElement.dailyPrice.toString();
     isLongTerm.value = carElement.isLongTerm == 1 ? true : false;
-    //weeklyDiscount = "%${carElement.weeklyRent.toString()}";
+    weeklyDiscount = "%${carElement.weeklyRent}";
+    monthlyDiscount = "%${carElement.monthlyRent}";
   }
 
   final pricesAndDiscountsKey = GlobalKey<FormState>();
@@ -613,21 +689,23 @@ class MyCarsDetailController extends GetxController {
     }
   }
 
-  Future<void> editPriceandDiscount() async {
+  Future<GeneralResponse> editPriceandDiscount() async {
+    GeneralResponse generalResponse = GeneralResponse(success: false, message: "");
     if (pricesAndDiscountsKey.currentState!.validate()) {
       Map<String, dynamic> editPriceandDiscount = {
         "car_id": carElement.carId,
-        "weekly_rent": weeklyDiscount != null ? int.parse(weeklyDiscount!.replaceAll('%', '')) : 0,
-        "monthly_rent": monthlyDiscount != null ? int.parse(monthlyDiscount!.replaceAll('%', '')) : 0,
-        "min_day": int.parse(minRentDay.text),
-        "price": double.parse(dailyRentPrice.text),
+        "weekly_rent_discount": weeklyDiscount != null ? int.parse(weeklyDiscount!.replaceAll('%', '')) : 0,
+        "monthly_rent_discount": monthlyDiscount != null ? int.parse(monthlyDiscount!.replaceAll('%', '')) : 0,
+        "min_rent_day": int.parse(minRentDay.text),
+        "daily_price": dailyRentPrice.text.toString(),
         "is_long_term": isLongTerm.value ? 1 : 0,
       };
+      log(editPriceandDiscount["daily_price"]);
 
       GeneralResponse generalResponse = await ApiService.CarPriceEdit(editPriceandDiscount);
-      log(generalResponse.message, name: "Price edited");
+      return generalResponse;
     } else {
-      Helpers.showSnackbar("Uyarı!", "Lütfen gerekli alanları doldurunuz.");
+      return generalResponse;
     }
   }
 
@@ -650,6 +728,7 @@ class MyCarsDetailController extends GetxController {
   //Active And Delete Car
 
   RxInt isActive = 0.obs;
+  RxInt isApproved = 0.obs;
 
   Future<GeneralResponse> changeActivity() async {
     if (isActive.value == 0) {
@@ -667,6 +746,13 @@ class MyCarsDetailController extends GetxController {
 
     return generalResponse;
   }
+
+  Future<GeneralResponse> DeleteCar() async {
+    GeneralResponse generalResponse = GeneralResponse(success: false, message: "Aracınız silinemedi!");
+    generalResponse = await ApiService.DeleteCar(carElement.carId);
+    log(generalResponse.message);
+    return generalResponse;
+  }
 }
 
 class EditCarUploadImage {
@@ -676,7 +762,7 @@ class EditCarUploadImage {
   String description;
   String photo64;
   String ext;
-  bool isChanged;
+  RxBool isChanged;
   int photoType;
 
   EditCarUploadImage(
@@ -689,3 +775,16 @@ class EditCarUploadImage {
       required this.path,
       required this.photoType});
 }
+
+class DeliveryTimeCRUD {
+  int carID;
+  String deliveryTime;
+  TimeOfDay start;
+  TimeOfDay end;
+
+  DeliveryTimeCRUD({required this.carID, required this.deliveryTime, required this.start, required this.end});
+
+  Map<String, dynamic> toJson() => {"carID": carID, "deliveryTime": deliveryTime, "start": getTimeString(start), "end": getTimeString(end)};
+}
+
+String getTimeString(TimeOfDay time) => '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
